@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "ms-python.debugpy",
+        "donjayamanne.python-environment-manager",
+        "charliermarsh.ruff"
+    ]
+}
