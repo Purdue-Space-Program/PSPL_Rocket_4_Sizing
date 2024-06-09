@@ -1,0 +1,8 @@
+# Required Python packages
+# Run "pip install -r requirements.txt"
+
+ruff==0.4.8         # Linter/formatter
+CoolProp==6.6.0
+fluids==1.0.25
+numpy==1.26.4
+matplotlib==3.9.0
