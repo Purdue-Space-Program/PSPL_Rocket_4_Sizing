@@ -27,7 +27,7 @@ def read_inputs():
 
     # Incorporate continuous inputs into complete inputs (while converting the start-stop-step format into a list)
     for column in continuous_inputs:
-        non_prop_inputs[column] = list(np.round(np.arange(continuous_inputs[column][0], continuous_inputs[column][1] + step_factor, continuous_inputs[column][2]), 3))
+        non_prop_inputs[column] = list(np.round(np.arange(continuous_inputs[column].iloc[0], continuous_inputs[column].iloc[1] + step_factor, continuous_inputs[column].iloc[2]), 3))
 
     # Incorporate non-propellant combination discrete inputs into complete inputs (while converting the start-stop-step format into a list)
     non_prop_inputs['Tank wall'] = list(tank_walls.index)
@@ -37,7 +37,7 @@ def read_inputs():
 
     # Incorporate propellant combination and mixture ratio inputs into inputs
     for prop_combo in list(prop_combos.index):
-        possible_rockets_by_prop[prop_combo] = list(product([prop_combo], list(np.round(np.arange(prop_combos.loc[prop_combo][2], prop_combos.loc[prop_combo][3] + step_factor, prop_combos.loc[prop_combo][4]), 3)), *non_prop_inputs.values()))
+        possible_rockets_by_prop[prop_combo] = list(product([prop_combo], list(np.round(np.arange(prop_combos.loc[prop_combo].iloc[2], prop_combos.loc[prop_combo].iloc[3] + step_factor, prop_combos.loc[prop_combo].iloc[4]), 3)), *non_prop_inputs.values()))
 
     possible_rockets = [] # List of all possible rockets that could be built with combinations of the rocket-defining inputs
 
