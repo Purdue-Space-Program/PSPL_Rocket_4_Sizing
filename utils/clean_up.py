@@ -1,4 +1,4 @@
-# WARNING: This script will delete all folders in the current working directory.
+# WARNING: This script will delete all folders in the OUTPUT directory. Use with caution.
 # Owner: Nick Nielsen
 
 import os
@@ -7,11 +7,11 @@ import sys
 
 
 if __name__ == "__main__":
-  current_dir = os.getcwd() # Get the current working directory
+  output_dir = "../data/outputs"
 
   # Iterate over all items in the current directory
-  for item in os.listdir(current_dir):
-    item_path = os.path.join(current_dir, item)
+  for item in os.listdir(output_dir):
+    item_path = os.path.join(output_dir, item)
 
     # Check if the item is a directory
     if os.path.isdir(item_path):
