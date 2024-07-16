@@ -6,31 +6,32 @@ This repository contains the sizing code for Rocket 4. This is work in progress 
 
 ```plaintext
 └── PSPL_ROCKET_4_SIZING/
-  ├── data/
-  │ ├── inputs/
-  │ │ └── rocket_defining_inputs.xlsx
-  │ └── outputs/
-  │ └── YYYY-MM-DD_HH-MM-SS/
-  │ └── possible_rockets.py
-  ├── scripts/
-  │ ├── combustion.py
-  │ ├── propulsion.py
-  │ ├── structural.py
-  │ ├── tanks.py
-  │ └── traj.py
-  ├── tests/
-  │ ├── test_combustion.py
-  │ ├── test_propulsion.py
-  │ ├── test_structural.py
-  │ ├── test_tanks.py
-  │ └── test_traj.py
-  ├── utils/
-  │ ├── clean_up.py
-  │ └── rocket_defining_input_handler.py
-  ├── main.py
-  ├── .gitignore
-  ├── README.md
-  └── requirements.txt
+    ├── data/
+    │   ├── inputs/
+    │   │   └── rocket_defining_inputs.xlsx
+    │   └── outputs/
+    │       └── YYYY-MM-DD_HH-MM-SS/
+    │           └── possible_rockets.py
+    ├── scripts/
+    │   ├── combustion.py
+    │   ├── propulsion.py
+    │   ├── structural.py
+    │   ├── tanks.py
+    │   └── traj.py
+    ├── tests/
+    │   ├── test_combustion.py
+    │   ├── test_propulsion.py
+    │   ├── test_structural.py
+    │   ├── test_tanks.py
+    │   └── test_traj.py
+    ├── utils/
+    │   ├── clean_up.py
+    │   └── rocket_defining_input_handler.py
+    ├── main.py
+    ├── .gitignore
+    ├── README.md
+    └── requirements.txt
+
 ```
 
 ## Installation
