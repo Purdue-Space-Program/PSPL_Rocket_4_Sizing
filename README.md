@@ -11,7 +11,8 @@ This repository contains the sizing code for Rocket 4. This is work in progress 
     │   │   └── rocket_defining_inputs.xlsx
     │   └── outputs/
     │       └── YYYY-MM-DD_HH-MM-SS/
-    │           └── possible_rockets.py
+    │           ├── possible_rockets.xlsx
+    |           └── rocket_defining_inputs.xlsx
     ├── scripts/
     │   ├── combustion.py
     │   ├── propulsion.py

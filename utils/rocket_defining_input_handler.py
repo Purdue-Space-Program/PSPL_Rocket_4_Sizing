@@ -16,6 +16,7 @@ def read_inputs():
 
     # Constants
     step_factor = 0.000001  # Added to arange stop value to ensure the stop value is reached for ranges divisible by the step size
+    input_precision = 3 # Number of decimal places to round continuous input values to
 
     # Bring all rocket-defining inputs into Pandas dataframes
     with pd.ExcelFile("rocket_defining_inputs.xlsx") as RDIs:
@@ -43,7 +44,7 @@ def read_inputs():
                     continuous_inputs[column].iloc[1] + step_factor,
                     continuous_inputs[column].iloc[2],
                 ),
-                3,
+                input_precision,
             )
         )
 
@@ -65,7 +66,7 @@ def read_inputs():
                             prop_combos.loc[prop_combo].iloc[3] + step_factor,
                             prop_combos.loc[prop_combo].iloc[4],
                         ),
-                        3,
+                        input_precision,
                     )
                 ),
                 *non_prop_inputs.values(),
