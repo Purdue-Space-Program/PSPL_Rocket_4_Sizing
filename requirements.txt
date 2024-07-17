@@ -1,8 +1,30 @@
-# Required Python packages
-# Run "pip install -r requirements.txt"
-
-ruff==0.4.8         # Linter/formatter
+certifi==2024.7.4
+charset-normalizer==3.3.2
+contourpy==1.2.1
 CoolProp==6.6.0
+cycler==0.12.1
+DateTime==5.5
+et-xmlfile==1.1.0
 fluids==1.0.25
-numpy==1.26.4
+fonttools==4.53.1
+idna==3.7
+kiwisolver==1.4.5
 matplotlib==3.9.0
+numpy==1.26.4
+openpyxl==3.1.5
+packaging==24.1
+pandas==2.2.2
+pillow==10.4.0
+progressbar==2.5
+pyparsing==3.1.2
+python-dateutil==2.9.0.post0
+python-utils==3.8.2
+pytz==2024.1
+requests==2.32.3
+ruff==0.4.8
+scipy==1.14.0
+six==1.16.0
+typing_extensions==4.12.2
+tzdata==2024.1
+urllib3==2.2.2
+zope.interface==6.4.post2
