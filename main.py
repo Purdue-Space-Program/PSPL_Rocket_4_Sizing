@@ -24,7 +24,7 @@ def main():
 
     os.mkdir(
         os.path.join("data/outputs", folder_name)
-    )  # Create folder with the date and time as the name in the ../Runs directory
+    )  # Create folder with the date and time as the name in the ../Runs directory 
 
     shutil.copy(
         "data/inputs/rocket_defining_inputs.xlsx",
