@@ -33,12 +33,9 @@ def main():
 
     os.chdir(os.path.join("data/inputs"))  # Change directory to the new folder
 
-    # Get inputs from Excel sheet
-    possible_rockets = read_inputs()[
-        0
-    ]  # dataframe containing all possible rockets. Rows are rockets, columns are inputs
-
     os.chdir(os.path.join("../outputs", folder_name))
+
+    (possible_rockets, prop_combos, tank_walls, copvs) = read_inputs()  # Get information on possible rockets
 
     possible_rockets.to_excel(
         "possible_rocket_combinations.xlsx"
