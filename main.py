@@ -17,39 +17,54 @@ import progressbar as pb
 
 
 def main():
-    current_datetime = datetime.datetime.now()  # Get current date and time
-    folder_name = current_datetime.strftime(
+
+    # Output Folder Creation
+    # This section creates an output folder with the time of the run and the input and output sheets.
+    # Owner: Nick Nielsen
+
+    currentDatetime = datetime.datetime.now()  # Get current date and time
+    folderName = currentDatetime.strftime(
         "%Y-%m-%d_%H-%M-%S"
     )  # Format date and time as a string
 
     os.mkdir(
-        os.path.join("data/outputs", folder_name)
+        os.path.join("data/outputs", folderName)
     )  # Create folder with the date and time as the name in the ../Runs directory 
 
     shutil.copy(
         "data/inputs/rocket_defining_inputs.xlsx",
-        os.path.join("data/outputs", folder_name),
+        os.path.join("data/outputs", folderName),
     )  # Copy rocket_defining_inputs.xlsx file from input folder to output folder
 
     os.chdir(os.path.join("data/inputs"))  # Change directory to the new folder
 
-    os.chdir(os.path.join("../outputs", folder_name))
+    os.chdir(os.path.join("../outputs", folderName))
 
-    (possible_rockets, prop_combos, tank_walls, copvs) = read_inputs()  # Get information on possible rockets
 
-    possible_rockets.to_excel(
+    # Possible Rockets
+    # This section uses the input reader to get the data from the input spreadsheet.
+    # Owner: Hugo Filmer
+
+    (possibleRockets, propCombos, tankWalls, copvs) = read_inputs()  # Get information on possible rockets
+
+    possibleRockets.to_excel(
         "possible_rocket_combinations.xlsx"
     )  # Save the possible rockets to an Excel sheet
 
-    number_of_possible_rockets = 100  # Get the number of possible rockets
+
+    # Progress Bar
+    # This section creates a progress bar to track script progress [TEST FOR NOW]
+    # Owner: Nick Nielsen
+
+    numberPossibleRockets = 100  # Get the number of possible rockets
 
     bar = pb.ProgressBar(
-        maxval=number_of_possible_rockets
+        maxval=numberPossibleRockets
     )  # Create a progress bar with the number of possible rockets as the max value
 
     bar.start()  # Start the progress bar
 
-    for i in range(number_of_possible_rockets):
+    for i in range(numberPossibleRockets):
         time.sleep(0.01)  # Simulate a lonnnng calculation
 
         bar.update(i + 1)  # Update the progress bar

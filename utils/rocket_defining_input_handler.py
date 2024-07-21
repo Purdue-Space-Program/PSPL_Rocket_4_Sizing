@@ -15,78 +15,90 @@ def read_inputs():
     from itertools import product
 
     # Constants
-    step_factor = 0.000001  # Added to arange stop value to ensure the stop value is reached for ranges divisible by the step size
-    input_precision = 3 # Number of decimal places to round continuous input values to
+    STEP_FACTOR = 0.000001  # Added to arange stop value to ensure the stop value is reached for ranges divisible by the step size
+    INPUT_PRECISION = 3  # Number of decimal places to round continuous input values to
 
+    # Get Inputs
+    # This section reads the input spreadsheet using the Pandas library.
+    # Owner: Hugo Filmer
+    
     # Bring all rocket-defining inputs into Pandas dataframes
     with pd.ExcelFile("rocket_defining_inputs.xlsx") as RDIs:
-        continuous_inputs = pd.read_excel(
+        continuousInputs = pd.read_excel(
             RDIs, "Continuous Inputs", index_col=0
         )  # Dataframe containing continuous inputs. Columns are different inputs, rows are start-stop-step values
-        prop_combos = pd.read_excel(
+        propCombos = pd.read_excel(
             RDIs, "Propellant Combinations", index_col=0
         )  # Dataframe containing propellant combination options. Rows are different combinations, columns are oxidizers and fuels
-        tank_walls = pd.read_excel(
+        tankWalls = pd.read_excel(
             RDIs, "Tank Walls", index_col=0
         )  # Dataframe containing tank wall options. Rows are different walls, columns are wall parameters
         copvs = pd.read_excel(
             RDIs, "COPVs", index_col=0
         )  # Dataframe containing COPV options. Rows are different COPVs, columns are COPV parameters
 
-    non_prop_inputs = {}  # Dict with the complete set of rocket-defining inputs to iterate through other than propellant combination, keyed by the type of input
 
-    # Incorporate continuous inputs into complete inputs (while converting the start-stop-step format into a list)
-    for column in continuous_inputs:
-        non_prop_inputs[column] = list(
+    # Possible Rockets
+    # This section creates a set of possible rockets from the inputs.
+    # Owner: Hugo Filmer
+
+    nonPropInputs = {}  # Dict with the complete set of rocket-defining inputs to iterate through other than propellant combination, keyed by the type of input
+
+    # Incorporate continuous inputs (while converting the start-stop-step format into a list)
+    for column in continuousInputs:
+        nonPropInputs[column] = list(
             np.round(
                 np.arange(
-                    continuous_inputs[column].iloc[0],
-                    continuous_inputs[column].iloc[1] + step_factor,
-                    continuous_inputs[column].iloc[2],
+                    continuousInputs[column].iloc[0],
+                    continuousInputs[column].iloc[1] + STEP_FACTOR,
+                    continuousInputs[column].iloc[2],
                 ),
-                input_precision,
+                INPUT_PRECISION,
             )
         )
 
-    # Incorporate non-propellant combination discrete inputs into complete inputs (while converting the start-stop-step format into a list)
-    non_prop_inputs["Tank wall"] = list(tank_walls.index)
-    non_prop_inputs["COPV"] = list(copvs.index)
+    # Incorporate non-propellant combination discrete inputs (while converting the start-stop-step format into a list)
+    nonPropInputs["Tank wall"] = list(tankWalls.index)
+    nonPropInputs["COPV"] = list(copvs.index)
 
-    possible_rockets_by_prop = {}  # Dict with all possible combinations of rocket-defining inputs for each propellant combination
+    possibleRocketsByProp = {}  # Dict with all possible combinations of rocket-defining inputs for each propellant combination
 
-    # Incorporate propellant combination and mixture ratio inputs into inputs
-    for prop_combo in list(prop_combos.index):
-        possible_rockets_by_prop[prop_combo] = list(
-            product(
-                [prop_combo],
-                list(
-                    np.round(
-                        np.arange(
-                            prop_combos.loc[prop_combo].iloc[2],
-                            prop_combos.loc[prop_combo].iloc[3] + step_factor,
-                            prop_combos.loc[prop_combo].iloc[4],
+    # Create a set of inputs for each propellant combination
+    for propCombo in list(propCombos.index):
+        possibleRocketsByProp[propCombo] = product(
+            [propCombo],
+            list(
+                np.round(
+                    np.arange(
+                        propCombos.loc[propCombo].iloc[2],
+                        propCombos.loc[propCombo].iloc[3] + STEP_FACTOR,
+                        propCombos.loc[propCombo].iloc[4],
                         ),
-                        input_precision,
-                    )
-                ),
-                *non_prop_inputs.values(),
-            )
+                    INPUT_PRECISION,
+                )
+            ),
+            *nonPropInputs.values(),
         )
 
-    possible_rockets = []  # List of all possible rockets that could be built with combinations of the rocket-defining inputs
 
-    # Get list of all possible combinations of rocket-defining inputs
-    for prop_combo in possible_rockets_by_prop.keys():
-        possible_rockets = possible_rockets + possible_rockets_by_prop[prop_combo]
+    possibleRockets = []  # List of all possible rockets that could be built with combinations of the rocket-defining inputs. Each rocket is a
+    # tuple contained in the list with every input parameter for that rocket.
 
-    # Create Excel sheet with all possible rockets
+    # Join each separate propellant combinaton's set of inputs together
+    for propCombo in possibleRocketsByProp.keys():
+        possibleRockets += possibleRocketsByProp[propCombo]
+
+    # Output
+    # This section creates a dataframe with all the possible rockets in it and returns each needed dataframe.
+    # Owner: Hugo Filmer
+
     RIDs = []  # Rocket ID numbers to index with for easy reference
-    for id in range(1, len(possible_rockets) + 1):
+    for id in range(1, len(possibleRockets) + 1):
         RIDs.append(f"RID#{id}")
-    possible_rockets_df = pd.DataFrame(
-        possible_rockets,
+    possibleRocketsDF = pd.DataFrame(
+        possibleRockets,
         index=RIDs,
-        columns=["Propellant combination", "O:F (mass)"] + list(non_prop_inputs.keys()),
+        columns=["Propellant combination", "O:F (mass)"] + list(nonPropInputs.keys()),
     )  # Dataframe containing all possible rockets. Rows are rockets, columns are inputs
 
-    return possible_rockets_df, prop_combos, tank_walls, copvs
+    return possibleRocketsDF, propCombos, tankWalls, copvs

@@ -7,16 +7,16 @@ import sys
 
 
 if __name__ == "__main__":
-  output_dir = "../data/outputs"
+  outputDir = "../data/outputs"
 
   # Iterate over all items in the current directory
-  for item in os.listdir(output_dir):
-    item_path = os.path.join(output_dir, item)
+  for item in os.listdir(outputDir):
+    itemPath = os.path.join(outputDir, item)
 
     # Check if the item is a directory
-    if os.path.isdir(item_path):
+    if os.path.isdir(itemPath):
       # Remove the directory and its contents
-      shutil.rmtree(item_path)
+      shutil.rmtree(itemPath)
 
   # Print a message indicating successful cleanup
   print("Cleanup completed.")
