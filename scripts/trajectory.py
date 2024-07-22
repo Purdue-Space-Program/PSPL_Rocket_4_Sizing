@@ -20,9 +20,10 @@ def traj(
 
     """
     # Constants
-    gravity = 9.81  # [m/s^2] acceleration due to gravity
+    GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
     FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
     RAIL_HEIGHT = 18.29  # [m] height of the rail
+    RHO_0 = 1.292 # [kg/m^3] density of air at sea level
 
     # Rocket Properties
 
@@ -47,3 +48,12 @@ def traj(
         else:
             pressure_thrust = 0  # [N] thrust due to pressure
             thrust = 0  # [N] total thrust of the rocket
+            
+    drag = 0.5 * RHO_0 * velocity * ascent_drag_coeff * reference_area # [N] force of drag
+    grav = GRAVITY * mass # [N] force of gravity
+    accel = (jet_thrust - drag - grav) / mass
+    velocity = velocity + accel * dt
+    altitude = altitude + velocity * dt
+
+
+
