@@ -85,4 +85,4 @@ def fluids(pumps, fuel, oxidizer, mixRatio, chamberPressure, copvPressure, copvV
     lowerPlumbingLength = 0.56 * tankOD / (6.625 * 0.0254)
     fluidSystemsMass = tankMass + copvMass + 10
 
-fluids(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 6984.76, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)
+fluids(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)

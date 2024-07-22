@@ -45,9 +45,9 @@ def main():
     # This section uses the input reader to get the data from the input spreadsheet.
     # Owner: Hugo Filmer
 
-    (possibleRockets, propCombos, tankWalls, copvs) = read_inputs()  # Get information on possible rockets
+    (possibleRocketsDF, propCombos, tankWalls, copvs) = read_inputs()  # Get information on possible rockets
 
-    possibleRockets.to_excel(
+    possibleRocketsDF.to_excel(
         "possible_rocket_combinations.xlsx"
     )  # Save the possible rockets to an Excel sheet
 
