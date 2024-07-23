@@ -17,14 +17,14 @@ This repository contains the sizing code for Rocket 4. This is work in progress 
     │   ├── combustion.py
     │   ├── propulsion.py
     │   ├── structural.py
-    │   ├── tanks.py
-    │   └── traj.py
+    │   ├── fluids.py
+    │   └── trajectory.py
     ├── tests/
     │   ├── test_combustion.py
     │   ├── test_propulsion.py
     │   ├── test_structural.py
-    │   ├── test_tanks.py
-    │   └── test_traj.py
+    │   ├── test_fluids.py
+    │   └── test_trajectory.py
     ├── utils/
     │   ├── clean_up.py
     │   └── rocket_defining_input_handler.py

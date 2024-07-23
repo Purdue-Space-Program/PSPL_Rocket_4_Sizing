@@ -1,8 +1,5 @@
 import numpy as np
 
-# Owners: Nick Nielsen
-
-
 def traj(
     wet_mass, m_dot_total, jet_thrust, tank_OD, ascent_drag_coeff, exit_area, burn_time
 ):
