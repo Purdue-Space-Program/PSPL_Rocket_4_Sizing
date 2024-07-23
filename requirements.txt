@@ -20,6 +20,7 @@ pandas==2.2.2
 pathspec==0.12.1
 pillow==10.4.0
 platformdirs==4.2.2
+progressbar==2.5
 progressbar2==4.4.2
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
