@@ -6,10 +6,6 @@ import numpy as np
 
 from ambiance import Atmosphere
 
-import matplotlib.pyplot as plt
-
-import time
-
 def trajectory(
     wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime
 ):
