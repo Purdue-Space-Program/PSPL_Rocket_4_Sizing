@@ -6,8 +6,10 @@ import numpy as np
 
 from ambiance import Atmosphere
 
+import matplotlib.pyplot as plt
+
 def trajectory(
-    wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime
+    wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime, dt
 ):
     """
     Inputs:
@@ -41,9 +43,16 @@ def trajectory(
 
     altitude = RAIL_HEIGHT + FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
-
     time = 0  # [s] initial time of the rocket
-    dt = 0.005  # [s] time step of the rocket
+    # dt = 0.005  # [s] time step of the rocket
+
+    # Array Initialization:
+    altitudeArray = []
+    machArray = []
+    accelArray = []
+    timeArray = []
+    
+
 
     while velocity >= 0:
         atmo = Atmosphere(altitude)
@@ -58,16 +67,58 @@ def trajectory(
         rho = atmo.density
         drag = 0.5 * rho * velocity ** 2 * ascentDragCoeff * referenceArea # [N] force of drag
         grav = GRAVITY * mass # [N] force of gravity
+
         accel = (thrust - drag - grav) / mass # acceleration equation of motion
+        accelArray.append(accel)
+
         velocity = velocity + accel * dt # velocity integration
+        mach = velocity / atmo.speed_of_sound
+        machArray.append(mach)
+
         altitude = altitude + velocity * dt # position integration
+        altitudeArray.append(altitude)
+
         time = time + dt # time step
+        timeArray.append(time)
 
-    return altitude
+    return altitude, max(machArray), max(accelArray)
 
-altitude = trajectory(74.69, 1.86, 3792, 0.168275, 0.48, .02, 100000, 13)
+altitudeArray = []
+runTimeArray = []
+dtArray = []
 
-print(altitude)
+list = [0.001, 0.005, 0.01, 0.025, 0.05, 0.1]
+
+import time
+
+for i in list:
+    startTime = time.time()
+    altitude, maxMach, maxAccel = trajectory(74.69, 1.86, 3792, 0.168275, 0.48, .02, 100000, 13, i)
+    runTime = time.time() - startTime
+    runTimeArray.append(runTime)
+    altitudeArray.append(altitude)
+    dtArray.append(i)
+    print('Max Altitude is: ' + str(altitude))
+    print('Maximum Mach Number is: %.1f', maxMach)
+    print('Maximum Acceleration is %.1f m/s^2', maxAccel)
+    
+
+# Make plot
+# plt.figure(1)
+# plt.title('Height v. Time Step')
+# plt.scatter(dtArray, altitudeArray)
+# plt.ylabel('Height [m]')
+# plt.xlabel('Time Step (s)')
+# plt.grid()
+# plt.show()
+
+plt.figure(2)
+plt.title('Run Time vs Time Step')
+plt.plot(dtArray, runTimeArray)
+plt.ylabel('Run Time [s]')
+plt.xlabel('Time Step [s]')
+plt.grid()
+plt.show()
 
 
 
