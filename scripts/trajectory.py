@@ -19,19 +19,31 @@ def trajectory(
     dt,
 ):
     """
-    Inputs:
-    wetMass [kg]: wet mass of the rocket
-    mDotTotal [kg/s]: total mass flow rate of the engine
-    jetThrust [N]:engine thrust
-    tankOD [m]: outer diameter of the tank
-    ascentDragCoeff [-]: drag coefficient during ascent
-    exitArea [m^2]: exit area of the nozzle
-    exitPressure [Pa]: exit pressure of the nozzle
-    burnTime [s]: burn time of the engine
+    _summary_
 
-    Outputs:
-    altitude [m]: final altitude of the rocket
+    Parameters
+    ----------
+    wetMass : float
+        Wet mass of the rocket [kg].
+    mDotTotal : float
+        Total mass flow rate of the engine [kg/s].
+    jetThrust : float
+        Engine thrust [N].
+    tankOD : float
+        Outer diameter of the tank [m].
+    ascentDragCoeff : float
+        Drag coefficient during ascent [-].
+    exitArea : float
+        Exit area of the nozzle [m^2].
+    exitPressure : float
+        Exit pressure of the nozzle [Pa].
+    burnTime : float
+        Burn time of the engine [s].
 
+    Returns
+    -------
+    altitude : float
+        Final altitude of the rocket [m].
     """
 
     # Constants
@@ -54,10 +66,10 @@ def trajectory(
     # dt = 0.005  # [s] time step of the rocket
 
     # Array Initialization:
-    altitudeArray = []
-    machArray = []
-    accelArray = []
-    timeArray = []
+    altitudeArray = []  # [m] array of altitudes
+    machArray = []  # [-] array of mach numbers
+    accelArray = []  # [m/s^2] array of accelerations
+    timeArray = []  # [s] array of times
 
     while velocity >= 0:
         atmo = Atmosphere(altitude)
@@ -71,31 +83,31 @@ def trajectory(
         else:
             thrust = 0  # [N] total thrust of the rocket
 
-        rho = atmo.density
+        rho = atmo.density  # [kg/m^3] density of the air
         drag = (
             0.5 * rho * velocity**2 * ascentDragCoeff * referenceArea
         )  # [N] force of drag
         grav = GRAVITY * mass  # [N] force of gravity
 
         accel = (thrust - drag - grav) / mass  # acceleration equation of motion
-        accelArray.append(accel)
+        accelArray.append(accel)  # append acceleration to array
 
         velocity = velocity + accel * dt  # velocity integration
-        mach = velocity / atmo.speed_of_sound
-        machArray.append(mach)
+        mach = velocity / atmo.speed_of_sound  # mach number
+        machArray.append(mach)  # append mach number to array
 
         altitude = altitude + velocity * dt  # position integration
         altitudeArray.append(altitude)
 
         time = time + dt  # time step
-        timeArray.append(time)
+        timeArray.append(time)  # append time to array
 
-    return altitude, max(machArray), max(accelArray)
+    return altitude, max(machArray), max(accelArray)  # return final altitude
 
 
-altitudeArray = []
-runTimeArray = []
-dtArray = []
+altitudeArray = []  # [m] array of altitudes
+runTimeArray = []  # [s] array of run times
+dtArray = []  # [s] array of time steps
 
 list = [0.001, 0.005, 0.01, 0.025, 0.05, 0.1]
 
