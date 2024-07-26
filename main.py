@@ -9,23 +9,23 @@
 
 #  /$$$$$$  /$$$$$$ /$$$$$$$$ /$$$$$$$$ /$$     /$$       /$$$$$$$$ /$$       /$$$$$$ /$$$$$$$$  /$$$$$$  /$$$$$$$$ /$$     /$$
 # /$$__  $$|_  $$_/|_____ $$ | $$_____/|  $$   /$$/      | $$_____/| $$      |_  $$_/| $$_____/ /$$__  $$| $$_____/|  $$   /$$/
-#| $$  \__/  | $$       /$$/ | $$       \  $$ /$$/       | $$      | $$        | $$  | $$      | $$  \__/| $$       \  $$ /$$/ 
-#|  $$$$$$   | $$      /$$/  | $$$$$     \  $$$$/        | $$$$$   | $$        | $$  | $$$$$   |  $$$$$$ | $$$$$     \  $$$$/  
-# \____  $$  | $$     /$$/   | $$__/      \  $$/         | $$__/   | $$        | $$  | $$__/    \____  $$| $$__/      \  $$/   
-# /$$  \ $$  | $$    /$$/    | $$          | $$          | $$      | $$        | $$  | $$       /$$  \ $$| $$          | $$    
-#|  $$$$$$/ /$$$$$$ /$$$$$$$$| $$$$$$$$    | $$          | $$      | $$$$$$$$ /$$$$$$| $$$$$$$$|  $$$$$$/| $$$$$$$$    | $$    
-# \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/    
+# | $$  \__/  | $$       /$$/ | $$       \  $$ /$$/       | $$      | $$        | $$  | $$      | $$  \__/| $$       \  $$ /$$/
+# |  $$$$$$   | $$      /$$/  | $$$$$     \  $$$$/        | $$$$$   | $$        | $$  | $$$$$   |  $$$$$$ | $$$$$     \  $$$$/
+# \____  $$  | $$     /$$/   | $$__/      \  $$/         | $$__/   | $$        | $$  | $$__/    \____  $$| $$__/      \  $$/
+# /$$  \ $$  | $$    /$$/    | $$          | $$          | $$      | $$        | $$  | $$       /$$  \ $$| $$          | $$
+# |  $$$$$$/ /$$$$$$ /$$$$$$$$| $$$$$$$$    | $$          | $$      | $$$$$$$$ /$$$$$$| $$$$$$$$|  $$$$$$/| $$$$$$$$    | $$
+# \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/
 
 from utils.rocket_defining_input_handler import read_inputs
+from scripts import trajectory, fluids
+
 import os
 import datetime
 import shutil
-import time
 import progressbar as pb
 
 
 def main():
-
     # Output Folder Creation
     # This section creates an output folder with the time of the run and the input and output sheets.
     # Owner: Nick Nielsen
@@ -37,7 +37,7 @@ def main():
 
     os.mkdir(
         os.path.join("data/outputs", folderName)
-    )  # Create folder with the date and time as the name in the ../Runs directory 
+    )  # Create folder with the date and time as the name in the ../Runs directory
 
     shutil.copy(
         "data/inputs/rocket_defining_inputs.xlsx",
@@ -48,17 +48,17 @@ def main():
 
     os.chdir(os.path.join("../outputs", folderName))
 
-
     # Possible Rockets
     # This section uses the input reader to get the data from the input spreadsheet.
     # Owner: Hugo Filmer
 
-    (possibleRocketsDF, propCombos, tankWalls, copvs) = read_inputs()  # Get information on possible rockets
+    (possibleRocketsDF, propCombos, tankWalls, copvs) = (
+        read_inputs()
+    )  # Get information on possible rockets
 
     possibleRocketsDF.to_excel(
         "possible_rocket_combinations.xlsx"
     )  # Save the possible rockets to an Excel sheet
-
 
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
@@ -73,8 +73,7 @@ def main():
     bar.start()  # Start the progress bar
 
     for i in range(numberPossibleRockets):
-        time.sleep(0.01)  # Simulate a lonnnng calculation
-
+        fluids.fluids()  # Run the fluids script
         bar.update(i + 1)  # Update the progress bar
 
     bar.finish()  # Finish the progress bar
