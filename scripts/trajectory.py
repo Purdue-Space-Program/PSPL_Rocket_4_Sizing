@@ -1,15 +1,22 @@
-# Owners: Nick Nielsen, Hudson Reynolds
+# Owners: Hudson Reynolds
 # 24 July 2024
 
 
+import matplotlib.pyplot as plt
 import numpy as np
-
 from ambiance import Atmosphere
 
-import matplotlib.pyplot as plt
 
 def trajectory(
-    wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime, dt
+    wetMass,
+    mDotTotal,
+    jetThrust,
+    tankOD,
+    ascentDragCoeff,
+    exitArea,
+    exitPressure,
+    burnTime,
+    dt,
 ):
     """
     Inputs:
@@ -31,7 +38,7 @@ def trajectory(
     GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
     FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
     RAIL_HEIGHT = 18.29  # [m] height of the rail
-    RHO_0 = 1.225 # [kg / m^3] density of air at sea level
+    RHO_0 = 1.225  # [kg / m^3] density of air at sea level
 
     # Rocket Properties
 
@@ -51,37 +58,40 @@ def trajectory(
     machArray = []
     accelArray = []
     timeArray = []
-    
-
 
     while velocity >= 0:
         atmo = Atmosphere(altitude)
         pressure = atmo.pressure
         if time < burnTime:
             mass = mass - mDotTotal * dt  # [kg] mass of the rocket
-            thrust = jetThrust  - (exitPressure - pressure) * exitArea # [N] force of thrust, accounting for pressure thrust
+            thrust = (
+                jetThrust - (exitPressure - pressure) * exitArea
+            )  # [N] force of thrust, accounting for pressure thrust
 
         else:
             thrust = 0  # [N] total thrust of the rocket
 
         rho = atmo.density
-        drag = 0.5 * rho * velocity ** 2 * ascentDragCoeff * referenceArea # [N] force of drag
-        grav = GRAVITY * mass # [N] force of gravity
+        drag = (
+            0.5 * rho * velocity**2 * ascentDragCoeff * referenceArea
+        )  # [N] force of drag
+        grav = GRAVITY * mass  # [N] force of gravity
 
-        accel = (thrust - drag - grav) / mass # acceleration equation of motion
+        accel = (thrust - drag - grav) / mass  # acceleration equation of motion
         accelArray.append(accel)
 
-        velocity = velocity + accel * dt # velocity integration
+        velocity = velocity + accel * dt  # velocity integration
         mach = velocity / atmo.speed_of_sound
         machArray.append(mach)
 
-        altitude = altitude + velocity * dt # position integration
+        altitude = altitude + velocity * dt  # position integration
         altitudeArray.append(altitude)
 
-        time = time + dt # time step
+        time = time + dt  # time step
         timeArray.append(time)
 
     return altitude, max(machArray), max(accelArray)
+
 
 altitudeArray = []
 runTimeArray = []
@@ -93,15 +103,17 @@ import time
 
 for i in list:
     startTime = time.time()
-    altitude, maxMach, maxAccel = trajectory(74.69, 1.86, 3792, 0.168275, 0.48, .02, 100000, 13, i)
+    altitude, maxMach, maxAccel = trajectory(
+        74.69, 1.86, 3792, 0.168275, 0.48, 0.02, 100000, 13, i
+    )
     runTime = time.time() - startTime
     runTimeArray.append(runTime)
     altitudeArray.append(altitude)
     dtArray.append(i)
-    print('Max Altitude is: ' + str(altitude))
-    print('Maximum Mach Number is: %.1f', maxMach)
-    print('Maximum Acceleration is %.1f m/s^2', maxAccel)
-    
+    print("Max Altitude is: " + str(altitude))
+    print("Maximum Mach Number is: %.1f", maxMach)
+    print("Maximum Acceleration is %.1f m/s^2", maxAccel)
+
 
 # Make plot
 # plt.figure(1)
@@ -113,13 +125,9 @@ for i in list:
 # plt.show()
 
 plt.figure(2)
-plt.title('Run Time vs Time Step')
+plt.title("Run Time vs Time Step")
 plt.plot(dtArray, runTimeArray)
-plt.ylabel('Run Time [s]')
-plt.xlabel('Time Step [s]')
+plt.ylabel("Run Time [s]")
+plt.xlabel("Time Step [s]")
 plt.grid()
 plt.show()
-
-
-
-
