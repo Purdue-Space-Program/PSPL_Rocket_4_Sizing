@@ -64,6 +64,46 @@ def fluids(
     tankOD,
     tankID,
 ):
+    """_summary_
+
+    Parameters
+    ----------
+    pumps : Boolean
+        Boolean for whether or not the engine has pumps.
+    fuel : str
+        Fuel being used.
+    oxidizer : str
+        Oxidizer being used.
+    mixRatio : float
+        Mixture ratio of the fuel and oxidizer. [O/F]
+    chamberPressure : float
+        Pressure within the combustion chamber of the engine.[Pa]
+    copvPressure : float
+        Pressure of the COPV bottle that is pressurizing the tanks above ambient pressure.[Pa]
+    copvVolume : float
+        Volume of the COPV bottle.[m^3]
+    copvMass : float
+        Mass of the COPV bottle.[kg]
+    tankOD : float
+        Outer diameter of the propellant tanks (and also the rocket's main structure).[m]
+    tankID : float
+        Inner diameter of the propellant tanks.[m]
+
+    Returns
+    -------
+    tankPressure : float
+        Nominal pressure of both the fuel and ox tanks.[Pa]
+    fuelTankVolume : float
+        Volume of the fuel tank.[m^3]
+    oxTankVolume : float
+        Volume of the ox tank.[m^3]
+    fuelTankLength : float
+        Length of the fuel tank.[m]
+    oxTankLength : float
+        Length of the ox tank.[m]
+
+
+    """
 
     print(chamberPressure)
     if pumps:
