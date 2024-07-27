@@ -17,26 +17,27 @@
 # productMolecularWeight: [kg/kmol] molecular weight of products at exit
 # specificGasConstant:    [J/kg-K] gas constant of products at exit
 
-import CEA_Wrap
+import CEA_Wrap as CEA
 
 import CoolProp.CoolProp as cp
 
 def runCEA(chamberPressure, mixtureRatio, exitPressureRatio, fuelName, oxName, fuelTemp, oxTemp):
-    fuel = CEA_Wrap.Fuel(fuelName, temp = fuelTemp)
-    oxidizer = CEA_Wrap.Oxidizer(oxName, temp = oxTemp)
-    rocket = CEA_Wrap.RocketProblem(pressure = chamberPressure / 10**5, materials = [fuel, oxidizer], filename = "engineCEAoutput", pressure_units = "bar")
-    rocket.set_o_f(mixtureRatio)
-    rocket.set_pip(exitPressureRatio)
+    # Unit conversions
+    Pa_to_bar = 1 / 10**5
+
+    # CEA run
+    fuel = CEA.Fuel(fuelName, temp = fuelTemp)
+    oxidizer = CEA.Oxidizer(oxName, temp = oxTemp)
+    rocket = CEA.RocketProblem(pressure = chamberPressure * Pa_to_bar, pip = exitPressureRatio, materials = [fuel, oxidizer], 
+                               o_f = mixtureRatio, filename = "engineCEAoutput", pressure_units = "bar")
     data = rocket.run()
 
-    chamberTemperature = data["c_t"]
-    specificHeatRatio = data["gamma"]
-    productMolecularWeight = data["m"]
+    # Extract CEA outputs
+    cstar = data.cstar
+    specificImpulse = data.isp
+    expansionRatio = data.ae
 
-    gasConstant = cp.PropsSI("gas_constant", "Water")
-    specificGasConstant = gasConstant / productMolecularWeight * 1000
-
-    return [chamberTemperature, specificHeatRatio, productMolecularWeight, specificGasConstant]
+    return [cstar, specificImpulse, expansionRatio]
 
 
 runCEA(2 * 10**6, 2.4, 20, "CH4(L)", "O2(L)", 120, 100)
