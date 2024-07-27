@@ -64,7 +64,7 @@ def main():
     # This section creates a progress bar to track script progress [TEST FOR NOW]
     # Owner: Nick Nielsen
 
-    numberPossibleRockets = 100  # Get the number of possible rockets
+    numberPossibleRockets = len(possibleRocketsDF)  # Get the number of possible rockets
 
     bar = pb.ProgressBar(
         maxval=numberPossibleRockets
@@ -73,7 +73,32 @@ def main():
     bar.start()  # Start the progress bar
 
     for i in range(numberPossibleRockets):
-        fluids.fluids()  # Run the fluids script
+        tankPressure, fuelTankVolume, oxTankVolume, fuelTankLength, oxTankLength = (
+            fluids.calculate_fluids(
+                pumps,
+                fuel,
+                oxidizer,
+                mixRatio,
+                chamberPressure,
+                copvPressure,
+                copvVolume,
+                copvMass,
+                tankOD,
+                tankID,
+            )
+        )  # Calculate the necessary fluid parameters
+
+        altitude = trajectory.calculate_trajectory(
+            wetMass,
+            mDotTotal,
+            jetThrust,
+            tankOD,
+            tankID,
+            exitPressure,
+            burnTime,
+            dt,
+        )  # Calculate the trajectory
+
         bar.update(i + 1)  # Update the progress bar
 
     bar.finish()  # Finish the progress bar
