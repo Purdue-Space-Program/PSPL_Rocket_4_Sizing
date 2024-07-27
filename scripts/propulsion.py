@@ -30,30 +30,36 @@ import numpy as np
 # burnTime:               [s] duration of engine burn
 # totalImpulse:           [N-s] integral of thrust over duration of burn
 
-def propulsion(thrustToWeight, vehicleMass, chamberDiameter, chamberTemperature, chamberPressure, exitPressure, characteristicLength, specificHeatRatio,
-                     specificGasConstant, fuelMass, oxMass, fuelDensity, oxDensity, mixtureRatio):
-    k = specificHeatRatio
+def propulsion(thrustToWeight, vehicleMass, chamberDiameter, chamberPressure, exitPressure, cstar, specificImpulse, expansionRatio, 
+               efficiencyFactor, characteristicLength, fuelMass, oxMass, fuelDensity, oxDensity, mixtureRatio):
 
-    thrust = thrustToWeight * vehicleMass
-    
-    # Sutton equation (3-15b)
-    exitVelocity = ((2 * k / (k - 1)) * specificGasConstant * chamberTemperature * (1 - (exitPressure / chamberPressure)**((k - 1) / k)))**(1/2)
-    totalMassFlowRate = thrust / exitVelocity
-    fuelMassFlowRate = totalMassFlowRate / (1 + mixtureRatio)
-    oxMassFlowRate = totalMassFlowRate * mixtureRatio / (1 + mixtureRatio)
+    # Constants
+    g = 9.81
+    groundLevelPressure = 101325
 
-    # Sutton equation (3-24)
-    throatArea = totalMassFlowRate * (k * specificGasConstant * chamberTemperature)**(1/2) / (chamberPressure * k
-                 * ((2 / (k + 1))**((k + 1)/(k - 1)))**(1/2))
-    throatDiameter = 2 * (throatArea / math.pi)**(1/2)
-    
-    # Sutton equation (3-25)
-    expansionRatio = (((k + 1)/2)**(1 / (k - 1)) * (exitPressure / chamberPressure)**(1 / k) * ((k + 1) / (k - 1) * (1 - (exitPressure / 
-                      chamberPressure)**((k - 1) / k)))**(1/2))**(-1)
-    exitArea = expansionRatio * throatArea
-    exitDiameter = 2 * (exitArea / math.pi)**(1/2)
+    requiredSeaLevelThrust = thrustToWeight * vehicleMass * g # Required sea level thrust to meet initial thrust to weight ratio
+    idealThrust = 0
+    seaLevelThrustToWeight = 0
+
+    # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
+    while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
+        idealExhaustVelocity = specificImpulse * g
+        totalMassFlowRate = idealThrust / (idealExhaustVelocity * efficiencyFactor**2)
+        fuelMassFlowRate = totalMassFlowRate / (1 + mixtureRatio)
+        oxMassFlowRate = mixtureRatio * fuelMassFlowRate
+
+        throatArea = cstar * totalMassFlowRate / chamberPressure
+        throatDiameter = 2 * (throatArea / math.pi)**(1/2)
+        exitArea = expansionRatio * throatArea
+        exitDiameter = 2 * (exitArea / math.pi)**(1/2)
+        
+        seaLevelThrust = idealThrust + exitArea * (exitPressure - groundLevelPressure)
+        seaLevelThrustToWeight = seaLevelThrust / (vehicleMass * g)
+        idealThrust = requiredSeaLevelThrust - exitArea * (exitPressure - groundLevelPressure)
+ 
 
     chamberArea = math.pi / 4 * chamberDiameter**2
+    contractionRatio = chamberArea / throatArea
 
     convergingLength = 0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(45))
     divergingLength = 0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15))
@@ -62,7 +68,7 @@ def propulsion(thrustToWeight, vehicleMass, chamberDiameter, chamberTemperature,
     chamberLength = characteristicLength * throatArea / chamberArea - convergingLength * (1 + (throatArea / chamberArea)**(1/2) + throatArea / chamberArea)
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate
-    totalImpulse = thrust * burnTime
+    totalImpulse = idealThrust * burnTime
 
     # rows are for 0.25", 0.50", and 0.75" respectively
     tubeThicknesses = np.array([0.035, 0.049, 0.095]) * 0.0254
@@ -71,4 +77,4 @@ def propulsion(thrustToWeight, vehicleMass, chamberDiameter, chamberTemperature,
     fuelVelocities = fuelMassFlowRate / (fuelDensity * tubeAreas)
     oxVelocities = oxMassFlowRate / (oxDensity * tubeAreas)
 
-propulsion(4000, 6.0 * 0.0254, 3000, 2 * 10**6, 101325, 1.0, 1.2, 400, 9.669987790415082, 23.207970696996192, 400, 1000, 2.4)
+propulsion(4, 150, 7 * 0.0254, 300 * 6895, 11 * 6895, 1783.9, 270.2, 4.9174, 0.9, 45 * 0.0254, 1, 1, 1, 1, 2.38)
