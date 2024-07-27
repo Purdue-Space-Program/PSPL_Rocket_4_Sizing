@@ -7,7 +7,7 @@ import numpy as np
 from ambiance import Atmosphere
 
 
-def trajectory(
+def calculate_trajectory(
     wetMass,
     mDotTotal,
     jetThrust,
@@ -115,7 +115,7 @@ import time
 
 for i in list:
     startTime = time.time()
-    altitude, maxMach, maxAccel = trajectory(
+    altitude, maxMach, maxAccel = calculate_trajectory(
         74.69, 1.86, 3792, 0.168275, 0.48, 0.02, 100000, 13, i
     )
     runTime = time.time() - startTime

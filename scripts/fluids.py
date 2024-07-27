@@ -52,7 +52,7 @@ SAFETY_FACTOR_U = 1.50  # [1] safety factor to tank structure ultimate
 PROOF_FACTOR = 1.50  # [1] ratio of proof pressure to nominal pressure
 
 
-def fluids(
+def calculate_fluids(
     pumps,
     fuel,
     oxidizer,
@@ -175,7 +175,7 @@ def fluids(
 
 
 """
-fluids(
+calculate_fluids(
     False,
     "Methane",
     "Oxygen",
