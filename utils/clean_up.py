@@ -5,20 +5,18 @@ import os
 import shutil
 import sys
 
-
 if __name__ == "__main__":
-  outputDir = "../data/outputs"
+    outputDir = "../data/outputs"
 
-  # Iterate over all items in the current directory
-  for item in os.listdir(outputDir):
-    itemPath = os.path.join(outputDir, item)
+    # Iterate over all items in the current directory
+    for item in os.listdir(outputDir):
+        itemPath = os.path.join(outputDir, item)
 
-    # Check if the item is a directory
-    if os.path.isdir(itemPath):
-      # Remove the directory and its contents
-      shutil.rmtree(itemPath)
+        # Check if the item is a directory
+        if os.path.isdir(itemPath):
+            # Remove the directory and its contents
+            shutil.rmtree(itemPath)
 
-  # Print a message indicating successful cleanup
-  print("Cleanup completed.")
-  sys.exit(0) 
-
+    # Print a message indicating successful cleanup
+    print("Cleanup completed.")
+    sys.exit(0)

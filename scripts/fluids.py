@@ -121,7 +121,7 @@ def calculate_fluids(
     heliumMass = copvVolume * heliumDensity
     # heliumGasConstant = CoolProp.CoolProp.PropsSI("gas_constant", "T", T_INF, "P", bottlePressure, "Helium")
     heliumGasConstant = 2077  # [J/kg-K]
-    tankTotalVolume = heliumMass * heliumGasConstant * T_INF / tankPressure
+    tankTotalVolume = heliumMass * heliumGasConstant * T_INF / tankPressure  # [m^3]
 
     tankThickness = 0.5 * (tankOD - tankID)
 

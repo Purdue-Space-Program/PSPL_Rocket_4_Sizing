@@ -97,7 +97,7 @@ def calculate_trajectory(
         machArray.append(mach)  # append mach number to array
 
         altitude = altitude + velocity * dt  # position integration
-        altitudeArray.append(altitude)
+        altitudeArray.append(altitude)  # append altitude to array
 
         time = time + dt  # time step
         timeArray.append(time)  # append time to array

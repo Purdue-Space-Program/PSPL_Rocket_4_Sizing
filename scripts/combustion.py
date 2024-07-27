@@ -18,18 +18,26 @@
 # specificGasConstant:    [J/kg-K] gas constant of products at exit
 
 import CEA_Wrap as CEA
-
 import CoolProp.CoolProp as cp
 
-def runCEA(chamberPressure, mixtureRatio, exitPressureRatio, fuelName, oxName, fuelTemp, oxTemp):
+
+def runCEA(
+    chamberPressure, mixtureRatio, exitPressureRatio, fuelName, oxName, fuelTemp, oxTemp
+):
     # Unit conversions
     Pa_to_bar = 1 / 10**5
 
     # CEA run
-    fuel = CEA.Fuel(fuelName, temp = fuelTemp)
-    oxidizer = CEA.Oxidizer(oxName, temp = oxTemp)
-    rocket = CEA.RocketProblem(pressure = chamberPressure * Pa_to_bar, pip = exitPressureRatio, materials = [fuel, oxidizer], 
-                               o_f = mixtureRatio, filename = "engineCEAoutput", pressure_units = "bar")
+    fuel = CEA.Fuel(fuelName, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxName, temp=oxTemp)
+    rocket = CEA.RocketProblem(
+        pressure=chamberPressure * Pa_to_bar,
+        pip=exitPressureRatio,
+        materials=[fuel, oxidizer],
+        o_f=mixtureRatio,
+        filename="engineCEAoutput",
+        pressure_units="bar",
+    )
     data = rocket.run()
 
     # Extract CEA outputs

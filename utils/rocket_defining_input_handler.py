@@ -10,19 +10,22 @@
 
 
 def read_inputs():
+    from itertools import product
+
     import numpy as np
     import pandas as pd
-    from itertools import product
 
     # Constants
     STEP_FACTOR = 0.000001  # Added to arange stop value to ensure the stop value is reached for ranges divisible by the step size
     INPUT_PRECISION = 3  # Number of decimal places to round continuous input values to
-    COPV_OD_MARGIN = 0.1  # [in] Minimum permissible gap between the COPV OD and the tanks OD
+    COPV_OD_MARGIN = (
+        0.1  # [in] Minimum permissible gap between the COPV OD and the tanks OD
+    )
 
     # Get Inputs
     # This section reads the input spreadsheet using the Pandas library.
     # Owner: Hugo Filmer
-    
+
     # Bring all rocket-defining inputs into Pandas dataframes
     with pd.ExcelFile("rocket_defining_inputs.xlsx") as RDIs:
         continuousInputs = pd.read_excel(
@@ -38,12 +41,13 @@ def read_inputs():
             RDIs, "COPVs", index_col=0
         )  # Dataframe containing COPV options. Rows are different COPVs, columns are COPV parameters
 
-
     # Possible Rockets
     # This section creates a set of possible rockets from the inputs.
     # Owner: Hugo Filmer
 
-    nonPropInputs = {}  # Dict with the complete set of rocket-defining inputs to iterate through other than propellant combination, keyed by the type of input
+    nonPropInputs = (
+        {}
+    )  # Dict with the complete set of rocket-defining inputs to iterate through other than propellant combination, keyed by the type of input
 
     # Incorporate continuous inputs (while converting the start-stop-step format into a list)
     for column in continuousInputs:
@@ -62,7 +66,9 @@ def read_inputs():
     nonPropInputs["Tank wall"] = list(tankWalls.index)
     nonPropInputs["COPV"] = list(copvs.index)
 
-    possibleRocketsByProp = {}  # Dict with all possible combinations of rocket-defining inputs for each propellant combination
+    possibleRocketsByProp = (
+        {}
+    )  # Dict with all possible combinations of rocket-defining inputs for each propellant combination
 
     marginTime = 0
 
@@ -72,12 +78,12 @@ def read_inputs():
             product(
                 [propCombo],
                 list(
-                     np.round(
-                         np.arange(
+                    np.round(
+                        np.arange(
                             propCombos.loc[propCombo].iloc[2],
                             propCombos.loc[propCombo].iloc[3] + STEP_FACTOR,
                             propCombos.loc[propCombo].iloc[4],
-                            ),
+                        ),
                         INPUT_PRECISION,
                     )
                 ),
@@ -93,11 +99,13 @@ def read_inputs():
             tankWallIndex = list(nonPropInputs.keys()).index("Tank wall")
             tankOD = tankWalls.loc[rocket[tankWallIndex + 2], "Outer diameter (in)"]
 
-            if copvOD + 2*COPV_OD_MARGIN >= tankOD:
+            if copvOD + 2 * COPV_OD_MARGIN >= tankOD:
                 badRocketIndex = possibleRocketsByProp[propCombo].index(rocket)
                 del possibleRocketsByProp[propCombo][badRocketIndex]
-                
-    possibleRockets = []  # List of all possible rockets that could be built with combinations of the rocket-defining inputs. Each rocket is a
+
+    possibleRockets = (
+        []
+    )  # List of all possible rockets that could be built with combinations of the rocket-defining inputs. Each rocket is a
     # tuple contained in the list with every input parameter for that rocket.
 
     # Join each separate propellant combinaton's set of inputs together

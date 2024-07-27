@@ -3,78 +3,161 @@
 # 27 May 2024
 
 import math
+
 import numpy as np
 
-# Inputs:
-# thrust:               [N] design thrust for engine
-# chamberDiameter:      [m] inner diameter of combustion chamber
-# chamberTemperature:   [K] temperature of products in combustion chamber
-# chamberPressure:      [Pa] pressure within combustion chamber
-# exitPressure:         [Pa] pressure of surroundings outside nozzle
-# characteristicLength: [m] length in chamber needed for full propellant reaction
-# specificHeatRatio:    [1] ratio of specific heats for products at exit
-# specificGasConstant:  [J/kg-K] gas constant for products at exit
-# fuelTankVolume:       [m^3] volume of fuel tank
-# oxTankVolume:         [m^3] volume of oxidizer tank
-# mixtureRatio:         [1] ratio of oxidizer to fuel by mass
 
-# Outputs:
-# chamberLength:          [m] length of combustion chamber
-# nozzleConvergingLength: [m] length of nozzle converging section
-# nozzleDivergingSection: [m] length of nozzle diverging section
-# throatDiameter:         [m] diameter of nozzle throat
-# exitDiameter:           [m] diameter of nozzle exit
-# fuelMassFlowRate:       [kg/s] mass flow rate of fuel
-# oxMassFlowRate:         [kg/s] mass flow rate of oxidizer
-# lineVelocities:         [m/s] fuel and oxidizer line velocities for different tube sizes
-# burnTime:               [s] duration of engine burn
-# totalImpulse:           [N-s] integral of thrust over duration of burn
+def calculate_propulsion(
+    thrustToWeight,
+    vehicleMass,
+    chamberDiameter,
+    chamberPressure,
+    exitPressure,
+    cstar,
+    specificImpulse,
+    expansionRatio,
+    efficiencyFactor,
+    characteristicLength,
+    fuelMass,
+    oxMass,
+    fuelDensity,
+    oxDensity,
+    mixtureRatio,
+):
+    """
+    _summary_
 
-def propulsion(thrustToWeight, vehicleMass, chamberDiameter, chamberPressure, exitPressure, cstar, specificImpulse, expansionRatio, 
-               efficiencyFactor, characteristicLength, fuelMass, oxMass, fuelDensity, oxDensity, mixtureRatio):
+    Parameters
+    ----------
+    thrust : float
+        Design thrust for the engine [N].
+    chamberDiameter : float
+        Inner diameter of combustion chamber [m].
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    chamberPressure : float
+        Pressure within the combustion chamber [Pa].
+    exitPressure : float
+        Pressure of surroundings outside the nozzle [Pa].
+    characteristicLength : float
+        Length in chamber needed for full propellant reaction [m].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    specificGasConstant : float
+        Gas constant for products at exit [J/kg-K].
+    fuelTankVolume : float
+        Volume of fuel tank [m^3].
+    oxTankVolume : float
+        Volume of oxidizer tank [m^3].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+
+    Returns
+    -------
+    chamberLength : float
+        Length of combustion chamber [m].
+    nozzleConvergingLength : float
+        Length of nozzle converging section [m].
+    nozzleDivergingSection : float
+        Length of nozzle diverging section [m].
+    throatDiameter : float
+        Diameter of nozzle throat [m].
+    exitDiameter : float
+        Diameter of nozzle exit [m].
+    fuelMassFlowRate : float
+        Mass flow rate of fuel [kg/s].
+    oxMassFlowRate : float
+        Mass flow rate of oxidizer [kg/s].
+    lineVelocities : list of float
+        Fuel and oxidizer line velocities for different tube sizes [m/s].
+    burnTime : float
+        Duration of engine burn [s].
+    totalImpulse : float
+        Integral of thrust over duration of burn [N-s].
+    """
 
     # Constants
-    g = 9.81
-    groundLevelPressure = 101325
+    g = 9.81  # [m/s^2] acceleration due to gravity
+    groundLevelPressure = 101325  # [Pa] pressure at sea level
 
-    requiredSeaLevelThrust = thrustToWeight * vehicleMass * g # Required sea level thrust to meet initial thrust to weight ratio
+    requiredSeaLevelThrust = (
+        thrustToWeight * vehicleMass * g
+    )  # Required sea level thrust to meet initial thrust to weight ratio
     idealThrust = 0
     seaLevelThrustToWeight = 0
 
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
-        idealExhaustVelocity = specificImpulse * g
-        totalMassFlowRate = idealThrust / (idealExhaustVelocity * efficiencyFactor**2)
-        fuelMassFlowRate = totalMassFlowRate / (1 + mixtureRatio)
-        oxMassFlowRate = mixtureRatio * fuelMassFlowRate
+        idealExhaustVelocity = specificImpulse * g  # [m/s] ideal exhaust velocity
+        totalMassFlowRate = idealThrust / (
+            idealExhaustVelocity * efficiencyFactor**2
+        )  # [kg/s] total mass flow rate
+        fuelMassFlowRate = totalMassFlowRate / (
+            1 + mixtureRatio
+        )  # [kg/s] fuel mass flow rate
+        oxMassFlowRate = (
+            mixtureRatio * fuelMassFlowRate
+        )  # [kg/s] oxidizer mass flow rate
 
-        throatArea = cstar * totalMassFlowRate / chamberPressure
-        throatDiameter = 2 * (throatArea / math.pi)**(1/2)
-        exitArea = expansionRatio * throatArea
-        exitDiameter = 2 * (exitArea / math.pi)**(1/2)
-        
-        seaLevelThrust = idealThrust + exitArea * (exitPressure - groundLevelPressure)
-        seaLevelThrustToWeight = seaLevelThrust / (vehicleMass * g)
-        idealThrust = requiredSeaLevelThrust - exitArea * (exitPressure - groundLevelPressure)
- 
+        throatArea = cstar * totalMassFlowRate / chamberPressure  # [m^2] throat area
+        throatDiameter = 2 * (throatArea / math.pi) ** (1 / 2)  # [m] throat diameter
+        exitArea = expansionRatio * throatArea  # [m^2] exit area
+        exitDiameter = 2 * (exitArea / math.pi) ** (1 / 2)  # [m] exit diameter
 
-    chamberArea = math.pi / 4 * chamberDiameter**2
-    contractionRatio = chamberArea / throatArea
+        seaLevelThrust = idealThrust + exitArea * (
+            exitPressure - groundLevelPressure
+        )  # [N] sea
+        seaLevelThrustToWeight = seaLevelThrust / (
+            vehicleMass * g
+        )  # sea level thrust to weight ratio
+        idealThrust = requiredSeaLevelThrust - exitArea * (
+            exitPressure - groundLevelPressure
+        )  # [N] ideal thrust
 
-    convergingLength = 0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(45))
-    divergingLength = 0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15))
+    chamberArea = math.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
+    contractionRatio = chamberArea / throatArea  # [1] contraction ratio
+
+    convergingLength = (
+        0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(45))
+    )  # [m] converging length
+    divergingLength = (
+        0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15))
+    )  # [m] diverging length
 
     # Sutton equations (8-8) and (8-9)
-    chamberLength = characteristicLength * throatArea / chamberArea - convergingLength * (1 + (throatArea / chamberArea)**(1/2) + throatArea / chamberArea)
+    chamberLength = (
+        characteristicLength * throatArea / chamberArea
+        - convergingLength
+        * (1 + (throatArea / chamberArea) ** (1 / 2) + throatArea / chamberArea)
+    )  # [m] chamber length
 
-    burnTime = (fuelMass + oxMass) / totalMassFlowRate
-    totalImpulse = idealThrust * burnTime
+    burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
+    totalImpulse = idealThrust * burnTime  # [N-s] total impulse
 
     # rows are for 0.25", 0.50", and 0.75" respectively
-    tubeThicknesses = np.array([0.035, 0.049, 0.095]) * 0.0254
-    tubeODs = np.array([0.25, 0.50, 0.75]) * 0.0254
-    tubeAreas = (tubeODs - 2 * tubeThicknesses)**2 * math.pi/4
-    fuelVelocities = fuelMassFlowRate / (fuelDensity * tubeAreas)
-    oxVelocities = oxMassFlowRate / (oxDensity * tubeAreas)
+    tubeThicknesses = np.array([0.035, 0.049, 0.095]) * 0.0254  # [m] tube thicknesses
+    tubeODs = np.array([0.25, 0.50, 0.75]) * 0.0254  # [m] tube outer diameters
+    tubeAreas = (tubeODs - 2 * tubeThicknesses) ** 2 * math.pi / 4  # [m^2] tube areas
+    fuelVelocities = fuelMassFlowRate / (
+        fuelDensity * tubeAreas
+    )  # [m/s] fuel velocities
+    oxVelocities = oxMassFlowRate / (oxDensity * tubeAreas)  # [m/s] oxidizer velocities
 
-propulsion(4, 150, 7 * 0.0254, 300 * 6895, 11 * 6895, 1783.9, 270.2, 4.9174, 0.9, 45 * 0.0254, 1, 1, 1, 1, 2.38)
+
+calculate_propulsion(
+    4,
+    150,
+    7 * 0.0254,
+    300 * 6895,
+    11 * 6895,
+    1783.9,
+    270.2,
+    4.9174,
+    0.9,
+    45 * 0.0254,
+    1,
+    1,
+    1,
+    1,
+    2.38,
+)
