@@ -9,7 +9,7 @@ from ambiance import Atmosphere
 import matplotlib.pyplot as plt
 
 def trajectory(
-    wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime, dt
+    wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime, plots
 ):
     """
     Inputs:
@@ -21,6 +21,7 @@ def trajectory(
     exitArea [m^2]: exit area of the nozzle
     exitPressure [Pa]: exit pressure of the nozzle
     burnTime [s]: burn time of the engine
+    plots [-]: boolean for plotting, 1 = on, 0 = off
 
     Outputs:
     altitude [m]: final altitude of the rocket
@@ -44,15 +45,13 @@ def trajectory(
     altitude = RAIL_HEIGHT + FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
-    # dt = 0.005  # [s] time step of the rocket
+    dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed
 
     # Array Initialization:
     altitudeArray = []
     machArray = []
     accelArray = []
     timeArray = []
-    
-
 
     while velocity >= 0:
         atmo = Atmosphere(altitude)
@@ -81,34 +80,33 @@ def trajectory(
         time = time + dt # time step
         timeArray.append(time)
 
+    if plots == 1:
+        plt.figure(1)
+        plt.title('Height v. Time')
+        plt.plot(timeArray, altitudeArray)
+        plt.ylabel('Height [m]')
+        plt.xlabel('Time (s)')
+        plt.grid()
+        plt.show()
+
+        plt.figure(2)
+        plt.title('Mach v. Time')
+        plt.plot(timeArray, machArray)
+        plt.ylabel('Mach [-]')
+        plt.xlabel('Time (s)')
+        plt.grid()
+        plt.show()
+
+
     return altitude, max(machArray), max(accelArray)
 
-altitudeArray = []
 
-startTime = time.time()
-altitude, maxMach, maxAccel = trajectory(74.69, 1.86, 3792, 0.168275, 0.48, .02, 100000, 13, 0.025)
-runTime = time.time() - startTime
-print('Max Altitude is: ' + str(altitude))
-print('Maximum Mach Number is: %.1f', maxMach)
-print('Maximum Acceleration is %.1f m/s^2', maxAccel)
+altitude, maxMach, maxAccel = trajectory(74.69, 1.86, 3792, 0.168275, 0.48, .02, 100000, 13, 1)
+print("Max Altitude is: ", altitude)
+print('Maximum Mach Number is:', maxMach)
+print('Maximum Acceleration is', maxAccel)
     
 
-# Make plot
-# plt.figure(1)
-# plt.title('Height v. Time Step')
-# plt.scatter(dtArray, altitudeArray)
-# plt.ylabel('Height [m]')
-# plt.xlabel('Time Step (s)')
-# plt.grid()
-# plt.show()
-
-# plt.figure(2)
-# plt.title('Run Time vs Time Step')
-# plt.plot(dtArray, runTimeArray)
-# plt.ylabel('Run Time [s]')
-# plt.xlabel('Time Step [s]')
-# plt.grid()
-# plt.show()
 
 
 
