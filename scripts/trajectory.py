@@ -2,11 +2,9 @@
 # 24 July 2024
 
 
-import numpy as np
-
-from ambiance import Atmosphere
-
 import matplotlib.pyplot as plt
+import numpy as np
+from ambiance import Atmosphere
 
 
 def calculate_trajectory(

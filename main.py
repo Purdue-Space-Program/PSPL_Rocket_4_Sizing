@@ -16,13 +16,14 @@
 # |  $$$$$$/ /$$$$$$ /$$$$$$$$| $$$$$$$$    | $$          | $$      | $$$$$$$$ /$$$$$$| $$$$$$$$|  $$$$$$/| $$$$$$$$    | $$
 # \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/
 
-from utils.rocket_defining_input_handler import read_inputs
-from scripts import trajectory, fluids
-
-import os
 import datetime
+import os
 import shutil
+
 import progressbar as pb
+
+from scripts import fluids, trajectory
+from utils.rocket_defining_input_handler import read_inputs
 
 
 def main():
