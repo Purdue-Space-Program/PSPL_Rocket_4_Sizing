@@ -8,31 +8,56 @@ from ambiance import Atmosphere
 
 import matplotlib.pyplot as plt
 
-def trajectory(
-    wetMass, mDotTotal, jetThrust, tankOD, ascentDragCoeff, exitArea, exitPressure, burnTime, plots
+
+def calculate_trajectory(
+    wetMass,
+    mDotTotal,
+    jetThrust,
+    tankOD,
+    ascentDragCoeff,
+    exitArea,
+    exitPressure,
+    burnTime,
+    plots,
 ):
     """
-    Inputs:
-    wetMass [kg]: wet mass of the rocket
-    mDotTotal [kg/s]: total mass flow rate of the engine
-    jetThrust [N]:engine thrust
-    tankOD [m]: outer diameter of the tank
-    ascentDragCoeff [-]: drag coefficient during ascent
-    exitArea [m^2]: exit area of the nozzle
-    exitPressure [Pa]: exit pressure of the nozzle
-    burnTime [s]: burn time of the engine
-    plots [-]: boolean for plotting, 1 = on, 0 = off
+    _summary_
 
-    Outputs:
-    altitude [m]: final altitude of the rocket
+    Parameters
+    ----------
+    wetMass : float
+        Wet mass of the rocket [kg].
+    mDotTotal : float
+        Total mass flow rate of the engine [kg/s].
+    jetThrust : float
+        Engine thrust [N].
+    tankOD : float
+        Outer diameter of the tank [m].
+    ascentDragCoeff : float
+        Drag coefficient during ascent [-].
+    exitArea : float
+        Exit area of the nozzle [m^2].
+    exitPressure : float
+        Exit pressure of the nozzle [Pa].
+    burnTime : float
+        Burn time of the engine [s].
+    plots : bool
+        Boolean for plotting, 1 = on, 0 = off [-].
 
+    Returns
+    -------
+    altitude : float
+        Final altitude of the rocket [m].
+    maxMach : float
+        Maximum Mach number of the rocket [-].
+    maxAccel : float
+        Maximum acceleration of the rocket [m/s^2].
     """
 
     # Constants
     GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
     FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
     RAIL_HEIGHT = 18.29  # [m] height of the rail
-    RHO_0 = 1.225 # [kg / m^3] density of air at sea level
 
     # Rocket Properties
 
@@ -58,56 +83,55 @@ def trajectory(
         pressure = atmo.pressure
         if time < burnTime:
             mass = mass - mDotTotal * dt  # [kg] mass of the rocket
-            thrust = jetThrust  - (exitPressure - pressure) * exitArea # [N] force of thrust, accounting for pressure thrust
+            thrust = (
+                jetThrust - (exitPressure - pressure) * exitArea
+            )  # [N] force of thrust, accounting for pressure thrust
 
         else:
             thrust = 0  # [N] total thrust of the rocket
 
         rho = atmo.density
-        drag = 0.5 * rho * velocity ** 2 * ascentDragCoeff * referenceArea # [N] force of drag
-        grav = GRAVITY * mass # [N] force of gravity
+        drag = (
+            0.5 * rho * velocity**2 * ascentDragCoeff * referenceArea
+        )  # [N] force of drag
+        grav = GRAVITY * mass  # [N] force of gravity
 
-        accel = (thrust - drag - grav) / mass # acceleration equation of motion
+        accel = (thrust - drag - grav) / mass  # acceleration equation of motion
         accelArray.append(accel)
 
-        velocity = velocity + accel * dt # velocity integration
+        velocity = velocity + accel * dt  # velocity integration
         mach = velocity / atmo.speed_of_sound
         machArray.append(mach)
 
-        altitude = altitude + velocity * dt # position integration
+        altitude = altitude + velocity * dt  # position integration
         altitudeArray.append(altitude)
 
-        time = time + dt # time step
+        time = time + dt  # time step
         timeArray.append(time)
 
     if plots == 1:
         plt.figure(1)
-        plt.title('Height v. Time')
+        plt.title("Height v. Time")
         plt.plot(timeArray, altitudeArray)
-        plt.ylabel('Height [m]')
-        plt.xlabel('Time (s)')
+        plt.ylabel("Height [m]")
+        plt.xlabel("Time (s)")
         plt.grid()
         plt.show()
 
         plt.figure(2)
-        plt.title('Mach v. Time')
+        plt.title("Mach v. Time")
         plt.plot(timeArray, machArray)
-        plt.ylabel('Mach [-]')
-        plt.xlabel('Time (s)')
+        plt.ylabel("Mach [-]")
+        plt.xlabel("Time (s)")
         plt.grid()
         plt.show()
-
 
     return altitude, max(machArray), max(accelArray)
 
 
-altitude, maxMach, maxAccel = trajectory(74.69, 1.86, 3792, 0.168275, 0.48, .02, 100000, 13, 1)
-print("Max Altitude is: ", altitude)
-print('Maximum Mach Number is:', maxMach)
-print('Maximum Acceleration is', maxAccel)
-    
-
-
-
-
-
+# altitude, maxMach, maxAccel = trajectory(
+#     74.69, 1.86, 3792, 0.168275, 0.48, 0.02, 100000, 13, 1
+# )
+# print("Max Altitude is: ", altitude)
+# print("Maximum Mach Number is:", maxMach)
+# print("Maximum Acceleration is", maxAccel)
