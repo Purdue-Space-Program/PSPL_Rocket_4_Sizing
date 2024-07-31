@@ -16,45 +16,22 @@
 # |  $$$$$$/ /$$$$$$ /$$$$$$$$| $$$$$$$$    | $$          | $$      | $$$$$$$$ /$$$$$$| $$$$$$$$|  $$$$$$/| $$$$$$$$    | $$
 # \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/
 
-import datetime
-import os
-import shutil
 
 import progressbar as pb
 
 from scripts import fluids, trajectory
-from utils.rocket_defining_input_handler import read_inputs
+from utils import rocket_defining_input_handler, output_folder
 
 
 def main():
-    # Output Folder Creation
-    # This section creates an output folder with the time of the run and the input and output sheets.
-    # Owner: Nick Nielsen
-
-    currentDatetime = datetime.datetime.now()  # Get current date and time
-    folderName = currentDatetime.strftime(
-        "%Y-%m-%d_%H-%M-%S"
-    )  # Format date and time as a string
-
-    os.mkdir(
-        os.path.join("data/outputs", folderName)
-    )  # Create folder with the date and time as the name in the ../Runs directory
-
-    shutil.copy(
-        "data/inputs/rocket_defining_inputs.xlsx",
-        os.path.join("data/outputs", folderName),
-    )  # Copy rocket_defining_inputs.xlsx file from input folder to output folder
-
-    os.chdir(os.path.join("data/inputs"))  # Change directory to the new folder
-
-    os.chdir(os.path.join("../outputs", folderName))
+    startTime = output_folder.create_output_folder()  # Create a new output folder
 
     # Possible Rockets
     # This section uses the input reader to get the data from the input spreadsheet.
     # Owner: Hugo Filmer
 
     (possibleRocketsDF, propCombos, tankWalls, copvs) = (
-        read_inputs()
+        rocket_defining_input_handler.read_inputs()
     )  # Get information on possible rockets
 
     possibleRocketsDF.to_excel(
