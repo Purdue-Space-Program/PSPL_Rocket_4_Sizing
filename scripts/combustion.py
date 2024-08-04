@@ -25,6 +25,38 @@ import CoolProp.CoolProp as cp
 def runCEA(
     chamberPressure, mixtureRatio, exitPressureRatio, fuelName, oxName, fuelTemp, oxTemp
 ):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    chamberPressure : float
+        Pressure within the engine combustion chamber [Pa].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+    exitPressureRatio : float
+        Ratio of chamber pressure to nozzle exit pressure [-].
+    fuelName : str
+        Name of fuel under CEA conventions [N/A].
+    oxName : str
+        Name of oxidizer under CEA conventions [N/A].
+    fuelTemp : float
+        Temperature of fuel upon injection into combustion [K].
+    oxTemp : float
+        Temperature of oxidizer upon injection into combustion [K].
+
+    Returns
+    -------
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    productMolecularWeight : float
+        Molecular weight of products at exit [kg/kmol].
+    specificGasConstant : float
+        Gas constant of products at exit [J/kg-K].
+    """
+
     # Unit conversions
     Pa_to_bar = 1 / 10**5
 
