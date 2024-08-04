@@ -18,6 +18,7 @@
 
 
 import progressbar as pb
+import time
 
 from scripts import fluids, trajectory
 from utils import rocket_defining_input_handler, output_folder
@@ -44,42 +45,11 @@ def main():
 
     numberPossibleRockets = len(possibleRocketsDF)  # Get the number of possible rockets
 
-    bar = pb.ProgressBar(
-        maxval=numberPossibleRockets
-    )  # Create a progress bar with the number of possible rockets as the max value
+    # bar = pb.ProgressBar(
+    #     maxval=numberPossibleRockets
+    # )  # Create a progress bar with the number of possible rockets as the max value
 
-    bar.start()  # Start the progress bar
-
-    for i in range(numberPossibleRockets):
-        tankPressure, fuelTankVolume, oxTankVolume, fuelTankLength, oxTankLength = (
-            fluids.calculate_fluids(
-                pumps,
-                fuel,
-                oxidizer,
-                mixRatio,
-                chamberPressure,
-                copvPressure,
-                copvVolume,
-                copvMass,
-                tankOD,
-                tankID,
-            )
-        )  # Calculate the necessary fluid parameters
-
-        altitude = trajectory.calculate_trajectory(
-            wetMass,
-            mDotTotal,
-            jetThrust,
-            tankOD,
-            tankID,
-            exitPressure,
-            burnTime,
-            dt,
-        )  # Calculate the trajectory
-
-        bar.update(i + 1)  # Update the progress bar
-
-    bar.finish()  # Finish the progress bar
+    # bar.start()  # Start the progress bar
 
 
 if __name__ == "__main__":
