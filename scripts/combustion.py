@@ -17,6 +17,7 @@
 # productMolecularWeight: [kg/kmol] molecular weight of products at exit
 # specificGasConstant:    [J/kg-K] gas constant of products at exit
 
+
 import CEA_Wrap as CEA
 import CoolProp.CoolProp as cp
 
@@ -38,6 +39,7 @@ def runCEA(
         filename="engineCEAoutput",
         pressure_units="bar",
     )
+
     data = rocket.run()
 
     # Extract CEA outputs
@@ -48,4 +50,5 @@ def runCEA(
     return [cstar, specificImpulse, expansionRatio]
 
 
-runCEA(2 * 10**6, 2.4, 20, "CH4(L)", "O2(L)", 120, 100)
+for i in range(1, 6):
+    runCEA(2 * 10**6, 2.4 + i * 0.1, 20, "CH4(L)", "O2(L)", 120, 100)
