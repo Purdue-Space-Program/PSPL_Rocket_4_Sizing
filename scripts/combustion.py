@@ -55,7 +55,19 @@ def runCEA(
         Molecular weight of products at exit [kg/kmol].
     specificGasConstant : float
         Gas constant of products at exit [J/kg-K].
+
     """
+
+    # Convert fuel and oxidizer names to CEA conventions
+    if oxName == "Oxygen":
+        oxName = "O2(L)"
+
+    if fuelName == "Methane":
+        fuelName = "CH4(L)"
+    elif fuelName == "n-Dodecane":
+        fuelName = "Jet-A(L)"
+    elif fuelName == "Ethanol":
+        fuelName = "C2H5OH(L)"
 
     # Unit conversions
     Pa_to_bar = 1 / 10**5

@@ -45,11 +45,71 @@ def main():
 
     numberPossibleRockets = len(possibleRocketsDF)  # Get the number of possible rockets
 
-    # bar = pb.ProgressBar(
-    #     maxval=numberPossibleRockets
-    # )  # Create a progress bar with the number of possible rockets as the max value
+    bar = pb.ProgressBar(
+        maxval=numberPossibleRockets
+    )  # Create a progress bar with the number of possible rockets as the max value
 
-    # bar.start()  # Start the progress bar
+    bar.start()  # Start the progress bar
+
+    for idx, rocket in possibleRocketsDF.iterrows():
+
+        # Continous Inputs
+        mixRatio = rocket["O:F (mass)"]  # Mixture ratio of the propellants
+        chamberPressure = rocket[
+            "Chamber pressure (psi)"
+        ]  # Chamber pressure of the engine [psi]
+        thurstToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
+
+        # Propellant Combinations
+        propellants = propCombos.loc[
+            rocket["Propellant combination"]
+        ]  # Get the propellant combination
+        fuel = propellants["Fuel"]  # Get the fuel properties
+        oxidizer = propellants["Oxidizer"]
+
+        # Tanks
+        tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
+
+        tankOD = tank["Outer diameter (in)"]  # Get the outer diameter of the tank
+        tankWallThickness = tank[
+            "Wall thickness (in)"
+        ]  # Get the wall thickness of the tank
+        tankID = (
+            tankOD - 2 * tankWallThickness
+        )  # Calculate the inner diameter of the tank
+
+        # Copvs
+        copv = copvs.loc[rocket["COPV"]]  # Get the COPV properties
+        copvVolume = copv["Volume (liters)"]
+        copvPressure = copv["Pressure (psi)"]
+        copvMass = copv["Mass (lbm)"]
+        copvLength = copv["Length (in)"]
+        copvOD = copv["Outer diameter (in)"]
+
+        # Fluids
+        (
+            tankPressure,
+            fuelTankVolume,
+            oxTankVolume,
+            fuelTankLength,
+            oxTankLength,
+        ) = fluids.run_fluids(
+            pumps=False,
+            fuel=fuel,
+            oxidizer=oxidizer,
+            mixRatio=mixRatio,
+            chamberPressure=chamberPressure,
+            copvPressure=copvPressure,
+            copvVolume=copvVolume,
+            copvMass=copvMass,
+            tankOD=tankOD,
+            tankID=tankID,
+        )
+
+        # Com
+
+        number = idx.split("#")[1]  # Get the number of the rocket
+        bar.update(int(number))  # Update the progress bar
 
 
 if __name__ == "__main__":
