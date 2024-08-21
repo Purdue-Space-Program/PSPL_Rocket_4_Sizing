@@ -117,34 +117,37 @@ def calculate_propulsion(
     chamberArea = math.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
-    convergingLength = (
-        0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(45))
-    )  # [m] converging length
-    divergingLength = (
-        0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15))
-    )  # [m] diverging length
+   # Thrust chamber size estimate, modeled as conical nozzle
+    divergeLength = 0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15)) # [m] nozzle diverging section length
+    convergeLength = 0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(25)) # [m] nozzle converging section length
+    convergeVolume = (1/3) * math.pi * convergeLength * ((chamberDiameter / 2)**2 + (throatDiameter / 2)**2 + ((chamberDiameter * throatDiameter) / 2)**2) # [m^3] nozzle converging section volume
+    chamberVolume = characteristicLength * throatArea - convergeVolume # [m^3] chamber volume
+    chamberLength = chamberVolume / chamberArea # [m] chamber length
+    thrustChamberLength = chamberLength + convergeLength + divergeLength # [m] overall thrust chamber length
 
-    # Sutton equations (8-8) and (8-9)
-    chamberLength = (
-        characteristicLength * throatArea / chamberArea
-        - convergingLength
-        * (1 + (throatArea / chamberArea) ** (1 / 2) + throatArea / chamberArea)
-    )  # [m] chamber length
+    # Mass estimates
+    chamberWallThickness = 0.001 # [m] chamber wall thickness
+    chamberMaterialDensity = 8190 # [kg/m^3] chamber wall material density (Inconel 718)
+    chamberMass = chamberMaterialDensity * (math.pi / 4) * ((chamberDiameter + chamberWallThickness)**2 - chamberDiameter**2) * thrustChamberLength # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
+
+    injectorMaterialDensity = 8190 # [kg/m^3] injector material density (Inconel 718)
+    injectorMass = injectorMaterialDensity * 0.0508 * (math.pi / 4) * chamberDiameter**2 # [kg] injector mass, modeled as solid disk w/ 2" height
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
-    totalImpulse = idealThrust * burnTime  # [N-s] total impulse
 
     # rows are for 0.25", 0.50", and 0.75" respectively
-    tubeThicknesses = np.array([0.035, 0.049, 0.095]) * 0.0254  # [m] tube thicknesses
-    tubeODs = np.array([0.25, 0.50, 0.75]) * 0.0254  # [m] tube outer diameters
-    tubeAreas = (tubeODs - 2 * tubeThicknesses) ** 2 * math.pi / 4  # [m^2] tube areas
+    tubeThickness = 0.065 * 0.0254  # [m] tube thicknesses
+    tubeODs = np.array([0.50, 0.75]) * 0.0254  # [m] tube outer diameters
+    tubeAreas = (math.pi / 4) * (tubeODs - (2 * tubeThickness))**2 # [m^2] tube areas
     fuelVelocities = fuelMassFlowRate / (
         fuelDensity * tubeAreas
     )  # [m/s] fuel velocities
     oxVelocities = oxMassFlowRate / (oxDensity * tubeAreas)  # [m/s] oxidizer velocities
+    lineVelocities = np.array([oxVelocities, fuelVelocities])
 
+    return idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass, lineVelocities
 
-calculate_propulsion(
+idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass, lineVelocities = calculate_propulsion(
     4,
     150,
     7 * 0.0254,
@@ -155,9 +158,18 @@ calculate_propulsion(
     4.9174,
     0.9,
     45 * 0.0254,
-    1,
-    1,
-    1,
-    1,
+    10 * 2.28,
+    10,
+    1100,
+    800,
     2.38,
 )
+
+print(idealThrust)
+print(oxMassFlowRate)
+print(fuelMassFlowRate)
+print(burnTime)
+print(chamberLength)
+print(chamberMass)
+print(injectorMass)
+print(lineVelocities)
