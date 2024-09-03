@@ -90,22 +90,18 @@ def calculate_propulsion(
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
         idealExhaustVelocity = specificImpulse * g  # [m/s] ideal exhaust velocity
         totalMassFlowRate = idealThrust / (
-            idealExhaustVelocity * efficiencyFactor**2
+            idealExhaustVelocity * efficiencyFactor
         )  # [kg/s] total mass flow rate
-        fuelMassFlowRate = totalMassFlowRate / (
-            1 + mixtureRatio
-        )  # [kg/s] fuel mass flow rate
-        oxMassFlowRate = (
-            mixtureRatio * fuelMassFlowRate
-        )  # [kg/s] oxidizer mass flow rate
 
         throatArea = cstar * totalMassFlowRate / chamberPressure  # [m^2] throat area
         throatDiameter = 2 * (throatArea / math.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
         exitDiameter = 2 * (exitArea / math.pi) ** (1 / 2)  # [m] exit diameter
 
-        seaLevelThrust = idealThrust + exitArea * (
-            exitPressure - groundLevelPressure
+        seaLevelThrust = (
+            idealThrust + 
+            exitArea * 
+            (exitPressure - groundLevelPressure)
         )  # [N] sea
         seaLevelThrustToWeight = seaLevelThrust / (
             vehicleMass * g
@@ -113,6 +109,13 @@ def calculate_propulsion(
         idealThrust = requiredSeaLevelThrust - exitArea * (
             exitPressure - groundLevelPressure
         )  # [N] ideal thrust
+
+    fuelMassFlowRate = totalMassFlowRate / (
+        1 + mixtureRatio
+    )  # [kg/s] fuel mass flow rate
+    oxMassFlowRate = (
+        mixtureRatio * fuelMassFlowRate
+    )  # [kg/s] oxidizer mass flow rate
 
     chamberArea = math.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
