@@ -238,12 +238,16 @@ calculate_fluids(
 """
 =======
     # Mass estimates
-    tankMass = 3 + (oxTankLength + fuelTankLength) * (tankOD^2 - tankID^2) * math.pi/4 * DENSITY_AL
-    fluidSystemsMass = tankMass + copvMass + 10
+    tanksMass = 798.29 * tankOD^(2.393)
+    upperPlumbingMass = 7.25
+    lowerPlumbingMass = 13.115 * tankOD^(0.469)
+    fluidSystemsMass = tanksMass + copvMass + upperPlumbingMass + lowerPlumbingMass
 
     # Size estimates
-    upperPlumbingLength = 0.4 * tankOD / (6.625 * 0.0254)
-    lowerPlumbingLength = 0.56 * tankOD / (6.625 * 0.0254)
+    tanksLength = 0.0584 * tanksMass + 1.229
+    upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339
+    lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411
 
 fluids(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)
 >>>>>>> Stashed changes
+
