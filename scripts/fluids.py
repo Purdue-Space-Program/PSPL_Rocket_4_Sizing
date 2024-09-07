@@ -18,236 +18,156 @@
 # 2. The pressurant gas in the COPV is helium.
 # 3. The tanks are made of an aluminum alloy.
 # 4. Ratio of fuel tank volume to ox tank volume is proportional to density ratio and mixture ratio.
+# 5. The tank use separate sqrt(2) ellipsoidal bulkheads (there is no common bulkhead).
 
-<<<<<<< Updated upstream
-import math
-
-import CoolProp.CoolProp as cool
-from pyfluids import Fluid, FluidsList, Input
-
-# Constants [RIGHT NOW SOME OF THESE ARE GUESSES]
-DENSITY_AL = 2700  # [kg/m^3] density of 6000-series aluminum
-YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] yield strength of 6000-series aluminum
-ULTIMATE_STRENGTH_AL = (
-    310 * 10**6
-)  # [Pa] ultimate tensile strength of 6000-series aluminum
-YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] modulus of elasticity for 6000-series aluminum
-
-FEED_DP_RATIO = (
-    0.8  # [1] ratio of feed system outlet pressure to inlet pressure (20% drop)
-)
-INJECTOR_DP_RATIO = (
-    0.8  # [1] ratio of chamber pressure to injector inlet pressure (20% drop)
-)
-PUMP_DP_RATIO = (
-    5.0  # [1] ratio of pump outlet pressure to pump inlet pressure (400% gain)\
-)
-T_INF = 293  # [K] ambient temperature
-FILL_PRESSURE = (
-    40 * 6894.76
-)  # [Pa] Pressure in the propellant tanks during fill (40 psi)
-
-SAFETY_FACTOR_Y = 1.25  # [1] safety factor to tank structure yield
-SAFETY_FACTOR_U = 1.50  # [1] safety factor to tank structure ultimate
-PROOF_FACTOR = 1.50  # [1] ratio of proof pressure to nominal pressure
-
-
-def calculate_fluids(
+def fluids(
     pumps,
-    fuel,
     oxidizer,
+    fuel,
     mixRatio,
     chamberPressure,
     copvPressure,
     copvVolume,
     copvMass,
     tankOD,
-    tankID,
-):
-    """_summary_
+    tankID,):
 
-    Parameters
-    ----------
-    pumps : Boolean
-        Boolean for whether or not the engine has pumps.
-    fuel : str
-        Fuel being used.
-    oxidizer : str
-        Oxidizer being used.
-    mixRatio : float
-        Mixture ratio of the fuel and oxidizer. [O/F]
-    chamberPressure : float
-        Pressure within the combustion chamber of the engine.[Pa]
-    copvPressure : float
-        Pressure of the COPV bottle that is pressurizing the tanks above ambient pressure.[Pa]
-    copvVolume : float
-        Volume of the COPV bottle.[m^3]
-    copvMass : float
-        Mass of the COPV bottle.[kg]
-    tankOD : float
-        Outer diameter of the propellant tanks (and also the rocket's main structure).[m]
-    tankID : float
-        Inner diameter of the propellant tanks.[m]
+    import math as m
+    from CoolProp.CoolProp import PropsSI
 
-    Returns
-    -------
-    tankPressure : float
-        Nominal pressure of both the fuel and ox tanks.[Pa]
-    fuelTankVolume : float
-        Volume of the fuel tank.[m^3]
-    oxTankVolume : float
-        Volume of the ox tank.[m^3]
-    fuelTankLength : float
-        Length of the fuel tank.[m]
-    oxTankLength : float
-        Length of the ox tank.[m]
+    # Constants
 
+    # Conversions
+    PSI2PA = 6894.76 # [Pa/psi] Conversion factor from psi to Pa
+    ATM2PA = 101325 # [Pa/atm] Conversion factor from atm to Pa
 
-    """
+    # Propellant
+    T_INF = 20 + 273.15 # [K] Assumed ambient temperature
+    FILL_PRESSURE = 60 * PSI2PA # [Pa] Pressure in the propellant tanks during fill
+    RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
+    ULLAGE_PERCENT =  10  # [1] Percent of tank volume dedicated to ullage
+    R_PROP = (100 - ULLAGE_PERCENT) / 100 # [1] Ratio of total tank volume to total propellant volume
 
-    print(chamberPressure)
-    if pumps:
-        tankPressure = chamberPressure / (
-            FEED_DP_RATIO * PUMP_DP_RATIO * INJECTOR_DP_RATIO
-        )
-    else:
-        tankPressure = chamberPressure / (FEED_DP_RATIO * INJECTOR_DP_RATIO)
-    print(tankPressure)
+    # Plumbing
+    CHAMBER_DP_RATIO = 0.6  # Chamber pressure / tank pressure, based on past rockets
+    HE_GAS_CONSTANT = 2077.1 # [J/kgK] Helium gas constant
+    COPV_TEMP_1 = T_INF + 15 # [K] Assumed initial COPV temperature
+    BURNOUT_PRESSURE_RATIO = 2 # [1] COPV burnout pressure / tank pressure to ensure choked flow
+    K_PRESSURIZATION = 1 # [1] Ratio of ideal tank volume to actual tank volume [1 IS TEMPORARY, NEED TO FIND ACTUAL VALUE]
 
-    helium = Fluid(FluidsList.Helium).with_state(
-        Input.pressure(copvPressure), Input.temperature(T_INF)
-    )
-    heliumDensity = heliumDensity
-    heliumMass = copvVolume * heliumDensity
-    # heliumGasConstant = CoolProp.CoolProp.PropsSI("gas_constant", "T", T_INF, "P", bottlePressure, "Helium")
-    heliumGasConstant = 2077  # [J/kg-K]
-    tankTotalVolume = heliumMass * heliumGasConstant * T_INF / tankPressure  # [m^3]
+    # Tank structure
+    DENSITY_AL = 2700  # [kg/m^3] Density of 6000-series aluminum
+    YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength of 6000-series aluminum
+    ULTIMATE_STRENGTH_AL = 310 * 10**6 # [Pa] Ultimate tensile strength of 6000-series aluminum
+    YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity for 6000-series aluminum
+    SAFETY_FACTOR_Y = 1.25  # [1] Safety factor to tank structure yield
+    SAFETY_FACTOR_U = 1.5 # [1] Safety factor to tank structure ultimate
+    PROOF_FACTOR = 1.5  # [1] Ratio of proof pressure to nominal pressure
 
-    tankThickness = 0.5 * (tankOD - tankID)
+    # Mass estimates
+    BULKHEAD_MASS = 4 # [kg] Assumed bulkhead mass
 
-    fuelTemp = cool.PropsSI("T", "P", FILL_PRESSURE, "Q", 0, fuel)
-    fuelDensity = cool.PropsSI("D", "P", FILL_PRESSURE, "Q", 0, fuel)
-    oxTemp = cool.PropsSI("T", "P", FILL_PRESSURE, "Q", 0, oxidizer)
-    oxDensity = cool.PropsSI("D", "P", FILL_PRESSURE, "Q", 0, oxidizer)
-=======
-from pyfluids import Fluid, FluidsList, Input
-import CoolProp.CoolProp as cool
-import math
-
-# Constants
-
-# Conversions
-PSI2PA = 6894.76 # [Pa/psi] Conversion factor from psi to Pa
-
-# Propellant
-FILL_PRESSURE = 40 * PSI2PA # [Pa] Pressure in the propellant tanks during fill
-RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
-ULLAGE_PERCENT =  10  # [1] Percent of tank mass dedicated to ullage
-
-# Plumbing
-CHAMBER_DP_RATIO = 0.6  # Chamber pressure / tank pressure, based on past rockets
-COPV_START_TEMP = 310  # [K] COPV starting temperature
-
-# Tank structure
-DENSITY_AL = 2700  # [kg/m^3] Density of 6000-series aluminum
-YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength of 6000-series aluminum
-ULTIMATE_STRENGTH_AL = 310 * 10**6 # [Pa] Ultimate tensile strength of 6000-series aluminum
-YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity for 6000-series aluminum
-SAFETY_FACTOR_Y = 1.25  # [1] Safety factor to tank structure yield
-SAFETY_FACTOR_U = 1.50  # [1] Safety factor to tank structure ultimate
-PROOF_FACTOR = 1.50  # [1] Ratio of proof pressure to nominal pressure
-
-def fluids(pumps, fuel, oxidizer, mixRatio, chamberPressure, copvPressure, copvVolume, copvMass, tankOD, tankID):
-    
     # Propellant properties
-    helium = Fluid(FluidsList.Helium).with_state(Input.pressure(copvPressure), Input.temperature(T_INF))
-    fuelTemp = cool.PropsSI("T", "P", FILL_PRESSURE, "Q", 0, fuel)
-    fuelDensity = cool.PropsSI("D", "P", FILL_PRESSURE, "Q", 0, fuel)
-    oxTemp = cool.PropsSI("T", "P", FILL_PRESSURE, "Q", 0, oxidizer)
-    oxDensity = cool.PropsSI("D", "P",  FILL_PRESSURE, "Q", 0, oxidizer)
+
+    # Oxidizer
+    if oxidizer.lower() == 'oxygen':
+        oxDensity = PropsSI("D", "P", FILL_PRESSURE, "Q", 0, oxidizer) # [kg/m^3] Oxygen density at fill pressure
+    else:
+        pass
+
+    # Fuel
+    if fuel.lower() == 'methane':
+        fuDensity = PropsSI("D", "P", FILL_PRESSURE, "Q", 0, fuel) # [kg/m^3] Methane density at fill pressure
+    elif fuel.lower() == 'ethanol':
+        fuDensity = 789 # [kg/m^3] Ethanol density
+    elif fuel.lower() == 'jet-a':
+        fuDensity = 807 # [kg/m^3] Jet-A density
+    elif fuel.lower() == 'isopropyl alcohol':
+        fuDensity = 786 # [kg/m^3] IPA density
 
     # Tank pressure
-    tankPressure = chamberPressure / CHAMBER_DP_RATIO  # [Pa] Pressure in the propellant tanks
+    if pumps:
+        pass # NEED TO DETERMINE METHOD
+    else:
+        tankPressure = chamberPressure / CHAMBER_DP_RATIO # [Pa] Tank pressure
 
-    # Tank sizing
-    heliumDensity = heliumDensity
-    heliumMass = copvVolume * heliumDensity
-    tankTotalVolume = heliumMass * heliumGasConstant * T_INF / tankPressure
-    
-    tankThickness = 0.5 * (tankOD - tankID)
+    # Tank volumes
+    heliumCv = PropsSI('CVMASS', 'P', 1 * ATM2PA, 'T', T_INF) # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
->>>>>>> Stashed changes
-    volumeRatio = mixRatio * fuelDensity / oxDensity
-    oxTankVolume = volumeRatio / (1 + volumeRatio) * tankTotalVolume
-    fuelTankVolume = tankTotalVolume / (1 + volumeRatio)
-    oxTankLength = oxTankVolume / (math.pi / 4 * tankID**2)
-    fuelTankLength = fuelTankVolume / (math.pi / 4 * tankID**2)
+    copvPressure1 = copvPressure # [Pa] COPV initial pressure
+    copvPressure2 = BURNOUT_PRESSURE_RATIO * tankPressure # [Pa] COPV burnout pressure
 
-    fuelMass = 0.83 * fuelTankVolume * fuelDensity  # assume 10% ullage and 7% residuals
-    oxMass = 0.83 * oxTankVolume * oxDensity
-    print(fuelMass)
-    print(oxMass)
+    copvEntropy1 = PropsSI('S', 'P', copvPressure1, 'T', COPV_TEMP_1, 'helium') # [J/kgK] COPV initial specific entropy
+    copvEntropy2 = copvEntropy1 # [J/kgK] COPV burnout specific entropy (assumed isentropic expansion)
 
-<<<<<<< Updated upstream
-    tankProofPressure = tankPressure * PROOF_FACTOR
+    copvDensity1 = PropsSI('D', 'P', copvPressure1, 'T', COPV_TEMP_1, 'helium') # [kg/m^3] COPV initial density 
+    copvDensity2 = PropsSI('S', 'P', copvPressure2, 'S', copvEntropy2, 'helium') # [kg/m^3] COPV burnout density
+
+    copvEnergy1 = PropsSI('U', 'P', copvPressure1, 'T', COPV_TEMP_1, 'helium') # [J/kg] COPV initial energy
+    copvEnergy2 = PropsSI('U', 'P', copvPressure2, 'S', copvEntropy2, 'helium') # [J/kg] COPV burnout energy
+
+    tankTotalVolume = K_PRESSURIZATION * (
+        ((copvDensity1 * copvVolume * copvEnergy1) - (copvDensity2 * copvVolume * copvEnergy2)) 
+        / (tankPressure * ((heliumCv / HE_GAS_CONSTANT) + R_PROP))
+    ) # [m^3] Total propellant tank volume
+
+    oxTankVolume = mixRatio * (tankTotalVolume * fuDensity) / (oxDensity + mixRatio * fuDensity) # [m^3] Oxidizer tank volume
+    fuTankVolume = tankTotalVolume - oxTankVolume # [m^3] Fuel tank volume
+
+    oxPropMass = R_PROP * oxTankVolume * oxDensity # [kg] Oxidizer mass
+    fuPropMass = R_PROP * fuTankVolume * fuDensity # [kg] Fuel mass
+
+    bulkheadVolume = (m.sqrt(2) * tankID**3) / 12 # [m^3] Total internal bulkhead volume for one tank
+
+    oxWallLength = (oxTankVolume - bulkheadVolume) / ((m.pi * tankID**2) / 4) # [m] Oxidizer tank wall length
+    fuWallLength = (fuTankVolume - bulkheadVolume) / ((m.pi * tankID**2) / 4) # [m] Fuel tank wall length
+
+    # Tank structures
+    tankThickness = (tankOD - tankID) / 2 # [m] Tank wall thickness
+
+    tankProofPressure = PROOF_FACTOR * tankPressure # [pa] Pressure to proof the tanks at
+
     yieldMargin = (
         YIELD_STRENGTH_AL
         / (SAFETY_FACTOR_Y * tankProofPressure * tankID / (2 * tankThickness))
         - 1
     )
+
     ultimateMargin = (
         ULTIMATE_STRENGTH_AL
         / (SAFETY_FACTOR_U * tankProofPressure * tankID / (2 * tankThickness))
         - 1
     )
+
     bucklingLoad = (
         0.3
         * YOUNGS_MODULUS
         * 2
         * tankThickness
         / tankOD
-        * (math.pi / 4)
+        * (m.pi / 4)
         * (tankOD**2 - tankID**2)
     )
 
+    # Mass estimates
     tankMass = (
-        3
-        + (oxTankLength + fuelTankLength)
+        BULKHEAD_MASS
+        + (oxWallLength + fuWallLength)
         * (tankOD ^ 2 - tankID ^ 2)
-        * math.pi
+        * m.pi
         / 4
         * DENSITY_AL
-    )
-    upperPlumbingLength = 0.4 * tankOD / (6.625 * 0.0254)
-    lowerPlumbingLength = 0.56 * tankOD / (6.625 * 0.0254)
-    fluidSystemsMass = tankMass + copvMass + 10
+    ) # [kg] Total mass of tanks
 
+    upperPlumbingMass = 7.25 # [kg] Mass of upper plumbing system
+    lowerPlumbingMass = 13.115 * tankOD^(0.469) # [kg] Mass of lower plumbing system
 
-"""
-calculate_fluids(
-    False,
-    "Methane",
-    "Oxygen",
-    2.4,
-    2 * 10**6,
-    40 * 10**6,
-    9.01289 * 10 ** (-3),
-    6.625 * 0.0254,
-    6.357 * 0.0254,
-)
-"""
-=======
-    # Mass estimates
-    tanksMass = 798.29 * tankOD^(2.393)
-    upperPlumbingMass = 7.25
-    lowerPlumbingMass = 13.115 * tankOD^(0.469)
-    fluidSystemsMass = tanksMass + copvMass + upperPlumbingMass + lowerPlumbingMass
+    fluidSystemsMass = tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass # [kg] Total mass of fluid systems
 
     # Size estimates
-    tanksLength = 0.0584 * tanksMass + 1.229
-    upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339
-    lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411
+    tankTotalLength = oxWallLength + fuWallLength + m.sqrt(2) * tankOD # [m] Total length of tanks end-to-end with bulkheads
+    upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339 # [m] Upper plumbing length
+    lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411 # [m] Lower plumbing length
 
 fluids(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)
->>>>>>> Stashed changes
 
