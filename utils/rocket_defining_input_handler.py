@@ -18,13 +18,10 @@ def read_inputs():
     # Constants
     STEP_FACTOR = 0.000001  # Added to arange stop value to ensure the stop value is reached for ranges divisible by the step size
     INPUT_PRECISION = 3  # Number of decimal places to round continuous input values to
-<<<<<<< Updated upstream
     COPV_OD_MARGIN = (
         0.1  # [in] Minimum permissible gap between the COPV OD and the tanks OD
     )
-=======
     COPV_OD_MARGIN = 0.061 * 1.5  # [in] PRELIMINARY Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube
->>>>>>> Stashed changes
 
     # Get Inputs
     # This section reads the input spreadsheet using the Pandas library.
