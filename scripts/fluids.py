@@ -20,7 +20,10 @@
 # 4. Ratio of fuel tank volume to ox tank volume is proportional to density ratio and mixture ratio.
 # 5. The tank use separate sqrt(2) ellipsoidal bulkheads (there is no common bulkhead).
 
-def fluids(
+import math as m
+from CoolProp.CoolProp import PropsSI
+
+def fluids_sizing(
     pumps,
     oxidizer,
     fuel,
@@ -31,9 +34,6 @@ def fluids(
     copvMass,
     tankOD,
     tankID,):
-
-    import math as m
-    from CoolProp.CoolProp import PropsSI
 
     # Constants
 
@@ -53,9 +53,11 @@ def fluids(
     HE_GAS_CONSTANT = 2077.1 # [J/kgK] Helium gas constant
     COPV_TEMP_1 = T_INF + 15 # [K] Assumed initial COPV temperature
     BURNOUT_PRESSURE_RATIO = 2 # [1] COPV burnout pressure / tank pressure to ensure choked flow
-    K_PRESSURIZATION = 1 # [1] Ratio of ideal tank volume to actual tank volume [1 IS TEMPORARY, NEED TO FIND ACTUAL VALUE]
+    K_PRESSURIZATION = 1.0 # [1] Ratio of ideal tank volume to actual tank volume [1 IS TEMPORARY, NEED TO FIND ACTUAL VALUE]
 
     # Tank structure
+    NUM_BULKHEADS = 4 # [1] Number of bulkheads the tanks use
+    K_BULKHEAD = 4.0 # [1] Ratio of total bulkhead mass to shell mass
     DENSITY_AL = 2700 # [kg/m^3] Density of 6000-series aluminum
     YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength of 6000-series aluminum
     ULTIMATE_STRENGTH_AL = 310 * 10**6 # [Pa] Ultimate tensile strength of 6000-series aluminum
@@ -63,9 +65,6 @@ def fluids(
     SAFETY_FACTOR_Y = 1.25  # [1] Safety factor to tank structure yield
     SAFETY_FACTOR_U = 1.5 # [1] Safety factor to tank structure ultimate
     PROOF_FACTOR = 1.5 # [1] Ratio of proof pressure to nominal pressure
-
-    # Mass estimates
-    BULKHEAD_MASS = 4 # [kg] Assumed bulkhead mass
 
     # Propellant properties
 
@@ -123,6 +122,32 @@ def fluids(
     oxPropMass = R_PROP * oxTankVolume * oxDensity # [kg] Oxidizer mass
     fuPropMass = R_PROP * fuTankVolume * fuDensity # [kg] Fuel mass
 
+    # Mass estimates
+    tankWallMass = (
+        (oxWallLength + fuWallLength)
+        * (tankOD ^ 2 - tankID ^ 2)
+        * m.pi
+        / 4
+        * DENSITY_AL
+    ) # [kg] Mass of tank walls
+
+    tankBulkheadmass = NUM_BULKHEADS * K_BULKHEAD * (
+        (tankOD ^ 3 - tankID ^ 3)
+        * m.sqrt(2)/12
+        * DENSITY_AL
+    ) # [kg] Mass of bulkheads
+
+    tankMass = tankWallMass + tankBulkheadmass # [kg] Total tank mass
+    upperPlumbingMass = 7.25 # [kg] Mass of upper plumbing system
+    lowerPlumbingMass = 13.115 * tankOD^(0.469) # [kg] Mass of lower plumbing system
+
+    fluidSystemsMass = tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass # [kg] Total mass of fluid systems
+
+    # Size estimates
+    tankTotalLength = oxWallLength + fuWallLength + NUM_BULKHEADS * m.sqrt(2)/4 * tankOD # [m] Total length of tanks end-to-end with bulkheads
+    upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339 # [m] Upper plumbing length
+    lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411 # [m] Lower plumbing length
+
     # Tank structures
     tankThickness = (tankOD - tankID) / 2 # [m] Tank wall thickness
 
@@ -132,13 +157,13 @@ def fluids(
         YIELD_STRENGTH_AL
         / (SAFETY_FACTOR_Y * tankProofPressure * tankID / (2 * tankThickness))
         - 1
-    )
+    ) # [1] Margin to yielding under hoop stress
 
     ultimateMargin = (
         ULTIMATE_STRENGTH_AL
         / (SAFETY_FACTOR_U * tankProofPressure * tankID / (2 * tankThickness))
         - 1
-    )
+    ) # [1] Margin to ultimate under hoop stress
 
     bucklingLoad = (
         0.3
@@ -148,27 +173,8 @@ def fluids(
         / tankOD
         * (m.pi / 4)
         * (tankOD**2 - tankID**2)
-    )
+    ) # [1] Margin to buckling
 
-    # Mass estimates
-    tankMass = (
-        BULKHEAD_MASS
-        + (oxWallLength + fuWallLength)
-        * (tankOD ^ 2 - tankID ^ 2)
-        * m.pi
-        / 4
-        * DENSITY_AL
-    ) # [kg] Total mass of tanks
 
-    upperPlumbingMass = 7.25 # [kg] Mass of upper plumbing system
-    lowerPlumbingMass = 13.115 * tankOD^(0.469) # [kg] Mass of lower plumbing system
-
-    fluidSystemsMass = tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass # [kg] Total mass of fluid systems
-
-    # Size estimates
-    tankTotalLength = oxWallLength + fuWallLength + m.sqrt(2) * tankOD # [m] Total length of tanks end-to-end with bulkheads
-    upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339 # [m] Upper plumbing length
-    lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411 # [m] Lower plumbing length
-
-fluids(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)
+fluids_sizing(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)
 
