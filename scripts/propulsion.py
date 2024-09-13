@@ -2,84 +2,75 @@
 # Daniel DeConti
 # 27 May 2024
 
-import math
-
 import numpy as np
-
+import CoolProp.CoolProp as CP
 
 def calculate_propulsion(
     thrustToWeight,
     vehicleMass,
-    chamberDiameter,
+    vehicleOuterDiameter,
     chamberPressure,
     exitPressure,
     cstar,
     specificImpulse,
     expansionRatio,
-    efficiencyFactor,
     characteristicLength,
-    fuelMass,
-    oxMass,
-    fuelDensity,
-    oxDensity,
     mixtureRatio,
+    oxMass,
+    fuelMass
 ):
     """
     _summary_
 
     Parameters
     ----------
-    thrust : float
-        Design thrust for the engine [N].
-    chamberDiameter : float
-        Inner diameter of combustion chamber [m].
-    chamberTemperature : float
-        Temperature of products in combustion chamber [K].
+    thrustToWeight : float
+        Required thrust to weight at launch [-].
+    vehicleMass : float
+        Vehicle wet mass [kg].
+    vehicleOuterDiameter : float
+        Vehicle outer diameter [m].
     chamberPressure : float
         Pressure within the combustion chamber [Pa].
     exitPressure : float
-        Pressure of surroundings outside the nozzle [Pa].
+        Pressure of engine exhaust at nozzle exit [Pa].
+    cstar : float
+        Characteristic velocity of engine [m/s].
+    specificImpulse : float
+        Specific impulse of engine [s].
+    expansionRatio : float
+        Ratio of nozzle exit area to nozzle throat area [-].
     characteristicLength : float
         Length in chamber needed for full propellant reaction [m].
-    specificHeatRatio : float
-        Ratio of specific heats for products at exit [-].
-    specificGasConstant : float
-        Gas constant for products at exit [J/kg-K].
-    fuelTankVolume : float
-        Volume of fuel tank [m^3].
-    oxTankVolume : float
-        Volume of oxidizer tank [m^3].
     mixtureRatio : float
         Ratio of oxidizer to fuel by mass [-].
+    oxMass : float
+        Volume of oxidizer tank [m^3].
+    fuelMass : float
+        Volume of fuel tank [m^3].
 
     Returns
     -------
-    chamberLength : float
-        Length of combustion chamber [m].
-    nozzleConvergingLength : float
-        Length of nozzle converging section [m].
-    nozzleDivergingSection : float
-        Length of nozzle diverging section [m].
-    throatDiameter : float
-        Diameter of nozzle throat [m].
-    exitDiameter : float
-        Diameter of nozzle exit [m].
-    fuelMassFlowRate : float
-        Mass flow rate of fuel [kg/s].
+    idealThrust : float
+        Ideally expanded engine thrust [N].
     oxMassFlowRate : float
         Mass flow rate of oxidizer [kg/s].
-    lineVelocities : list of float
-        Fuel and oxidizer line velocities for different tube sizes [m/s].
+    fuelMassFlowRate : float
+        Mass flow rate of fuel [kg/s].
     burnTime : float
         Duration of engine burn [s].
-    totalImpulse : float
-        Integral of thrust over duration of burn [N-s].
+    chamberLength : float
+        Total length of chamber [m].
+    chamberMass : float
+        Combustion chamber and nozzle mass [kg].
+    injectorMass : float
+        Mass of injector [kg].
     """
 
     # Constants
-    g = 9.81  # [m/s^2] acceleration due to gravity
-    groundLevelPressure = 101325  # [Pa] pressure at sea level
-
+    g = 9.81 # [m/s^2] acceleration due to gravity
+    groundLevelPressure = 101325 # [Pa] pressure at sea level
+    efficiencyFactor = 0.9
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * g
     )  # Required sea level thrust to meet initial thrust to weight ratio
@@ -138,41 +129,5 @@ def calculate_propulsion(
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
-    # rows are for 0.25", 0.50", and 0.75" respectively
-    tubeThickness = 0.065 * 0.0254  # [m] tube thicknesses
-    tubeODs = np.array([0.50, 0.75]) * 0.0254  # [m] tube outer diameters
-    tubeAreas = (math.pi / 4) * (tubeODs - (2 * tubeThickness))**2 # [m^2] tube areas
-    fuelVelocities = fuelMassFlowRate / (
-        fuelDensity * tubeAreas
-    )  # [m/s] fuel velocities
-    oxVelocities = oxMassFlowRate / (oxDensity * tubeAreas)  # [m/s] oxidizer velocities
-    lineVelocities = np.array([oxVelocities, fuelVelocities])
+    return [idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass]
 
-    return idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass, lineVelocities
-
-idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass, lineVelocities = calculate_propulsion(
-    4,
-    150,
-    7 * 0.0254,
-    300 * 6895,
-    11 * 6895,
-    1783.9,
-    270.2,
-    4.9174,
-    0.9,
-    45 * 0.0254,
-    10 * 2.28,
-    10,
-    1100,
-    800,
-    2.38,
-)
-
-print(idealThrust)
-print(oxMassFlowRate)
-print(fuelMassFlowRate)
-print(burnTime)
-print(chamberLength)
-print(chamberMass)
-print(injectorMass)
-print(lineVelocities)

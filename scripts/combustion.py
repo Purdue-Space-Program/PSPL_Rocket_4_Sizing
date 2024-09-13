@@ -61,13 +61,15 @@ def runCEA(
     # Convert fuel and oxidizer names to CEA conventions
     if oxName == "Oxygen":
         oxName = "O2(L)"
-
     if fuelName == "Methane":
         fuelName = "CH4(L)"
+        characteristicLength = 35 * 0.0254
     elif fuelName == "n-Dodecane":
         fuelName = "Jet-A(L)"
+        characteristicLength = 45 * 0.0254
     elif fuelName == "Ethanol":
         fuelName = "C2H5OH(L)"
+        characteristicLength = 45 * 0.0254
 
     # Unit conversions
     Pa_to_bar = 1 / 10**5
@@ -91,7 +93,7 @@ def runCEA(
     specificImpulse = data.isp
     expansionRatio = data.ae
 
-    return [cstar, specificImpulse, expansionRatio]
+    return [cstar, specificImpulse, expansionRatio, characteristicLength]
 
 
 for i in range(1, 6):
