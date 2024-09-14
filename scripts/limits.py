@@ -4,43 +4,28 @@
 
 
 def checkLimits(
-    lineVeloLim,
-    fuelLineVelo,
-    oxLineVelo,
     thrustLim,
     thrust,
-    altitudeLim,
-    altitude,
     totalImpulseLim,
     totalImpulse,
 ):
     """
     Inputs:
-    lineVeloLim [m/s]: maximum run line velocity for fuel and oxidizer
-    fuelLineVelo [m/s]: run line velocity for fuel
-    oxLineVelo [m/s]: run line velocity for oxidizer
     thrustLim [N]: maximum jet thrust of the engine. Determined by test stand capabilities and safety
     thrust [N]: jet thrust
-    altitudeLim [m]: maximum altitude of the rocket. Determined by FAA regulations and FAR requirements
-    altitude [m]: max altitude of the rocket
     totalImpulseLim [Ns]: maximum total impulse of the engine. Determined by FAR regulations
     totalImpulse [Ns]: total impulse
     """
 
     # Organize the limits and values into dictionaries
     limits = {
-        "lineVeloLim": lineVeloLim,
         "thrustLim": thrustLim,
-        "altitudeLim": altitudeLim,
         "totalImpulseLim": totalImpulseLim,
         # Add more limits as needed
     }
 
     values = {
-        "fuelLineVelo": fuelLineVelo,
-        "oxLineVelo": oxLineVelo,
         "thrust": thrust,
-        "altitude": altitude,
         "totalImpulse": totalImpulse,
         # Add more actual values as needed
     }

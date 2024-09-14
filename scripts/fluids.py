@@ -35,6 +35,55 @@ def fluids_sizing(
     tankOD,
     tankID,
 ):
+    """
+    _summary_
+
+        This function calculates the tank pressure, tank volumes, tank lengths, and fluid system masses for a rocket's propellant system using helium pressurization and aluminum alloy tanks. It accounts for both pressure-fed and pump-fed rockets and outputs critical design parameters based on the input variables.
+
+        Parameters
+        ----------
+        oxidizerMass : float
+            Mass of the oxidizer required for the rocket [kg].
+        fuelMass : float
+            Mass of the fuel required for the rocket [kg].
+        mixtureRatio : float
+            Oxidizer to fuel mass ratio [-].
+        chamberPressure : float
+            Engine chamber pressure [Pa].
+        ullage : float
+            Ullage volume fraction in the tanks [-].
+        maxTankPressure : float
+            Maximum allowable tank pressure [Pa].
+        heliumTemp : float
+            Initial temperature of the helium in the COPV [K].
+        heliumPressure : float
+            Initial helium pressure in the COPV [Pa].
+        structuralSafetyFactor : float
+            Safety factor for the structural components [-].
+        aluminumYieldStrength : float
+            Yield strength of the aluminum alloy used for tanks [Pa].
+        aluminumUltimateStrength : float
+            Ultimate tensile strength of the aluminum alloy [Pa].
+        plots : bool
+            Boolean to enable or disable plotting of results, 1 = on, 0 = off [-].
+
+        Returns
+        -------
+        oxidizerTankVolume : float
+            Calculated volume of the oxidizer tank [m^3].
+        fuelTankVolume : float
+            Calculated volume of the fuel tank [m^3].
+        oxidizerTankLength : float
+            Calculated length of the oxidizer tank [m].
+        fuelTankLength : float
+            Calculated length of the fuel tank [m].
+        heliumMass : float
+            Mass of helium required for pressurization [kg].
+        tankWallThickness : float
+            Thickness of the tank walls based on structural analysis [m].
+        systemMass : float
+            Total mass of the fluid system including propellant and pressurization system [kg].
+    """
 
     # Constants
 
