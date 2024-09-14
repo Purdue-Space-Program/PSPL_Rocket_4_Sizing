@@ -20,7 +20,7 @@
 import progressbar as pb
 import time
 
-from scripts import fluids, structures, propulsion, trajectory
+from scripts import fluidsystems, structures, propulsion, trajectory
 from utils import rocket_defining_input_handler, output_folder
 
 
@@ -93,7 +93,7 @@ def main():
             oxTankVolume,
             fuelTankLength,
             oxTankLength,
-        ) = fluids.run_fluids(
+        ) = fluidsystems.run_fluids(
             pumps=False,
             fuel=fuel,
             oxidizer=oxidizer,
