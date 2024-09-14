@@ -20,6 +20,7 @@
 
 import CEA_Wrap as CEA
 import CoolProp.CoolProp as cp
+import constants as c
 
 
 def runCEA(
@@ -57,6 +58,9 @@ def runCEA(
         Gas constant of products at exit [J/kg-K].
 
     """
+    # Get the fuel and oxidizer temperatures using CoolProp
+    fuelTemp = cp.PropsSI("T", "P", chamberPressure, fuelName)
+    oxTemp = cp.PropsSI("T", "P", chamberPressure, oxName)
 
     # Convert fuel and oxidizer names to CEA conventions
     if oxName == "Oxygen":
