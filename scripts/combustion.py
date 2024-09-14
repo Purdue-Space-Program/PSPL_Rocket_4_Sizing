@@ -76,7 +76,7 @@ def runCEA(
     if fuelName == "Methane":
         fuelName = "CH4(L)"
         characteristicLength = 35 * 0.0254
-    elif fuelName == "n-Dodecane":
+    elif fuelName == "Jet-A":
         fuelName = "Jet-A(L)"
         characteristicLength = 45 * 0.0254
     elif fuelName == "Ethanol":
@@ -84,7 +84,6 @@ def runCEA(
         characteristicLength = 45 * 0.0254
 
     # Unit conversions
-    Pa_to_bar = 1 / 10**5
 
     # CoolProp
 
@@ -92,7 +91,7 @@ def runCEA(
     fuel = CEA.Fuel(fuelName, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxName, temp=oxTemp)
     rocket = CEA.RocketProblem(
-        pressure=chamberPressure * Pa_to_bar,
+        pressure=chamberPressure * c.PA2BAR,
         pip=exitPressureRatio,
         materials=[fuel, oxidizer],
         o_f=mixtureRatio,

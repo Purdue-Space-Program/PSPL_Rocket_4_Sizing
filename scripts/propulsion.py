@@ -2,8 +2,16 @@
 # Daniel DeConti
 # 27 May 2024
 
-import CoolProp.CoolProp as CP
+import os
+import sys
+
 import numpy as np
+from CoolProp.CoolProp import PropsSI
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import constants as c
 
 
 def calculate_propulsion(
