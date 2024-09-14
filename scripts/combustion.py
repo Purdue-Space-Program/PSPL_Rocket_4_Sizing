@@ -59,8 +59,15 @@ def runCEA(
 
     """
     # Get the fuel and oxidizer temperatures using CoolProp
-    fuelTemp = cp.PropsSI("T", "P", chamberPressure, fuelName)
-    oxTemp = cp.PropsSI("T", "P", chamberPressure, oxName)
+    fuelTemp = cp.PropsSI(
+        "T",
+        "P",
+        c.FILL_PRESSURE,
+        "Q",
+        0,
+        fuelName,
+    )
+    oxTemp = cp.PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, oxName)
 
     # Convert fuel and oxidizer names to CEA conventions
     if oxName == "Oxygen":
@@ -99,7 +106,14 @@ def runCEA(
     specificImpulse = data.isp
     expansionRatio = data.ae
 
-    return [cstar, specificImpulse, expansionRatio, characteristicLength]
+    return [
+        cstar,
+        specificImpulse,
+        expansionRatio,
+        characteristicLength,
+        fuelTemp,
+        oxTemp,
+    ]
 
 
 for i in range(1, 6):
