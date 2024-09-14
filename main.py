@@ -94,7 +94,7 @@ def main():
             oxTankVolume,
             fuelTankLength,
             oxTankLength,
-        ) = fluids.run_fluids(
+        ) = fluidsystems.run_fluids(
             pumps=False,
             fuel=fuel,
             oxidizer=oxidizer,
