@@ -18,7 +18,7 @@ def calculate_propulsion(
     characteristicLength,
     mixtureRatio,
     oxMass,
-    fuelMass
+    fuelMass,
 ):
     """
     _summary_
@@ -69,8 +69,8 @@ def calculate_propulsion(
     """
 
     # Constants
-    g = 9.81 # [m/s^2] acceleration due to gravity
-    groundLevelPressure = 101325 # [Pa] pressure at sea level
+    g = 9.81  # [m/s^2] acceleration due to gravity
+    groundLevelPressure = 101325  # [Pa] pressure at sea level
     efficiencyFactor = 0.9
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * g
@@ -90,10 +90,8 @@ def calculate_propulsion(
         exitArea = expansionRatio * throatArea  # [m^2] exit area
         exitDiameter = 2 * (exitArea / math.pi) ** (1 / 2)  # [m] exit diameter
 
-        seaLevelThrust = (
-            idealThrust + 
-            exitArea * 
-            (exitPressure - groundLevelPressure)
+        seaLevelThrust = idealThrust + exitArea * (
+            exitPressure - groundLevelPressure
         )  # [N] sea
         seaLevelThrustToWeight = seaLevelThrust / (
             vehicleMass * g
@@ -105,30 +103,61 @@ def calculate_propulsion(
     fuelMassFlowRate = totalMassFlowRate / (
         1 + mixtureRatio
     )  # [kg/s] fuel mass flow rate
-    oxMassFlowRate = (
-        mixtureRatio * fuelMassFlowRate
-    )  # [kg/s] oxidizer mass flow rate
+    oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
 
     chamberArea = math.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
-   # Thrust chamber size estimate, modeled as conical nozzle
-    divergeLength = 0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15)) # [m] nozzle diverging section length
-    convergeLength = 0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(25)) # [m] nozzle converging section length
-    convergeVolume = (1/3) * math.pi * convergeLength * ((chamberDiameter / 2)**2 + (throatDiameter / 2)**2 + ((chamberDiameter * throatDiameter) / 2)**2) # [m^3] nozzle converging section volume
-    chamberVolume = characteristicLength * throatArea - convergeVolume # [m^3] chamber volume
-    chamberLength = chamberVolume / chamberArea # [m] chamber length
-    thrustChamberLength = chamberLength + convergeLength + divergeLength # [m] overall thrust chamber length
+    # Thrust chamber size estimate, modeled as conical nozzle
+    divergeLength = (
+        0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15))
+    )  # [m] nozzle diverging section length
+    convergeLength = (
+        0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(25))
+    )  # [m] nozzle converging section length
+    convergeVolume = (
+        (1 / 3)
+        * math.pi
+        * convergeLength
+        * (
+            (chamberDiameter / 2) ** 2
+            + (throatDiameter / 2) ** 2
+            + ((chamberDiameter * throatDiameter) / 2) ** 2
+        )
+    )  # [m^3] nozzle converging section volume
+    chamberVolume = (
+        characteristicLength * throatArea - convergeVolume
+    )  # [m^3] chamber volume
+    chamberLength = chamberVolume / chamberArea  # [m] chamber length
+    thrustChamberLength = (
+        chamberLength + convergeLength + divergeLength
+    )  # [m] overall thrust chamber length
 
     # Mass estimates
-    chamberWallThickness = 0.001 # [m] chamber wall thickness
-    chamberMaterialDensity = 8190 # [kg/m^3] chamber wall material density (Inconel 718)
-    chamberMass = chamberMaterialDensity * (math.pi / 4) * ((chamberDiameter + chamberWallThickness)**2 - chamberDiameter**2) * thrustChamberLength # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
+    chamberWallThickness = 0.001  # [m] chamber wall thickness
+    chamberMaterialDensity = (
+        8190  # [kg/m^3] chamber wall material density (Inconel 718)
+    )
+    chamberMass = (
+        chamberMaterialDensity
+        * (math.pi / 4)
+        * ((chamberDiameter + chamberWallThickness) ** 2 - chamberDiameter**2)
+        * thrustChamberLength
+    )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
-    injectorMaterialDensity = 8190 # [kg/m^3] injector material density (Inconel 718)
-    injectorMass = injectorMaterialDensity * 0.0508 * (math.pi / 4) * chamberDiameter**2 # [kg] injector mass, modeled as solid disk w/ 2" height
+    injectorMaterialDensity = 8190  # [kg/m^3] injector material density (Inconel 718)
+    injectorMass = (
+        injectorMaterialDensity * 0.0508 * (math.pi / 4) * chamberDiameter**2
+    )  # [kg] injector mass, modeled as solid disk w/ 2" height
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
-    return [idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass]
-
+    return [
+        idealThrust,
+        oxMassFlowRate,
+        fuelMassFlowRate,
+        burnTime,
+        chamberLength,
+        chamberMass,
+        injectorMass,
+    ]

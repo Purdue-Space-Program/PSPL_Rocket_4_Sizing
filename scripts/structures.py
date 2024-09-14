@@ -2,7 +2,7 @@
 # Authors: Sarah Vose / Will Mattison
 # Description:
 # This code will help to size the sturctural portion of the rocket and provide estimations for the mass
-# and size of certain sections. 
+# and size of certain sections.
 # Inputs:
 # -  Thrust [N]
 
