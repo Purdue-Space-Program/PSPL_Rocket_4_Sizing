@@ -65,13 +65,14 @@ def calculate_trajectory(
 
     # Initial Conditions
 
-    altitude = RAIL_HEIGHT + FAR_ALTITUDE  # [m] initial altitude of the rocket
+    altitude = FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
     dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed
 
     # Array Initialization:
     altitudeArray = []
+    velocityArray = []
     machArray = []
     accelArray = []
     timeArray = []
@@ -98,14 +99,22 @@ def calculate_trajectory(
         accelArray.append(accel)
 
         velocity = velocity + accel * dt  # velocity integration
+        velocityArray.append(velocity)
+
         mach = velocity / atmo.speed_of_sound
         machArray.append(mach)
 
         altitude = altitude + velocity * dt  # position integration
+
         altitudeArray.append(altitude)
 
         time = time + dt  # time step
         timeArray.append(time)
+
+    # Find the closest altitude to the RAIL_HEIGHT
+    closestRailAlt = min(altitudeArray, key=lambda x: abs(x - RAIL_HEIGHT))
+    closestRailIdx = altitudeArray.index(closestRailAlt)
+    exitVelo = velocityArray[closestRailIdx]
 
     if plots == 1:
         plt.figure(1)
@@ -124,7 +133,7 @@ def calculate_trajectory(
         plt.grid()
         plt.show()
 
-    return altitude, max(machArray), max(accelArray)
+    return altitude, max(machArray), max(accelArray), exitVelo
 
 
 # altitude, maxMach, maxAccel = trajectory(

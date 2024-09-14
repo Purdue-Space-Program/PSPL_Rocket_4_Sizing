@@ -20,7 +20,7 @@
 import progressbar as pb
 import time
 
-from scripts import fluids, trajectory
+from scripts import fluids, trajectory, combustion
 from utils import rocket_defining_input_handler, output_folder
 
 
@@ -106,7 +106,23 @@ def main():
             tankID=tankID,
         )
 
-        # Com
+        # Combustion
+        (
+            cstar,
+            specificImpulse,
+            expansionRatio,
+        ) = combustion.run_combustion(
+            chamberPressure,
+            mixRatio,
+            exitPressureRatio,
+            fuel,
+            oxidizer,
+            fuelTemp,
+            oxTemp,
+        )
+
+        # Trajectory
+        (altitude, maxMach, maxAccel, exitVelo) = trajectory.run_trajectory()
 
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
