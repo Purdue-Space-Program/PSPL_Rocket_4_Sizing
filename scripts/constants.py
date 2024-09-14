@@ -26,6 +26,20 @@ KG2LB = 1 / LB2KG  # [lbm/kg] Conversion factor from kg to lbm
 IN2M = 0.0254  # [m/in] Conversion factor from in to m
 M2IN = 1 / IN2M  # [in/m] Conversion factor from m to in
 
+## Volume
 
-# Constants
-fillPressure = 60  # psi
+L2M3 = 0.001  # [m^3/l] Conversion factor from L to m^3
+
+# Material Properties
+
+## 6000-Series Aluminum
+
+DENSITY_AL = 2700  # [kg/m^3] Density
+YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength 
+ULTIMATE_STRENGTH_AL = 310 * 10**6  # [Pa] Ultimate tensile strength 
+YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
+
+# Fluids Constants
+
+HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
+FILL_PRESSURE = 60  # psi
