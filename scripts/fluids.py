@@ -316,10 +316,8 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
     # Allowable alternate COPVs
     BZB_COPV_VOLUME = 9 * L2M3  # [m^3] Volume of the BZB COPV
     BZB_COPV_PRESSURE = 4950 * PSI2PA  # [Pa] Maximum pressure of the BZB COPV
-    BZ1_COPV_VOLUME = 1 * L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
-    BZ1_COPV_PRESSURE = (
-        1 * PSI2PA
-    )  # [Pa] Maximum pressure of the BZ1 COPV [TEMPORARY NEED TO ADD]
+    BZ1_COPV_VOLUME = 5 * L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
+    BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
 
     # Propellant
     T_INF = 20 + 273.15  # [K] Assumed ambient temperature
