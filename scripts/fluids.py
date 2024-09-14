@@ -3,6 +3,7 @@
 
 import math as m
 from CoolProp.CoolProp import PropsSI
+import constants as c
 
 # Fluids sizing script
 # Performs initial sizing of pressure-fed rocket configuration
