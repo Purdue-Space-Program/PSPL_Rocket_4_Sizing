@@ -14,7 +14,7 @@ from CoolProp.CoolProp import PropsSI
     # copvPressure [Pa]: The maximum pressure the selected COPV can hold
     # copvVolume [m^3]: The volume of the selected copv
     # tankOD [m]: The tank wall outer diameter
-    # tankID [m]: the tank wall inner diameter
+    # tankWallThick [m]: the tank wall thickness
 # Outputs:
     # fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
     # tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)  
@@ -35,7 +35,7 @@ def fluids_sizing(
     copvVolume,
     copvMass,
     tankOD,
-    tankID):
+    tankWallThick):
 
     # Constants
 
@@ -55,7 +55,7 @@ def fluids_sizing(
     HE_GAS_CONSTANT = 2077.1 # [J/kgK] Helium gas constant
     COPV_TEMP_1 = T_INF + 15 # [K] Assumed initial COPV temperature
     BURNOUT_PRESSURE_RATIO = 2 # [1] COPV burnout pressure / tank pressure to ensure choked flow
-    K_PRESSURIZATION = 1.0 # [1] Ratio of ideal tank volume to actual tank volume [1 IS TEMPORARY, NEED TO FIND ACTUAL VALUE]
+    K_PRESSURIZATION = 0.65 # [1] Ratio of ideal tank volume to actual tank volume [TEMPORARY, NEED TO FIND ACTUAL VALUE]
 
     # Tank structure
     NUM_BULKHEADS = 4 # [1] Number of bulkheads the tanks use
@@ -90,6 +90,8 @@ def fluids_sizing(
     tankPressure = chamberPressure / CHAMBER_DP_RATIO # [Pa] Tank pressure
 
     # Tank volumes
+    tankID = tankOD - 2*tankWallThick # [m] Tank wall inner diameter
+
     heliumCv = PropsSI('CVMASS', 'P', 1 * ATM2PA, 'T', T_INF, 'helium') # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     copvPressure1 = copvPressure # [Pa] COPV initial pressure
@@ -119,48 +121,47 @@ def fluids_sizing(
 
     # Propellant masses
     oxPropMass = R_PROP * oxTankVolume * oxDensity # [kg] Oxidizer mass
-    fuelPropMass = R_PROP * fuTankVolume * fuelDensity # [kg] Fuel mass
+    fuelPropMass = R_PROP * fuelTankVolume * fuelDensity # [kg] Fuel mass
 
     # Mass estimates
+
     tankWallMass = (
         (oxWallLength + fuelWallLength)
-        * (tankOD ^ 2 - tankID ^ 2)
+        * (tankOD ** 2 - tankID ** 2)
         * m.pi
         / 4
         * DENSITY_AL
     ) # [kg] Mass of tank walls
 
     tankBulkheadmass = NUM_BULKHEADS * K_BULKHEAD * (
-        (tankOD ^ 3 - tankID ^ 3)
+        (tankOD ** 3 - tankID ** 3)
         * m.sqrt(2)/12
         * DENSITY_AL
     ) # [kg] Mass of bulkheads
 
     tankMass = tankWallMass + tankBulkheadmass # [kg] Total tank mass
     upperPlumbingMass = 7.25 # [kg] Mass of upper plumbing system
-    lowerPlumbingMass = 13.115 * tankOD^(0.469) # [kg] Mass of lower plumbing system
+    lowerPlumbingMass = 13.115 * tankOD**(0.469) # [kg] Mass of lower plumbing system
 
     fluidSystemsMass = tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass # [kg] Total mass of fluid systems
 
     # Size estimates
-    tankTotalLength = oxWallLength + fuWallLength + NUM_BULKHEADS * m.sqrt(2)/4 * tankOD # [m] Total length of tanks end-to-end with bulkheads
+    tankTotalLength = oxWallLength + fuelWallLength + NUM_BULKHEADS * m.sqrt(2)/4 * tankOD # [m] Total length of tanks end-to-end with bulkheads
     upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339 # [m] Upper plumbing length
     lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411 # [m] Lower plumbing length
 
     # Tank structures
-    tankThickness = (tankOD - tankID) / 2 # [m] Tank wall thickness
-
     tankProofPressure = PROOF_FACTOR * tankPressure # [pa] Pressure to proof the tanks at
 
     yieldMargin = (
         YIELD_STRENGTH_AL
-        / (SAFETY_FACTOR_Y * tankProofPressure * tankID / (2 * tankThickness))
+        / (SAFETY_FACTOR_Y * tankProofPressure * tankID / (2 * tankWallThick))
         - 1
     ) # [1] Margin to yielding under hoop stress
 
     ultimateMargin = (
         ULTIMATE_STRENGTH_AL
-        / (SAFETY_FACTOR_U * tankProofPressure * tankID / (2 * tankThickness))
+        / (SAFETY_FACTOR_U * tankProofPressure * tankID / (2 * tankWallThick))
         - 1
     ) # [1] Margin to ultimate under hoop stress
 
@@ -168,7 +169,7 @@ def fluids_sizing(
         0.3
         * YOUNGS_MODULUS
         * 2
-        * tankThickness
+        * tankWallThick
         / tankOD
         * (m.pi / 4)
         * (tankOD**2 - tankID**2)
@@ -267,7 +268,3 @@ def pumpfed_fluids_sizing(
         BZBcopvUsable = True
     else:
         BZBcopvUsable = False
-
-# Test case (loosely based on CMS)
-
-fluids_sizing(False, "Methane", "Oxygen", 2.4, 2 * 10**6, 40 * 10**6, 9.01289 * 10**(-3), 6.625 * 0.0254, 6.357 * 0.0254)
