@@ -17,11 +17,12 @@
 # \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/
 
 
-import progressbar as pb
 import time
 
-from scripts import fluids, structures, propulsion, trajectory
-from utils import rocket_defining_input_handler, output_folder
+import progressbar as pb
+
+from scripts import fluids, propulsion, structures, trajectory
+from utils import output_folder, rocket_defining_input_handler
 
 
 def main():

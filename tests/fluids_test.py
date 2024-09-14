@@ -1,4 +1,10 @@
-from fluids import fluids_sizing  # Needs to be fixed
+import sys
+import os
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from scripts import fluids
 
 # Constants
 PSI2PA = 6894.76  # [Pa/psi] Conversion factor from psi to Pa
@@ -29,7 +35,7 @@ tankWallThick = 0.134 * IN2M  # [m]
     fuelPropMass,
     oxTankVolume,
     fuelTankVolume,
-) = fluids_sizing(
+) = fluids.fluids_sizing(
     oxidizer,
     fuel,
     mixRatio,

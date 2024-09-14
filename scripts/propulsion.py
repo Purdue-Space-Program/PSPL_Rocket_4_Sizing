@@ -2,8 +2,9 @@
 # Daniel DeConti
 # 27 May 2024
 
-import numpy as np
 import CoolProp.CoolProp as CP
+import numpy as np
+
 
 def calculate_propulsion(
     thrustToWeight,

@@ -2,7 +2,14 @@
 # Owner: Hugo Filmer, Daniel DeConti
 
 import math as m
+import os
+import sys
+
 from CoolProp.CoolProp import PropsSI
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import constants as c
 
 # Fluids sizing script

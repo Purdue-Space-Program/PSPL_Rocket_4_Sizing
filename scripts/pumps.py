@@ -1,5 +1,7 @@
-from CoolProp import CoolProp as cp
 import math
+
+from CoolProp import CoolProp as cp
+
 
 def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
     volumetricFlowrate = (massFlowRate / density) # convert from lbm/s to gpm
