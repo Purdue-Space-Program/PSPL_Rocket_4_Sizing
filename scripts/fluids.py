@@ -7,24 +7,25 @@ from CoolProp.CoolProp import PropsSI
 # Fluids sizing script
 # Performs initial sizing of pressure-fed rocket configuration
 # Inputs:
-    # oxidizer [string]: The oxidizer to be used
-    # fuel [string]: The fuel to be used
-    # mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
-    # chamberPressure [Pa]: The nominal engine chamber pressure
-    # copvPressure [Pa]: The maximum pressure the selected COPV can hold
-    # copvVolume [m^3]: The volume of the selected copv
-    # tankOD [m]: The tank wall outer diameter
-    # tankWallThick [m]: the tank wall thickness
+# oxidizer [string]: The oxidizer to be used
+# fuel [string]: The fuel to be used
+# mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
+# chamberPressure [Pa]: The nominal engine chamber pressure
+# copvPressure [Pa]: The maximum pressure the selected COPV can hold
+# copvVolume [m^3]: The volume of the selected copv
+# tankOD [m]: The tank wall outer diameter
+# tankWallThick [m]: the tank wall thickness
 # Outputs:
-    # fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
-    # tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)  
-    # upperPlumbingLength [m]: The length of upper plumbing
-    # tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
-    # lowerPlumbingLength [m]: The length of lower plumbing
-    # oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
-    # fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
-    # oxTankVolume [m^3]: The total volume of the oxidizer tank
-    # fuelTankVolume [m^3]: The total volume of the fuel tank
+# fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
+# tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
+# upperPlumbingLength [m]: The length of upper plumbing
+# tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
+# lowerPlumbingLength [m]: The length of lower plumbing
+# oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
+# fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
+# oxTankVolume [m^3]: The total volume of the oxidizer tank
+# fuelTankVolume [m^3]: The total volume of the fuel tank
+
 
 def fluids_sizing(
     oxidizer,
@@ -86,7 +87,7 @@ def fluids_sizing(
         systemMass : float
             Total mass of the fluid system including propellant and pressurization system [kg].
     """
-    tankWallThick):
+    # tankWallThick):
 
     # Constants
 
@@ -104,11 +105,15 @@ def fluids_sizing(
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
 
     # Plumbing
-    CHAMBER_DP_RATIO = 0.6 # [1] Chamber pressure / tank pressure, based on past rockets
-    HE_GAS_CONSTANT = 2077.1 # [J/kgK] Helium gas constant
-    COPV_TEMP_1 = T_INF + 15 # [K] Assumed initial COPV temperature
-    BURNOUT_PRESSURE_RATIO = 2 # [1] COPV burnout pressure / tank pressure to ensure choked flow
-    K_PRESSURIZATION = 0.65 # [1] Ratio of ideal tank volume to actual tank volume [TEMPORARY, NEED TO FIND ACTUAL VALUE]
+    CHAMBER_DP_RATIO = (
+        0.6  # [1] Chamber pressure / tank pressure, based on past rockets
+    )
+    HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
+    COPV_TEMP_1 = T_INF + 15  # [K] Assumed initial COPV temperature
+    BURNOUT_PRESSURE_RATIO = (
+        2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
+    )
+    K_PRESSURIZATION = 0.65  # [1] Ratio of ideal tank volume to actual tank volume [TEMPORARY, NEED TO FIND ACTUAL VALUE]
 
     # Tank structure
     NUM_BULKHEADS = 4  # [1] Number of bulkheads the tanks use
@@ -149,9 +154,11 @@ def fluids_sizing(
     tankPressure = chamberPressure / CHAMBER_DP_RATIO  # [Pa] Tank pressure
 
     # Tank volumes
-    tankID = tankOD - 2*tankWallThick # [m] Tank wall inner diameter
+    tankID = tankOD - 2 * tankWallThick  # [m] Tank wall inner diameter
 
-    heliumCv = PropsSI('CVMASS', 'P', 1 * ATM2PA, 'T', T_INF, 'helium') # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
+    heliumCv = PropsSI(
+        "CVMASS", "P", 1 * ATM2PA, "T", T_INF, "helium"
+    )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     copvPressure1 = copvPressure  # [Pa] COPV initial pressure
     copvPressure2 = BURNOUT_PRESSURE_RATIO * tankPressure  # [Pa] COPV burnout pressure
@@ -183,8 +190,12 @@ def fluids_sizing(
         / (tankPressure * (heliumCv / HE_GAS_CONSTANT + R_PROP))
     )  # [m^3] Total propellant tank volume
 
-    oxTankVolume = mixRatio * (tankTotalVolume * fuelDensity) / (oxDensity + mixRatio * fuelDensity) # [m^3] Oxidizer tank volume
-    fuelTankVolume = tankTotalVolume - oxTankVolume # [m^3] Fuel tank volume
+    oxTankVolume = (
+        mixRatio
+        * (tankTotalVolume * fuelDensity)
+        / (oxDensity + mixRatio * fuelDensity)
+    )  # [m^3] Oxidizer tank volume
+    fuelTankVolume = tankTotalVolume - oxTankVolume  # [m^3] Fuel tank volume
 
     bulkheadVolume = (
         m.sqrt(2) * tankID**3
@@ -196,44 +207,56 @@ def fluids_sizing(
     fuWallLength = (fuTankVolume - bulkheadVolume) / (
         (m.pi * tankID**2) / 4
     )  # [m] Fuel tank wall length
-    oxWallLength = (oxTankVolume - bulkheadVolume) / ((m.pi * tankID**2) / 4) # [m] Oxidizer tank wall length
-    fuelWallLength = (fuelTankVolume - bulkheadVolume) / ((m.pi * tankID**2) / 4) # [m] Fuel tank wall length
+    oxWallLength = (oxTankVolume - bulkheadVolume) / (
+        (m.pi * tankID**2) / 4
+    )  # [m] Oxidizer tank wall length
+    fuelWallLength = (fuelTankVolume - bulkheadVolume) / (
+        (m.pi * tankID**2) / 4
+    )  # [m] Fuel tank wall length
 
     # Propellant masses
-    oxPropMass = R_PROP * oxTankVolume * oxDensity # [kg] Oxidizer mass
-    fuelPropMass = R_PROP * fuelTankVolume * fuelDensity # [kg] Fuel mass
+    oxPropMass = R_PROP * oxTankVolume * oxDensity  # [kg] Oxidizer mass
+    fuelPropMass = R_PROP * fuelTankVolume * fuelDensity  # [kg] Fuel mass
 
     # Mass estimates
 
     tankWallMass = (
         (oxWallLength + fuelWallLength)
-        * (tankOD ** 2 - tankID ** 2)
+        * (tankOD**2 - tankID**2)
         * m.pi
         / 4
         * DENSITY_AL
     )  # [kg] Mass of tank walls
 
-    tankBulkheadmass = NUM_BULKHEADS * K_BULKHEAD * (
-        (tankOD ** 3 - tankID ** 3)
-        * m.sqrt(2)/12
-        * DENSITY_AL
-    ) # [kg] Mass of bulkheads
+    tankBulkheadmass = (
+        NUM_BULKHEADS
+        * K_BULKHEAD
+        * ((tankOD**3 - tankID**3) * m.sqrt(2) / 12 * DENSITY_AL)
+    )  # [kg] Mass of bulkheads
 
-    tankMass = tankWallMass + tankBulkheadmass # [kg] Total tank mass
-    upperPlumbingMass = 7.25 # [kg] Mass of upper plumbing system
-    lowerPlumbingMass = 13.115 * tankOD^(0.469) # [kg] Mass of lower plumbing system
+    tankMass = tankWallMass + tankBulkheadmass  # [kg] Total tank mass
+    upperPlumbingMass = 7.25  # [kg] Mass of upper plumbing system
+    lowerPlumbingMass = 13.115 * tankOD ^ (0.469)  # [kg] Mass of lower plumbing system
 
     fluidSystemsMass = (
         tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass
     )  # [kg] Total mass of fluid systems
 
     # Size estimates
-    tankTotalLength = oxWallLength + fuelWallLength + NUM_BULKHEADS * m.sqrt(2)/4 * tankOD # [m] Total length of tanks end-to-end with bulkheads
-    upperPlumbingLength = 0.0747 * upperPlumbingMass - 0.0339 # [m] Upper plumbing length
-    lowerPlumbingLength = 0.036 * lowerPlumbingMass + 0.3411 # [m] Lower plumbing length
+    tankTotalLength = (
+        oxWallLength + fuelWallLength + NUM_BULKHEADS * m.sqrt(2) / 4 * tankOD
+    )  # [m] Total length of tanks end-to-end with bulkheads
+    upperPlumbingLength = (
+        0.0747 * upperPlumbingMass - 0.0339
+    )  # [m] Upper plumbing length
+    lowerPlumbingLength = (
+        0.036 * lowerPlumbingMass + 0.3411
+    )  # [m] Lower plumbing length
 
     # Tank structures
-    tankProofPressure = PROOF_FACTOR * tankPressure # [pa] Pressure to proof the tanks at
+    tankProofPressure = (
+        PROOF_FACTOR * tankPressure
+    )  # [pa] Pressure to proof the tanks at
 
     yieldMargin = (
         YIELD_STRENGTH_AL
@@ -258,22 +281,31 @@ def fluids_sizing(
     )  # [1] Margin to buckling
 
     # Return outputs
-    return(fluidSystemsMass, tankPressure, upperPlumbingLength, tankTotalLength, lowerPlumbingLength, oxPropMass, fuelPropMass, oxTankVolume, fuelTankVolume)
+    return (
+        fluidSystemsMass,
+        tankPressure,
+        upperPlumbingLength,
+        tankTotalLength,
+        lowerPlumbingLength,
+        oxPropMass,
+        fuelPropMass,
+        oxTankVolume,
+        fuelTankVolume,
+    )
+
 
 # Fluids pump resizing script
 # Determines if the BZ1 or BZB COPV can be used for a pump-fed configuration
 # Inputs:
-    # tankTotalVolume [m^3]: The total design volume of the tanks
-    # npshRequired [Pa]: The required net positive suction head for the pumps
+# tankTotalVolume [m^3]: The total design volume of the tanks
+# npshRequired [Pa]: The required net positive suction head for the pumps
 # Outputs:
-    # BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
-    # BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
+# BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
+# BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
 
-def pumpfed_fluids_sizing(
-        tankTotalVolume,
-        npshRequired
-        ):
-    
+
+def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
+
     # Constants
 
     # Conversions
