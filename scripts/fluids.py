@@ -1,13 +1,6 @@
 # Rocket 4 Fluids Script
 # Owner: Daniel DeConti, Hugo Filmer
 
-# Assumptions:
-# 1. Fuel and oxidizer tanks are at a close enough pressure to share the same variable for sizing purposes
-# 2. The pressurant gas in the COPV is helium
-# 3. The tanks are made of an aluminum alloy
-# 4. Ratio of fuel tank volume to ox tank volume is proportional to density ratio and mixture ratio
-# 5. The tank use separate sqrt(2) ellipsoidal bulkheads (there is no common bulkhead)
-
 import math as m
 from CoolProp.CoolProp import PropsSI
 
@@ -42,7 +35,7 @@ def fluids_sizing(
     copvVolume,
     copvMass,
     tankOD,
-    tankID,):
+    tankID):
 
     # Constants
 
