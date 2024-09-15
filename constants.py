@@ -45,6 +45,8 @@ YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
 
 # Fluids Constants
 
+RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
+ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 FILL_PRESSURE = 60  # psi
 

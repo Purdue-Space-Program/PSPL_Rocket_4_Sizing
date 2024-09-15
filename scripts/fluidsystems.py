@@ -49,61 +49,58 @@ def fluids_sizing(
     """
     _summary_
 
-        This function calculates the tank pressure, tank volumes, tank lengths, and fluid system masses for a rocket's propellant system using helium pressurization and aluminum alloy tanks. It accounts for both pressure-fed and pump-fed rockets and outputs critical design parameters based on the input variables.
+        This function calculates fluid system parameters for a single-stage pressure fed rocket using helium pressurization and aluminum alloy tanks.
 
         Parameters
         ----------
-        oxidizerMass : float
-            Mass of the oxidizer required for the rocket [kg].
-        fuelMass : float
-            Mass of the fuel required for the rocket [kg].
+        oxidizer : string
+            The oxidizer to be used for propulsion.
+        fuel : string
+            The fuel to be used for propulsion.
         mixtureRatio : float
-            Oxidizer to fuel mass ratio [-].
+            The Oxidizer to fuel mass ratio [1].
         chamberPressure : float
-            Engine chamber pressure [Pa].
-        ullage : float
-            Ullage volume fraction in the tanks [-].
-        maxTankPressure : float
-            Maximum allowable tank pressure [Pa].
-        heliumTemp : float
-            Initial temperature of the helium in the COPV [K].
-        heliumPressure : float
-            Initial helium pressure in the COPV [Pa].
-        structuralSafetyFactor : float
-            Safety factor for the structural components [-].
-        aluminumYieldStrength : float
-            Yield strength of the aluminum alloy used for tanks [Pa].
-        aluminumUltimateStrength : float
-            Ultimate tensile strength of the aluminum alloy [Pa].
-        plots : bool
-            Boolean to enable or disable plotting of results, 1 = on, 0 = off [-].
+            The engine chamber pressure [Pa].
+        copvPressure : float
+            The maximum allowable pressure in the selected helium COPV [Pa].
+        copvVolume : float
+            The volume of the selected helium COPV [m^3].
+        copvMass : float
+            The mass of the selected helium COPV [kg].
+        tankOD : float
+            The outer diameter of the selected tank wall [m].
+        tankThickness : float
+            The wall thickness of the selected tank wall [m].
+ 
 
         Returns
         -------
-        oxidizerTankVolume : float
-            Calculated volume of the oxidizer tank [m^3].
+        fluidSystemsMass : float
+            Total dry mass of the rocket's fluid systems [kg].
+        tankPressure : float
+            Pressure in the propellant tanks [pa].
+        upperPlumbingLength : float
+            Length of upper plumbing (without the helium COPV) [m].
+        tankTotalLength : float
+            End-to-end length of the propellant tanks [m].
+        lowerPlumbingLength : float
+            Length of lower plumbing [m].
+        oxPropMass : float
+            Mass of oxidizer to be used [m].
+        fuelPropMass : float
+            Mass of fuel to be used [kg].
+        oxTankVolume : float
+            Volume of the oxidizer tank [m^3].
         fuelTankVolume : float
-            Calculated volume of the fuel tank [m^3].
-        oxidizerTankLength : float
-            Calculated length of the oxidizer tank [m].
-        fuelTankLength : float
-            Calculated length of the fuel tank [m].
-        heliumMass : float
-            Mass of helium required for pressurization [kg].
-        tankWallThickness : float
-            Thickness of the tank walls based on structural analysis [m].
-        systemMass : float
-            Total mass of the fluid system including propellant and pressurization system [kg].
+            Volume of the fuel tank [m^3].
     """
 
     # Constants
 
     # Propellant
     T_INF = 20 + 273.15  # [K] Assumed ambient temperature
-    RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
-    ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
     R_PROP = (
-        100 - ULLAGE_PERCENT
+        100 - c.ULLAGE_PERCENT
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
 
     # Plumbing
