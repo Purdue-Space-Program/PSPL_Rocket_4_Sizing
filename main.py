@@ -21,7 +21,7 @@ import time
 
 import progressbar as pb
 
-from scripts import fluids, propulsion, structures, trajectory
+from scripts import fluidsystems, propulsion, structures, trajectory
 from utils import output_folder, rocket_defining_input_handler
 
 
@@ -72,12 +72,9 @@ def main():
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
 
         tankOD = tank["Outer diameter (in)"]  # Get the outer diameter of the tank
-        tankWallThickness = tank[
+        tankThickness = tank[
             "Wall thickness (in)"
         ]  # Get the wall thickness of the tank
-        tankID = (
-            tankOD - 2 * tankWallThickness
-        )  # Calculate the inner diameter of the tank
 
         # COPVs
         copv = copvs.loc[rocket["COPV"]]  # Get the COPV properties
@@ -87,7 +84,7 @@ def main():
         copvLength = copv["Length (in)"]
         copvOD = copv["Outer diameter (in)"]
 
-        # Propellants
+        # Fluidsystems
         (
             tankPressure,
             fuelTankVolume,
@@ -95,16 +92,15 @@ def main():
             fuelTankLength,
             oxTankLength,
         ) = fluidsystems.run_fluids(
-            pumps=False,
-            fuel=fuel,
             oxidizer=oxidizer,
+            fuel=fuel,
             mixRatio=mixRatio,
             chamberPressure=chamberPressure,
             copvPressure=copvPressure,
             copvVolume=copvVolume,
             copvMass=copvMass,
             tankOD=tankOD,
-            tankID=tankID,
+            tankThickness=tankThickness,
         )
 
         # Combustion

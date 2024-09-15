@@ -29,6 +29,10 @@ M2IN = 1 / IN2M  # [in/m] Conversion factor from m to in
 ## Volume
 
 L2M3 = 0.001  # [m^3/l] Conversion factor from L to m^3
+M32L = 1 / L2M3 # [1/m^3] Conversion factor from m^3 to L
+
+M32IN3 = 61023.7 # [in^3/m^3] Conversion factor from m^3 to in^3
+IN32M3 = 1 / M32IN3 # [m^3/in^3] Conversion factor from in^3 to m^3
 
 # Material Properties
 
@@ -43,3 +47,9 @@ YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
 
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 FILL_PRESSURE = 60  # psi
+
+# Propellant Constants
+
+DENSITY_ETHANOL = 789 # [kg/m^3] Ethanol density at STP
+DENSITY_JET_A = 807 # [kg/m^3] Jet-A density at STP
+DENSITY_IPA = 786 # [kg/m^3] Isopropyl alcohol density at STP
