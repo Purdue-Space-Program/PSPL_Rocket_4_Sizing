@@ -26,7 +26,7 @@ import progressbar as pb
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
-from scripts import fluidsystems, propulsion, structures, trajectory
+from scripts import fluidsystems, propulsion, structures
 from utils import output_folder, rocket_defining_input_handler
 
 
@@ -73,6 +73,12 @@ def main():
         ]  # Get the propellant combination
         fuel = propellants["Fuel"]  # Get the fuel properties
         oxidizer = propellants["Oxidizer"]
+        fuelCEA = propellants[
+            "Fuel CEA"
+        ]  # Get the fuel properties with CEA naming conventions
+        oxidizerCEA = propellants[
+            "Oxidizer CEA"
+        ]  # Get the oxidizer properties for CEA naming conventions
 
         # Tanks
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
@@ -104,45 +110,12 @@ def main():
         copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
         copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
 
-        # # Fluidsystems
-        # (
-        #     tankPressure,
-        #     fuelTankVolume,
-        #     oxTankVolume,
-        #     fuelTankLength,
-        #     oxTankLength,
-        # ) = fluidsystems.run_fluids(
-        #     oxidizer=oxidizer,
-        #     fuel=fuel,
-        #     mixRatio=mixRatio,
-        #     chamberPressure=chamberPressure,
-        #     copvPressure=copvPressure,
-        #     copvVolume=copvVolume,
-        #     copvMass=copvMass,
-        #     tankOD=tankOD,
-        #     tankThickness=tankThickness,
-        # )
-
-        # # Combustion
-        # (
-        #     cstar,
-        #     specificImpulse,
-        #     expansionRatio,
-        # ) = combustion.run_CEA(
-        #     chamberPressure,
-        #     mixRatio,
-        #     exitPressureRatio,
-        #     fuel,
-        #     oxidizer,
-        #     fuelTemp,
-        #     oxTemp,
-        # )
-
-        # # Trajectory
-        # (altitude, maxMach, maxAccel, exitVelo) = trajectory.run_trajectory()
-
+        # wait 0.1 seconds
+        time.sleep(0.1)
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
+
+    bar.finish()  # Finish the progress bar
 
 
 if __name__ == "__main__":

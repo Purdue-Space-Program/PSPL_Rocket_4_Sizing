@@ -94,9 +94,9 @@ def calculate_propulsion(
         )  # [kg/s] total mass flow rate
 
         throatArea = cstar * totalMassFlowRate / chamberPressure  # [m^2] throat area
-        throatDiameter = 2 * (throatArea / math.pi) ** (1 / 2)  # [m] throat diameter
+        throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
-        exitDiameter = 2 * (exitArea / math.pi) ** (1 / 2)  # [m] exit diameter
+        exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
 
         seaLevelThrust = idealThrust + exitArea * (
             exitPressure - groundLevelPressure
@@ -113,7 +113,7 @@ def calculate_propulsion(
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
 
-    chamberArea = math.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
+    chamberArea = np.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
     # Thrust chamber size estimate, modeled as conical nozzle
@@ -125,7 +125,7 @@ def calculate_propulsion(
     )  # [m] nozzle converging section length
     convergeVolume = (
         (1 / 3)
-        * math.pi
+        * np.pi
         * convergeLength
         * (
             (chamberDiameter / 2) ** 2
@@ -148,14 +148,14 @@ def calculate_propulsion(
     )
     chamberMass = (
         chamberMaterialDensity
-        * (math.pi / 4)
+        * (np.pi / 4)
         * ((chamberDiameter + chamberWallThickness) ** 2 - chamberDiameter**2)
         * thrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
     injectorMaterialDensity = 8190  # [kg/m^3] injector material density (Inconel 718)
     injectorMass = (
-        injectorMaterialDensity * 0.0508 * (math.pi / 4) * chamberDiameter**2
+        injectorMaterialDensity * 0.0508 * (np.pi / 4) * chamberDiameter**2
     )  # [kg] injector mass, modeled as solid disk w/ 2" height
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time

@@ -15,24 +15,24 @@ import constants as c
 # Fluids sizing script
 # Performs initial sizing of pressure-fed rocket configuration
 # Inputs:
-    # oxidizer [string]: The oxidizer to be used
-    # fuel [string]: The fuel to be used
-    # mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
-    # chamberPressure [Pa]: The nominal engine chamber pressure
-    # copvPressure [Pa]: The maximum pressure the selected COPV can hold
-    # copvVolume [m^3]: The volume of the selected copv
-    # tankOD [m]: The tank wall outer diameter
-    # tankWallThick [m]: the tank wall thickness
+# oxidizer [string]: The oxidizer to be used
+# fuel [string]: The fuel to be used
+# mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
+# chamberPressure [Pa]: The nominal engine chamber pressure
+# copvPressure [Pa]: The maximum pressure the selected COPV can hold
+# copvVolume [m^3]: The volume of the selected copv
+# tankOD [m]: The tank wall outer diameter
+# tankWallThick [m]: the tank wall thickness
 # Outputs:
-    # fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
-    # tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
-    # upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
-    # tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
-    # lowerPlumbingLength [m]: The length of lower plumbing
-    # oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
-    # fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
-    # oxTankVolume [m^3]: The total volume of the oxidizer tank
-    # fuelTankVolume [m^3]: The total volume of the fuel tank
+# fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
+# tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
+# upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
+# tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
+# lowerPlumbingLength [m]: The length of lower plumbing
+# oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
+# fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
+# oxTankVolume [m^3]: The total volume of the oxidizer tank
+# fuelTankVolume [m^3]: The total volume of the fuel tank
 
 
 def fluids_sizing(
@@ -71,7 +71,7 @@ def fluids_sizing(
             The outer diameter of the selected tank wall [m].
         tankThickness : float
             The wall thickness of the selected tank wall [m].
- 
+
 
         Returns
         -------
@@ -289,11 +289,11 @@ def fluids_sizing(
 # Fluids pump resizing script
 # Determines if the BZ1 or BZB COPV can be used for a pump-fed configuration
 # Inputs:
-    # tankTotalVolume [m^3]: The total design volume of the tanks
-    # npshRequired [Pa]: The required net positive suction head for the pumps
+# tankTotalVolume [m^3]: The total design volume of the tanks
+# npshRequired [Pa]: The required net positive suction head for the pumps
 # Outputs:
-    # BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
-    # BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
+# BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
+# BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
 
 
 def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
