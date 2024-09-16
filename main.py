@@ -38,7 +38,7 @@ def main():
     # Owner: Hugo Filmer
 
     (possibleRocketsDF, propCombos, tankWalls, copvs) = (
-        rocket_defining_input_handler.read_inputs()
+        rocket_defining_input_handler.read_inputs(
     )  # Get information on possible rockets
 
     possibleRocketsDF.to_excel(
