@@ -17,10 +17,15 @@
 # \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/
 
 
+import os
+import sys
 import time
 
+import numpy as np
 import progressbar as pb
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import constants as c
 from scripts import fluidsystems, propulsion, structures, trajectory
 from utils import output_folder, rocket_defining_input_handler
 
@@ -59,6 +64,7 @@ def main():
         chamberPressure = rocket[
             "Chamber pressure (psi)"
         ]  # Chamber pressure of the engine [psi]
+
         thurstToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
         # Propellant Combinations
@@ -71,37 +77,51 @@ def main():
         # Tanks
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
 
-        tankOD = tank["Outer diameter (in)"]  # Get the outer diameter of the tank
+        tankOD = tank["Outer diameter (in)"]  # [in] Get the outer diameter of the tank
+        tankOD = tankOD * c.IN2M  # [m] Convert the outer diameter to meters
         tankThickness = tank[
             "Wall thickness (in)"
-        ]  # Get the wall thickness of the tank
+        ]  # [in] Get the wall thickness of the tank
+        tankThickness = (
+            tankThickness * c.IN2M
+        )  # [m] Convert the wall thickness to meters
 
         # COPVs
         copv = copvs.loc[rocket["COPV"]]  # Get the COPV properties
-        copvVolume = copv["Volume (liters)"]
-        copvPressure = copv["Pressure (psi)"]
-        copvMass = copv["Mass (lbm)"]
-        copvLength = copv["Length (in)"]
-        copvOD = copv["Outer diameter (in)"]
 
-        # Fluidsystems
-        (
-            tankPressure,
-            fuelTankVolume,
-            oxTankVolume,
-            fuelTankLength,
-            oxTankLength,
-        ) = fluidsystems.run_fluids(
-            oxidizer=oxidizer,
-            fuel=fuel,
-            mixRatio=mixRatio,
-            chamberPressure=chamberPressure,
-            copvPressure=copvPressure,
-            copvVolume=copvVolume,
-            copvMass=copvMass,
-            tankOD=tankOD,
-            tankThickness=tankThickness,
-        )
+        copvVolume = copv["Volume (liters)"]  # [liters] Get the volume of the COPV
+        copvVolume = copvVolume * c.L2M3  # [m^3] Convert the volume to cubic meters
+
+        copvPressure = copv["Pressure (psi)"]  # [psi] Get the pressure of the COPV
+        copvPressure = copvPressure * c.PSI2PA  # [Pa] Convert the pressure to Pascals
+
+        copvMass = copv["Mass (lbm)"]  # [lbm] Get the mass of the COPV
+        copvMass = copvMass * c.LB2KG  # [kg] Convert the mass to kilograms
+
+        copvLength = copv["Length (in)"]  # [in] Get the length of the COPV
+        copvLength = copvLength * c.IN2M  # [m] Convert the length to meters
+
+        copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
+        copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
+
+        # # Fluidsystems
+        # (
+        #     tankPressure,
+        #     fuelTankVolume,
+        #     oxTankVolume,
+        #     fuelTankLength,
+        #     oxTankLength,
+        # ) = fluidsystems.run_fluids(
+        #     oxidizer=oxidizer,
+        #     fuel=fuel,
+        #     mixRatio=mixRatio,
+        #     chamberPressure=chamberPressure,
+        #     copvPressure=copvPressure,
+        #     copvVolume=copvVolume,
+        #     copvMass=copvMass,
+        #     tankOD=tankOD,
+        #     tankThickness=tankThickness,
+        # )
 
         # # Combustion
         # (
