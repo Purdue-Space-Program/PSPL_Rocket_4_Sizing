@@ -21,7 +21,7 @@ import time
 
 import progressbar as pb
 
-from scripts import fluids, propulsion, structures, trajectory
+# from scripts import fluids, propulsion, structures, trajectory, combustion
 from utils import output_folder, rocket_defining_input_handler
 
 
@@ -87,43 +87,56 @@ def main():
         copvLength = copv["Length (in)"]
         copvOD = copv["Outer diameter (in)"]
 
-        # Propellants
-        (
-            tankPressure,
-            fuelTankVolume,
-            oxTankVolume,
-            fuelTankLength,
-            oxTankLength,
-        ) = fluidsystems.run_fluids(
-            pumps=False,
-            fuel=fuel,
-            oxidizer=oxidizer,
-            mixRatio=mixRatio,
-            chamberPressure=chamberPressure,
-            copvPressure=copvPressure,
-            copvVolume=copvVolume,
-            copvMass=copvMass,
-            tankOD=tankOD,
-            tankID=tankID,
+        print(
+            f"Rocket {idx.split('#')[1]}: {fuel} and {oxidizer} with a mixture ratio of {mixRatio}"
         )
+        print(f"Chamber pressure: {chamberPressure} psi")
+        print(f"Thrust-to-Weight ratio: {thurstToWeight}")
+        print(f"Tank OD: {tankOD} in")
+        print(f"Tank ID: {tankID} in")
+        print(f"COPV Volume: {copvVolume} L")
+        print(f"COPV Pressure: {copvPressure} psi")
+        print(f"COPV Mass: {copvMass} lbm")
+        print(f"COPV Length: {copvLength} in")
+        print(f"COPV OD: {copvOD} in")
 
-        # Combustion
-        (
-            cstar,
-            specificImpulse,
-            expansionRatio,
-        ) = combustion.run_combustion(
-            chamberPressure,
-            mixRatio,
-            exitPressureRatio,
-            fuel,
-            oxidizer,
-            fuelTemp,
-            oxTemp,
-        )
+        # # Propellants
+        # (
+        #     tankPressure,
+        #     fuelTankVolume,
+        #     oxTankVolume,
+        #     fuelTankLength,
+        #     oxTankLength,
+        # ) = fluidsystems.run_fluids(
+        #     pumps=False,
+        #     fuel=fuel,
+        #     oxidizer=oxidizer,
+        #     mixRatio=mixRatio,
+        #     chamberPressure=chamberPressure,
+        #     copvPressure=copvPressure,
+        #     copvVolume=copvVolume,
+        #     copvMass=copvMass,
+        #     tankOD=tankOD,
+        #     tankID=tankID,
+        # )
 
-        # Trajectory
-        (altitude, maxMach, maxAccel, exitVelo) = trajectory.run_trajectory()
+        # # Combustion
+        # (
+        #     cstar,
+        #     specificImpulse,
+        #     expansionRatio,
+        # ) = combustion.run_CEA(
+        #     chamberPressure,
+        #     mixRatio,
+        #     exitPressureRatio,
+        #     fuel,
+        #     oxidizer,
+        #     fuelTemp,
+        #     oxTemp,
+        # )
+
+        # # Trajectory
+        # (altitude, maxMach, maxAccel, exitVelo) = trajectory.run_trajectory()
 
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar

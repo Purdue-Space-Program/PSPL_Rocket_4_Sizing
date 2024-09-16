@@ -24,7 +24,7 @@ import CoolProp.CoolProp as cp
 import constants as c
 
 
-def runCEA(
+def run_CEA(
     chamberPressure, mixtureRatio, exitPressureRatio, fuelName, oxName, fuelTemp, oxTemp
 ):
     """
@@ -70,18 +70,18 @@ def runCEA(
     )
     oxTemp = cp.PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, oxName)
 
-    # Convert fuel and oxidizer names to CEA conventions
-    if oxName == "Oxygen":
-        oxName = "O2(L)"
-    if fuelName == "Methane":
-        fuelName = "CH4(L)"
-        characteristicLength = 35 * 0.0254
-    elif fuelName == "Jet-A":
-        fuelName = "Jet-A(L)"
-        characteristicLength = 45 * 0.0254
-    elif fuelName == "Ethanol":
-        fuelName = "C2H5OH(L)"
-        characteristicLength = 45 * 0.0254
+    # # Convert fuel and oxidizer names to CEA conventions
+    # if oxName == "Oxygen":
+    #     oxName = "O2(L)"
+    # if fuelName == "Methane":
+    #     fuelName = "CH4(L)"
+    #     characteristicLength = 35 * 0.0254
+    # elif fuelName == "Jet-A":
+    #     fuelName = "Jet-A(L)"
+    #     characteristicLength = 45 * 0.0254
+    # elif fuelName == "Ethanol":
+    #     fuelName = "C2H5OH(L)"
+    #     characteristicLength = 45 * 0.0254
 
     # Unit conversions
 
@@ -117,4 +117,4 @@ def runCEA(
 
 
 for i in range(1, 6):
-    runCEA(2 * 10**6, 2.4 + i * 0.1, 20, "CH4(L)", "O2(L)", 120, 100)
+    run_CEA(2 * 10**6, 2.4 + i * 0.1, 20, "CH4(L)", "O2(L)", 120, 100)
