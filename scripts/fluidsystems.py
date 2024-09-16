@@ -15,24 +15,24 @@ import constants as c
 # Fluids sizing script
 # Performs initial sizing of pressure-fed rocket configuration
 # Inputs:
-# oxidizer [string]: The oxidizer to be used
-# fuel [string]: The fuel to be used
-# mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
-# chamberPressure [Pa]: The nominal engine chamber pressure
-# copvPressure [Pa]: The maximum pressure the selected COPV can hold
-# copvVolume [m^3]: The volume of the selected copv
-# tankOD [m]: The tank wall outer diameter
-# tankWallThick [m]: the tank wall thickness
+    # oxidizer [string]: The oxidizer to be used
+    # fuel [string]: The fuel to be used
+    # mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
+    # chamberPressure [Pa]: The nominal engine chamber pressure
+    # copvPressure [Pa]: The maximum pressure the selected COPV can hold
+    # copvVolume [m^3]: The volume of the selected copv
+    # tankOD [m]: The tank wall outer diameter
+    # tankWallThick [m]: the tank wall thickness
 # Outputs:
-# fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
-# tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
-# upperPlumbingLength [m]: The length of upper plumbing
-# tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
-# lowerPlumbingLength [m]: The length of lower plumbing
-# oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
-# fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
-# oxTankVolume [m^3]: The total volume of the oxidizer tank
-# fuelTankVolume [m^3]: The total volume of the fuel tank
+    # fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
+    # tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
+    # upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
+    # tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
+    # lowerPlumbingLength [m]: The length of lower plumbing
+    # oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
+    # fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
+    # oxTankVolume [m^3]: The total volume of the oxidizer tank
+    # fuelTankVolume [m^3]: The total volume of the fuel tank
 
 
 def fluids_sizing(
@@ -49,62 +49,58 @@ def fluids_sizing(
     """
     _summary_
 
-        This function calculates the tank pressure, tank volumes, tank lengths, and fluid system masses for a rocket's propellant system using helium pressurization and aluminum alloy tanks. It accounts for both pressure-fed and pump-fed rockets and outputs critical design parameters based on the input variables.
+        This function calculates fluid system parameters for a single-stage pressure fed rocket using helium pressurization and aluminum alloy tanks.
 
         Parameters
         ----------
-        oxidizerMass : float
-            Mass of the oxidizer required for the rocket [kg].
-        fuelMass : float
-            Mass of the fuel required for the rocket [kg].
+        oxidizer : string
+            The oxidizer to be used for propulsion.
+        fuel : string
+            The fuel to be used for propulsion.
         mixtureRatio : float
-            Oxidizer to fuel mass ratio [-].
+            The Oxidizer to fuel mass ratio [1].
         chamberPressure : float
-            Engine chamber pressure [Pa].
-        ullage : float
-            Ullage volume fraction in the tanks [-].
-        maxTankPressure : float
-            Maximum allowable tank pressure [Pa].
-        heliumTemp : float
-            Initial temperature of the helium in the COPV [K].
-        heliumPressure : float
-            Initial helium pressure in the COPV [Pa].
-        structuralSafetyFactor : float
-            Safety factor for the structural components [-].
-        aluminumYieldStrength : float
-            Yield strength of the aluminum alloy used for tanks [Pa].
-        aluminumUltimateStrength : float
-            Ultimate tensile strength of the aluminum alloy [Pa].
-        plots : bool
-            Boolean to enable or disable plotting of results, 1 = on, 0 = off [-].
+            The engine chamber pressure [Pa].
+        copvPressure : float
+            The maximum allowable pressure in the selected helium COPV [Pa].
+        copvVolume : float
+            The volume of the selected helium COPV [m^3].
+        copvMass : float
+            The mass of the selected helium COPV [kg].
+        tankOD : float
+            The outer diameter of the selected tank wall [m].
+        tankThickness : float
+            The wall thickness of the selected tank wall [m].
+ 
 
         Returns
         -------
-        oxidizerTankVolume : float
-            Calculated volume of the oxidizer tank [m^3].
+        fluidSystemsMass : float
+            Total dry mass of the rocket's fluid systems [kg].
+        tankPressure : float
+            Pressure in the propellant tanks [pa].
+        upperPlumbingLength : float
+            Length of upper plumbing (without the helium COPV) [m].
+        tankTotalLength : float
+            End-to-end length of the propellant tanks [m].
+        lowerPlumbingLength : float
+            Length of lower plumbing [m].
+        oxPropMass : float
+            Mass of oxidizer to be used [m].
+        fuelPropMass : float
+            Mass of fuel to be used [kg].
+        oxTankVolume : float
+            Volume of the oxidizer tank [m^3].
         fuelTankVolume : float
-            Calculated volume of the fuel tank [m^3].
-        oxidizerTankLength : float
-            Calculated length of the oxidizer tank [m].
-        fuelTankLength : float
-            Calculated length of the fuel tank [m].
-        heliumMass : float
-            Mass of helium required for pressurization [kg].
-        tankWallThickness : float
-            Thickness of the tank walls based on structural analysis [m].
-        systemMass : float
-            Total mass of the fluid system including propellant and pressurization system [kg].
+            Volume of the fuel tank [m^3].
     """
-    # tankWallThick):
 
     # Constants
 
     # Propellant
     T_INF = 20 + 273.15  # [K] Assumed ambient temperature
-    RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
-    ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
     R_PROP = (
-        100 - ULLAGE_PERCENT
+        100 - c.ULLAGE_PERCENT
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
 
     # Plumbing
@@ -140,11 +136,11 @@ def fluids_sizing(
             "D", "P", c.FILL_PRESSURE * c.PSI2PA, "Q", 0, fuel
         )  # [kg/m^3] Methane density at fill pressure
     elif fuel.lower() == "ethanol":
-        fuelDensity = 789  # [kg/m^3] Ethanol density
+        fuelDensity = c.DENSITY_ETHANOL  # [kg/m^3] Ethanol density
     elif fuel.lower() == "jet-a":
-        fuelDensity = 807  # [kg/m^3] Jet-A density
+        fuelDensity = c.DENSITY_JET_A  # [kg/m^3] Jet-A density
     elif fuel.lower() == "isopropyl alcohol":
-        fuelDensity = 786  # [kg/m^3] IPA density
+        fuelDensity = c.DENSITY_IPA  # [kg/m^3] IPA density
 
     # Tank pressure
     tankPressure = chamberPressure / CHAMBER_DP_RATIO  # [Pa] Tank pressure
@@ -244,7 +240,7 @@ def fluids_sizing(
     )  # [m] Total length of tanks end-to-end with bulkheads
     upperPlumbingLength = (
         0.0747 * upperPlumbingMass - 0.0339
-    )  # [m] Upper plumbing length
+    )  # [m] Upper plumbing length (not including COPv length)
     lowerPlumbingLength = (
         0.036 * lowerPlumbingMass + 0.3411
     )  # [m] Lower plumbing length
@@ -293,18 +289,14 @@ def fluids_sizing(
 # Fluids pump resizing script
 # Determines if the BZ1 or BZB COPV can be used for a pump-fed configuration
 # Inputs:
-# tankTotalVolume [m^3]: The total design volume of the tanks
-# npshRequired [Pa]: The required net positive suction head for the pumps
+    # tankTotalVolume [m^3]: The total design volume of the tanks
+    # npshRequired [Pa]: The required net positive suction head for the pumps
 # Outputs:
-# BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
-# BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
+    # BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
+    # BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
 
 
 def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
-
-    # Constants
-
-    # Conversions
 
     # Allowable alternate COPVs
     BZB_COPV_VOLUME = 9 * c.L2M3  # [m^3] Volume of the BZB COPV
@@ -320,12 +312,12 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
 
     # Plumbing
-    PUMP_DP_RATIO = 1  # [1] Pump inlet pressure / tank pressure, based on past rockets [NEED TO ADD]
+    PUMP_DP_RATIO = 0.9  # [1] Pump inlet pressure / tank pressure, based on past rockets [TEMPORARY, NEED TO FIND ACTUAL VALUE]
     COPV_TEMP_1 = T_INF + 15  # [K] Assumed initial COPV temperature
     BURNOUT_PRESSURE_RATIO = (
         2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
     )
-    K_PRESSURIZATION = 1.0  # [1] Ratio of ideal tank volume to actual tank volume [1 IS TEMPORARY, NEED TO FIND ACTUAL VALUE]
+    K_PRESSURIZATION = 0.65  # [1] Ratio of ideal tank volume to actual tank volume [TEMPORARY, NEED TO FIND ACTUAL VALUE]
 
     # Tank pressure using pumps
     pumpTankPressure = npshRequired / PUMP_DP_RATIO  # [Pa] Tank pressure

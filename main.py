@@ -21,7 +21,7 @@ import time
 
 import progressbar as pb
 
-# from scripts import fluids, propulsion, structures, trajectory, combustion
+from scripts import fluidsystems, propulsion, structures, trajectory
 from utils import output_folder, rocket_defining_input_handler
 
 
@@ -72,12 +72,9 @@ def main():
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
 
         tankOD = tank["Outer diameter (in)"]  # Get the outer diameter of the tank
-        tankWallThickness = tank[
+        tankThickness = tank[
             "Wall thickness (in)"
         ]  # Get the wall thickness of the tank
-        tankID = (
-            tankOD - 2 * tankWallThickness
-        )  # Calculate the inner diameter of the tank
 
         # COPVs
         copv = copvs.loc[rocket["COPV"]]  # Get the COPV properties
@@ -87,38 +84,24 @@ def main():
         copvLength = copv["Length (in)"]
         copvOD = copv["Outer diameter (in)"]
 
-        print(
-            f"Rocket {idx.split('#')[1]}: {fuel} and {oxidizer} with a mixture ratio of {mixRatio}"
+        # Fluidsystems
+        (
+            tankPressure,
+            fuelTankVolume,
+            oxTankVolume,
+            fuelTankLength,
+            oxTankLength,
+        ) = fluidsystems.run_fluids(
+            oxidizer=oxidizer,
+            fuel=fuel,
+            mixRatio=mixRatio,
+            chamberPressure=chamberPressure,
+            copvPressure=copvPressure,
+            copvVolume=copvVolume,
+            copvMass=copvMass,
+            tankOD=tankOD,
+            tankThickness=tankThickness,
         )
-        print(f"Chamber pressure: {chamberPressure} psi")
-        print(f"Thrust-to-Weight ratio: {thurstToWeight}")
-        print(f"Tank OD: {tankOD} in")
-        print(f"Tank ID: {tankID} in")
-        print(f"COPV Volume: {copvVolume} L")
-        print(f"COPV Pressure: {copvPressure} psi")
-        print(f"COPV Mass: {copvMass} lbm")
-        print(f"COPV Length: {copvLength} in")
-        print(f"COPV OD: {copvOD} in")
-
-        # # Propellants
-        # (
-        #     tankPressure,
-        #     fuelTankVolume,
-        #     oxTankVolume,
-        #     fuelTankLength,
-        #     oxTankLength,
-        # ) = fluidsystems.run_fluids(
-        #     pumps=False,
-        #     fuel=fuel,
-        #     oxidizer=oxidizer,
-        #     mixRatio=mixRatio,
-        #     chamberPressure=chamberPressure,
-        #     copvPressure=copvPressure,
-        #     copvVolume=copvVolume,
-        #     copvMass=copvMass,
-        #     tankOD=tankOD,
-        #     tankID=tankID,
-        # )
 
         # # Combustion
         # (
