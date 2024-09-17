@@ -29,18 +29,18 @@ M2IN = 1 / IN2M  # [in/m] Conversion factor from m to in
 ## Volume
 
 L2M3 = 0.001  # [m^3/l] Conversion factor from L to m^3
-M32L = 1 / L2M3 # [1/m^3] Conversion factor from m^3 to L
+M32L = 1 / L2M3  # [1/m^3] Conversion factor from m^3 to L
 
-M32IN3 = 61023.7 # [in^3/m^3] Conversion factor from m^3 to in^3
-IN32M3 = 1 / M32IN3 # [m^3/in^3] Conversion factor from in^3 to m^3
+M32IN3 = 61023.7  # [in^3/m^3] Conversion factor from m^3 to in^3
+IN32M3 = 1 / M32IN3  # [m^3/in^3] Conversion factor from in^3 to m^3
 
 # Material Properties
 
 ## 6000-Series Aluminum
 
 DENSITY_AL = 2700  # [kg/m^3] Density
-YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength 
-ULTIMATE_STRENGTH_AL = 310 * 10**6  # [Pa] Ultimate tensile strength 
+YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength
+ULTIMATE_STRENGTH_AL = 310 * 10**6  # [Pa] Ultimate tensile strength
 YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
 
 # Fluids Constants
@@ -52,6 +52,10 @@ FILL_PRESSURE = 60  # psi
 
 # Propellant Constants
 
-DENSITY_ETHANOL = 789 # [kg/m^3] Ethanol density at STP
-DENSITY_JET_A = 807 # [kg/m^3] Jet-A density at STP
-DENSITY_IPA = 786 # [kg/m^3] Isopropyl alcohol density at STP
+DENSITY_ETHANOL = 789  # [kg/m^3] Ethanol density at STP
+DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP
+DENSITY_IPA = 786  # [kg/m^3] Isopropyl alcohol density at STP
+
+# Gravity
+
+GRAVITY = 9.81  # [m/s^2] acceleration due to gravity

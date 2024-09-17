@@ -60,15 +60,6 @@ def run_CEA(
 
     """
     # Get the fuel and oxidizer temperatures using CoolProp
-    fuelTemp = cp.PropsSI(
-        "T",
-        "P",
-        c.FILL_PRESSURE,
-        "Q",
-        0,
-        fuelName,
-    )
-    oxTemp = cp.PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, oxName)
 
     # # Convert fuel and oxidizer names to CEA conventions
     # if oxName == "Oxygen":

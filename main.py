@@ -27,18 +27,18 @@ import progressbar as pb
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
 from scripts import fluidsystems, propulsion, structures
-from utils import output_folder, rocket_defining_input_handler
+from utils import output_folder, rocket_defining_input_handler, results_file
 
 
 def main():
-    startTime = output_folder.create_output_folder()  # Create a new output folder
+    output_folder.create_output_folder()  # Create a new output folder
 
     # Possible Rockets
     # This section uses the input reader to get the data from the input spreadsheet.
     # Owner: Hugo Filmer
 
     (possibleRocketsDF, propCombos, tankWalls, copvs) = (
-        rocket_defining_input_handler.read_inputs(
+        rocket_defining_input_handler.read_inputs()
     )  # Get information on possible rockets
 
     possibleRocketsDF.to_excel(
@@ -110,10 +110,14 @@ def main():
         copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
         copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
 
+        # Trajectory
+
         # wait 0.1 seconds
         time.sleep(0.1)
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
+
+    results_file.create_results_file()  # Output the results
 
     bar.finish()  # Finish the progress bar
 
