@@ -36,22 +36,20 @@
 
 # -  Total Structures Mass [kg]
 # -  Drag Coefficients [1]
-# -  Total Rocket Length [m]
 
-import math
+import numpy as np
 
 GUST_VELOCITY = 9  # [m/s] maximum wind gust velocity
 RHO_AIR = 1.225  # [kg/m^3] density of air at sea level
 MAX_Q_VELOCITY = 343  # [m/s] velocity at Mach 1
 
 
-def structures(
+def calculate_structures(
     thrustToWeight,
     vehicleMass,
     vehicleOD,
     componentMasses,
     componentLengths,
-    recoveryAccel,
     stabilityCaliber,
     railAccel,
 ):
@@ -59,13 +57,13 @@ def structures(
     thrust = thrustToWeight * vehicleMass
     # based on Newlands et al. (2016)
 
-    referenceArea = math.pi * (vehicleOD / 2) ^ 2
+    referenceArea = np.pi * vehicleOD**2 / 4
 
     # estimate drag coefficients for nosecone and fins
 
-    noseLiftCurveSlope = 2 * math.pi
-    finLiftCurveSlope = 2 * math.pi
-    boattailLiftCurveSlope = 2 * math.pi
+    noseLiftCurveSlope = 2 * np.pi
+    finLiftCurveSlope = 2 * np.pi
+    boattailLiftCurveSlope = 2 * np.pi
 
     # calculate aerodynamic forces:
     # lift on nosecone

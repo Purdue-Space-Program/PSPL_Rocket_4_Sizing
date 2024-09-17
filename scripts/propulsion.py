@@ -78,11 +78,14 @@ def calculate_propulsion(
     """
 
     # Constants
-    groundLevelPressure = 101325  # [Pa] pressure at sea level
-    efficiencyFactor = 0.9
+    SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
+    EFFICIENCY_FACTOR = 0.9
+    CHAMBER_WALL_THICKNESS = 0.001  # [m] chamber wall thickness
+
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
     )  # Required sea level thrust to meet initial thrust to weight ratio
+
     idealThrust = 0
     seaLevelThrustToWeight = 0
 
@@ -92,7 +95,7 @@ def calculate_propulsion(
             specificImpulse * c.GRAVITY
         )  # [m/s] ideal exhaust velocity
         totalMassFlowRate = idealThrust / (
-            idealExhaustVelocity * efficiencyFactor
+            idealExhaustVelocity * EFFICIENCY_FACTOR
         )  # [kg/s] total mass flow rate
 
         throatArea = cstar * totalMassFlowRate / chamberPressure  # [m^2] throat area
@@ -101,13 +104,13 @@ def calculate_propulsion(
         exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
 
         seaLevelThrust = idealThrust + exitArea * (
-            exitPressure - groundLevelPressure
+            exitPressure - SEA_LEVEL_PRESSURE
         )  # [N] sea
         seaLevelThrustToWeight = seaLevelThrust / (
             vehicleMass * c.GRAVITY
         )  # sea level thrust to weight ratio
         idealThrust = requiredSeaLevelThrust - exitArea * (
-            exitPressure - groundLevelPressure
+            exitPressure - SEA_LEVEL_PRESSURE
         )  # [N] ideal thrust
 
     fuelMassFlowRate = totalMassFlowRate / (
@@ -144,23 +147,28 @@ def calculate_propulsion(
     )  # [m] overall thrust chamber length
 
     # Mass estimates
-    chamberWallThickness = 0.001  # [m] chamber wall thickness
     chamberMaterialDensity = (
-        8190  # [kg/m^3] chamber wall material density (Inconel 718)
+        c.DENSITY_INCO  # [kg/m^3] chamber wall material density (Inconel 718)
     )
     chamberMass = (
         chamberMaterialDensity
         * (np.pi / 4)
-        * ((chamberDiameter + chamberWallThickness) ** 2 - chamberDiameter**2)
+        * ((chamberDiameter + CHAMBER_WALL_THICKNESS) ** 2 - chamberDiameter**2)
         * thrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
-    injectorMaterialDensity = 8190  # [kg/m^3] injector material density (Inconel 718)
+    injectorMaterialDensity = (
+        c.DENSITY_INCO
+    )  # [kg/m^3] injector material density (Inconel 718)
     injectorMass = (
         injectorMaterialDensity * 0.0508 * (np.pi / 4) * chamberDiameter**2
     )  # [kg] injector mass, modeled as solid disk w/ 2" height
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
+
+    totalPropulsionMass = (
+        chamberMass + injectorMass
+    )  # [kg] total propulsion system mass
 
     return [
         idealThrust,
@@ -170,4 +178,5 @@ def calculate_propulsion(
         chamberLength,
         chamberMass,
         injectorMass,
+        totalPropulsionMass,
     ]
