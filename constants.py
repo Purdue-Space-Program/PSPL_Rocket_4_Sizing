@@ -42,6 +42,7 @@ DENSITY_AL = 2700  # [kg/m^3] Density
 YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength
 ULTIMATE_STRENGTH_AL = 310 * 10**6  # [Pa] Ultimate tensile strength
 YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
+POISSON_RATIO_AL = 0.33 # [1] Poisson's ratio
 
 ## Inconel 718
 
