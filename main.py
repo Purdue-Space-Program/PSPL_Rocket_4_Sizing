@@ -20,14 +20,16 @@
 import os
 import sys
 import time
+import pandas as pd
 
 import numpy as np
 import progressbar as pb
 
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
-from scripts import fluidsystems, propulsion, structures
-from utils import output_folder, rocket_defining_input_handler, results_file
+from scripts import fluidsystems, propulsion, structures, trajectory
+from utils import output_folder, rocket_defining_input_handler
 
 
 def main():
@@ -44,6 +46,13 @@ def main():
     possibleRocketsDF.to_excel(
         "possible_rocket_combinations.xlsx"
     )  # Save the possible rockets to an Excel sheet
+
+    # Rocket results
+    # This section creates a dataframe to store the results of the rocket analysis
+    # Owner: Nick Nielsen
+    trajectoryDF = pd.DataFrame(
+        columns=["Altitude", "Max Mach", "Max Accel", "Rail Exit Velo"]
+    )
 
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
@@ -110,14 +119,36 @@ def main():
         copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
         copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
 
-        # Trajectory
+        # GET RESULTS
+
+        ## Trajectory
+        # [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
+        #     wetMass,
+        #     mDotTotal,
+        #     tankOD,
+        #     ascentDragCoeff,
+        #     exitArea,
+        #     exitPressure,
+        #     burnTime,
+        #     plots=0,
+        # )
+
+        # trajectoryDF = trajectoryDF.append(
+        #     {
+        #         "Altitude": altitude,
+        #         "Max Mach": maxMach,
+        #         "Max Accel": maxAccel,
+        #         "Rail Exit Velo": railExitVelo,
+        #     },
+        #     ignore_index=True,
+        # )
 
         # wait 0.1 seconds
         time.sleep(0.1)
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
 
-    results_file.create_results_file()  # Output the results
+    # results_file.create_results_file()  # Output the results
 
     bar.finish()  # Finish the progress bar
 
