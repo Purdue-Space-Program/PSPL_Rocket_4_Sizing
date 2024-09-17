@@ -56,6 +56,12 @@ DENSITY_ETHANOL = 789  # [kg/m^3] Ethanol density at STP
 DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP
 DENSITY_IPA = 786  # [kg/m^3] Isopropyl alcohol density at STP
 
-# Gravity
+
+# Other Constants in kg/mol
+MOLAR_MASS_ETHANOL = 0.04607  # [kg/mol] Ethanol molar mass
+MOLAR_MASS_JET_A = 0.170  # [kg/mol] Jet-A molar mass
+MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
+
 
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
+R = 8.314  # [J/mol-K] Universal gas constant

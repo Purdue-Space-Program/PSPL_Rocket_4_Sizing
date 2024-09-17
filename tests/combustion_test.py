@@ -12,8 +12,10 @@ import constants as c
 chamberPressure = 2e6  # [Pa]
 mixRatio = 2.4  # [-]
 exitPressureRatio = 20  # [-]
-fuel = "CH4(L)"
-oxidizer = "O2(L)"
+fuel = "methane"
+oxidizer = "oxygen"
+fuelCEA = "CH4(L)"
+oxidizerCEA = "O2(L)"
 
 
 # Run test case
@@ -23,10 +25,7 @@ oxidizer = "O2(L)"
     expansionRatio,
     fuelTemp,
     oxTemp,
+    characteristicLength,
 ] = combustion.run_CEA(
-    chamberPressure,
-    exitPressureRatio,
-    mixRatio,
-    fuel,
-    oxidizer,
+    chamberPressure, exitPressureRatio, mixRatio, fuel, oxidizer, fuelCEA, oxidizerCEA
 )

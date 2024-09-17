@@ -19,13 +19,19 @@
 
 
 import CEA_Wrap as CEA
-import CoolProp.CoolProp as cp
+from CoolProp.CoolProp import PropsSI
 
 import constants as c
 
 
 def run_CEA(
-    chamberPressure, mixtureRatio, exitPressureRatio, fuelName, oxName, fuelTemp, oxTemp
+    chamberPressure,
+    mixtureRatio,
+    exitPressureRatio,
+    fuel,
+    oxidizer,
+    fuelCEA,
+    oxidizerCEA,
 ):
     """
     _summary_
@@ -61,28 +67,29 @@ def run_CEA(
     """
     # Get the fuel and oxidizer temperatures using CoolProp
 
-    # # Convert fuel and oxidizer names to CEA conventions
-    # if oxName == "Oxygen":
-    #     oxName = "O2(L)"
-    # if fuelName == "Methane":
-    #     fuelName = "CH4(L)"
-    #     characteristicLength = 35 * 0.0254
-    # elif fuelName == "Jet-A":
-    #     fuelName = "Jet-A(L)"
-    #     characteristicLength = 45 * 0.0254
-    # elif fuelName == "Ethanol":
-    #     fuelName = "C2H5OH(L)"
-    #     characteristicLength = 45 * 0.0254
-
     # Unit conversions
+    chamberPressure = chamberPressure * c.PA2BAR
 
-    # CoolProp
+    # temperatures & characteristic length
+    if fuel == "methane":
+        fuelTemp = PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, fuel)
+        characteristicLength = 35 * 0.0254
+    elif fuel == "ethanol":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_ETHANOL / (c.R * c.DENSITY_ETHANOL)
+        characteristicLength = 45 * 0.0254
+    elif fuel == "jet-a":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_JET_A / (c.R * c.DENSITY_JET_A)
+        characteristicLength = 45 * 0.0254
+    elif fuel == "isopropyl alcohol":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_IPA / (c.R * c.DENSITY_IPA)
+
+    oxTemp = PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, oxidizer)
 
     # CEA run
-    fuel = CEA.Fuel(fuelName, temp=fuelTemp)
-    oxidizer = CEA.Oxidizer(oxName, temp=oxTemp)
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
     rocket = CEA.RocketProblem(
-        pressure=chamberPressure * c.PA2BAR,
+        pressure=chamberPressure,
         pip=exitPressureRatio,
         materials=[fuel, oxidizer],
         o_f=mixtureRatio,
@@ -103,8 +110,5 @@ def run_CEA(
         expansionRatio,
         fuelTemp,
         oxTemp,
+        characteristicLength,
     ]
-
-
-for i in range(1, 6):
-    run_CEA(2 * 10**6, 2.4 + i * 0.1, 20, "CH4(L)", "O2(L)", 120, 100)
