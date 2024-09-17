@@ -172,6 +172,74 @@ def main():
         #     ignore_index=True,
         # )
 
+        ## Combustion
+        # [
+        #     cstar,
+        #     specificImpulse,
+        #     expansionRatio,
+        #     fuelTemp,
+        #     oxTemp,
+        #     characteristicLength,
+        # ] = propulsion.calculate_combustion(
+        #     chamberPressure,
+        #     mixRatio,
+        #     exitPressureRatio,
+        #     fuel,
+        #     oxidizer,
+        #     fuelCEA,
+        #     oxidizerCEA,
+        # )
+
+        # combustionDF = combustionDF.append(
+        #     {
+        #         "C*": cstar,
+        #         "Isp": specificImpulse,
+        #         "Expansion Ratio": expansionRatio,
+        #         "Fuel Temp": fuelTemp,
+        #         "Ox Temp": oxTemp,
+        #         "Char Length": characteristicLength,
+        #     },
+        #     ignore_index=True,
+        # )
+
+        ## Propulsion
+        # [
+        #     idealThrust,
+        #     oxMassFlowRate,
+        #     fuelMassFlowRate,
+        #     burnTime,
+        #     chamberLength,
+        #     chamberMass,
+        #     injectorMass,
+        # ] = propulsion.calculate_propulsion(
+        #     thurstToWeight,
+        #     vehicleMass,
+        #     tankOD,
+        #     chamberPressure,
+        #     exitPressure,
+        #     cstar,
+        #     specificImpulse,
+        #     expansionRatio,
+        #     characteristicLength,
+        #     mixRatio,
+        #     oxPropMass,
+        #     fuelPropMass,
+        #     chamberDiameter,
+        # )
+
+        # propulsionDF = propulsionDF.append(
+        #     {
+        #         "Ideal Thrust": idealThrust,
+        #         "Ox Mass Flow Rate": oxMassFlowRate,
+        #         "Fuel Mass Flow Rate": fuelMassFlowRate,
+        #         "Burn Time": burnTime,
+        #         "Chamber Length": chamberLength,
+        #         "Chamber Mass": chamberMass,
+        #         "Injector Mass": injectorMass,
+        #     },
+        #     ignore_index=True,
+        # )
+
         ## Trajectory
         # [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
         #     wetMass,

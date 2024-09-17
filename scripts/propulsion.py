@@ -27,6 +27,7 @@ def calculate_propulsion(
     mixtureRatio,
     oxMass,
     fuelMass,
+    chamberDiameter,
 ):
     """
     _summary_
@@ -77,18 +78,19 @@ def calculate_propulsion(
     """
 
     # Constants
-    g = 9.81  # [m/s^2] acceleration due to gravity
     groundLevelPressure = 101325  # [Pa] pressure at sea level
     efficiencyFactor = 0.9
     requiredSeaLevelThrust = (
-        thrustToWeight * vehicleMass * g
+        thrustToWeight * vehicleMass * c.GRAVITY
     )  # Required sea level thrust to meet initial thrust to weight ratio
     idealThrust = 0
     seaLevelThrustToWeight = 0
 
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
-        idealExhaustVelocity = specificImpulse * g  # [m/s] ideal exhaust velocity
+        idealExhaustVelocity = (
+            specificImpulse * c.GRAVITY
+        )  # [m/s] ideal exhaust velocity
         totalMassFlowRate = idealThrust / (
             idealExhaustVelocity * efficiencyFactor
         )  # [kg/s] total mass flow rate
@@ -102,7 +104,7 @@ def calculate_propulsion(
             exitPressure - groundLevelPressure
         )  # [N] sea
         seaLevelThrustToWeight = seaLevelThrust / (
-            vehicleMass * g
+            vehicleMass * c.GRAVITY
         )  # sea level thrust to weight ratio
         idealThrust = requiredSeaLevelThrust - exitArea * (
             exitPressure - groundLevelPressure
@@ -118,10 +120,10 @@ def calculate_propulsion(
 
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
-        0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15))
+        0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
     )  # [m] nozzle diverging section length
     convergeLength = (
-        0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(25))
+        0.5 * (chamberDiameter - throatDiameter) / np.tan(np.radians(25))
     )  # [m] nozzle converging section length
     convergeVolume = (
         (1 / 3)

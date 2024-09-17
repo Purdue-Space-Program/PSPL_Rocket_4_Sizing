@@ -68,22 +68,23 @@ def run_CEA(
     # Get the fuel and oxidizer temperatures using CoolProp
 
     # Unit conversions
-    chamberPressure = chamberPressure * c.PA2BAR
+    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
     # temperatures & characteristic length
     if fuel == "methane":
-        fuelTemp = PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, fuel)
-        characteristicLength = 35 * 0.0254
+        fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
+        characteristicLength = 35 * 0.0254  # where are we sourcing these values?
     elif fuel == "ethanol":
         fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_ETHANOL / (c.R * c.DENSITY_ETHANOL)
-        characteristicLength = 45 * 0.0254
+        characteristicLength = 45 * 0.0254  # where are we sourcing these values?
     elif fuel == "jet-a":
         fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_JET_A / (c.R * c.DENSITY_JET_A)
-        characteristicLength = 45 * 0.0254
+        characteristicLength = 45 * 0.0254  # where are we sourcing these values?
     elif fuel == "isopropyl alcohol":
         fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_IPA / (c.R * c.DENSITY_IPA)
 
-    oxTemp = PropsSI("T", "P", c.FILL_PRESSURE, "Q", 0, oxidizer)
+    oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
 
     # CEA run
     fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
