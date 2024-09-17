@@ -101,7 +101,6 @@ def run_CEA(
         cstar,
         specificImpulse,
         expansionRatio,
-        characteristicLength,
         fuelTemp,
         oxTemp,
     ]
