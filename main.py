@@ -54,6 +54,19 @@ def main():
         columns=["Altitude", "Max Mach", "Max Accel", "Rail Exit Velo"]
     )
 
+    fluidsystemsDF = pd.DataFrame(
+        columns=[
+            "Fluid Systems Mass",
+            "Tank Pressure",
+            "Upper Plumbing Length",
+            "Tank Total Length",
+            "Lower Plumbing Length",
+            "Oxidizer Propellant Mass",
+            "Fuel Propellant Mass",
+            "Oxidizer Tank Volume",
+            "Fuel Tank Volume",
+        ]
+    )
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
     # Owner: Nick Nielsen
@@ -121,6 +134,44 @@ def main():
 
         # GET RESULTS
 
+        ## Fluid Systems
+        # [
+        #     fluidsystemsMass,
+        #     tankPressure,
+        #     upperPlumbingLength,
+        #     tankTotalLength,
+        #     lowerPlumbingLength,
+        #     oxPropMass,
+        #     fuelPropMass,
+        #     oxTankVolume,
+        #     fuelTankVolume,
+        # ] = fluidsystems.calculate_fluid_systems(
+        #     oxidizer,
+        #     fuel,
+        #     mixRatio,
+        #     chamberPressure,
+        #     copvPressure,
+        #     copvVolume,
+        #     copvMass,
+        #     tankOD,
+        #     tankThickness,
+        # )
+
+        # fluidsystemsDF = fluidsystemsDF.append(
+        #     {
+        #         "Fluid Systems Mass": fluidsystemsMass,
+        #         "Tank Pressure": tankPressure,
+        #         "Upper Plumbing Length": upperPlumbingLength,
+        #         "Tank Total Length": tankTotalLength,
+        #         "Lower Plumbing Length": lowerPlumbingLength,
+        #         "Oxidizer Propellant Mass": oxPropMass,
+        #         "Fuel Propellant Mass": fuelPropMass,
+        #         "Oxidizer Tank Volume": oxTankVolume,
+        #         "Fuel Tank Volume": fuelTankVolume,
+        #     },
+        #     ignore_index=True,
+        # )
+
         ## Trajectory
         # [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
         #     wetMass,
@@ -148,7 +199,14 @@ def main():
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
 
-    # results_file.create_results_file()  # Output the results
+    # results_file.create_results_file(
+    #     avionicsDF,
+    #     combustionDF,
+    #     trajectoryDF,
+    #     propulsionDF,
+    #     pumpsDF,
+    #     structuresDF,
+    # )  # Output the results
 
     bar.finish()  # Finish the progress bar
 
