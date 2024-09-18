@@ -15,24 +15,24 @@ import constants as c
 # Fluids sizing script
 # Performs initial sizing of pressure-fed rocket configuration
 # Inputs:
-# oxidizer [string]: The oxidizer to be used
-# fuel [string]: The fuel to be used
-# mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
-# chamberPressure [Pa]: The nominal engine chamber pressure
-# copvPressure [Pa]: The maximum pressure the selected COPV can hold
-# copvVolume [m^3]: The volume of the selected copv
-# tankOD [m]: The tank wall outer diameter
-# tankWallThick [m]: the tank wall thickness
+#   oxidizer [string]: The oxidizer to be used
+#   fuel [string]: The fuel to be used
+#   mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
+#   chamberPressure [Pa]: The nominal engine chamber pressure
+#   copvPressure [Pa]: The maximum pressure the selected COPV can hold
+#   copvVolume [m^3]: The volume of the selected copv
+#   tankOD [m]: The tank wall outer diameter
+#   tankWallThick [m]: the tank wall thickness
 # Outputs:
-# fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
-# tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
-# upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
-# tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
-# lowerPlumbingLength [m]: The length of lower plumbing
-# oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
-# fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
-# oxTankVolume [m^3]: The total volume of the oxidizer tank
-# fuelTankVolume [m^3]: The total volume of the fuel tank
+#   fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
+#   tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
+#   upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
+#   tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
+#   lowerPlumbingLength [m]: The length of lower plumbing
+#   oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
+#   fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
+#   oxTankVolume [m^3]: The total volume of the oxidizer tank
+#   fuelTankVolume [m^3]: The total volume of the fuel tank
 
 
 def fluids_sizing(
