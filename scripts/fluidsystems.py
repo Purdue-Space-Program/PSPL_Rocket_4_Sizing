@@ -289,11 +289,11 @@ def fluids_sizing(
 # Fluids pump resizing script
 # Determines if the BZ1 or BZB COPV can be used for a pump-fed configuration
 # Inputs:
-# tankTotalVolume [m^3]: The total design volume of the tanks
-# npshRequired [Pa]: The required net positive suction head for the pumps
+#   tankTotalVolume [m^3]: The total design volume of the tanks
+#   npshRequired [Pa]: The required net positive suction head for the pumps
 # Outputs:
-# BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
-# BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
+#   BZ1copvUsable [bool]: Whether the BZ1 COPV can pressurize the pump-fed configuration
+#   BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
 
 
 def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
@@ -402,3 +402,6 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
         BZBcopvUsable = True
     else:
         BZBcopvUsable = False
+
+    # Return outputs
+    return (BZ1copvUsable, BZBcopvUsable)

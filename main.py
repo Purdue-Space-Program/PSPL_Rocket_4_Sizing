@@ -25,10 +25,10 @@ import pandas as pd
 import numpy as np
 import progressbar as pb
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import constants as c
-from scripts import fluidsystems, propulsion, structures, trajectory, avionics
+from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory
 from utils import output_folder, rocket_defining_input_handler
 
 
@@ -184,7 +184,7 @@ def main():
             fuelTemp,
             oxTemp,
             characteristicLength,
-        ] = propulsion.calculate_combustion(
+        ] = propulsion.calculate_propulsion(
             chamberPressure,
             mixRatio,
             exitPressureRatio,

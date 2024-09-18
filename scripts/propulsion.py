@@ -6,6 +6,7 @@ import os
 import sys
 
 import numpy as np
+import CEA_Wrap as CEA
 from CoolProp.CoolProp import PropsSI
 
 # Add the parent directory to sys.path
@@ -13,6 +14,111 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
 
+# Inputs:
+#   chamberPressure:   [Pa] pressure within engine combustion chamber
+#   mixtureRatio:      [1] ratio of oxidizer to fuel by mass
+#   exitPressureRatio: [1] ratio of chamber pressure to nozzle exit pressure
+#   fuelName:          [N/A] name of fuel under CEA conventions
+#   oxName:            [N/A] name of oxidizer under CEA conventions
+#   fuelTemp:          [K] temperature of fuel upon injection into combustion
+#   oxTemp:            [K] temperature of oxidizer upon injection into combustion
+
+# Outputs:
+#   chamberTemperature:     [K] temperature of products in combustion chamber
+#   specificHeatRatio:      [1] ratio of specific heats for products at exit
+#   productMolecularWeight: [kg/kmol] molecular weight of products at exit
+#   specificGasConstant:    [J/kg-K] gas constant of products at exit
+
+
+def run_CEA(
+    chamberPressure,
+    mixtureRatio,
+    exitPressureRatio,
+    fuel,
+    oxidizer,
+    fuelCEA,
+    oxidizerCEA,
+):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    chamberPressure : float
+        Pressure within the engine combustion chamber [Pa].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+    exitPressureRatio : float
+        Ratio of chamber pressure to nozzle exit pressure [-].
+    fuelName : str
+        Name of fuel under CEA conventions [N/A].
+    oxName : str
+        Name of oxidizer under CEA conventions [N/A].
+    fuelTemp : float
+        Temperature of fuel upon injection into combustion [K].
+    oxTemp : float
+        Temperature of oxidizer upon injection into combustion [K].
+
+    Returns
+    -------
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    productMolecularWeight : float
+        Molecular weight of products at exit [kg/kmol].
+    specificGasConstant : float
+        Gas constant of products at exit [J/kg-K].
+
+    """
+    # Get the fuel and oxidizer temperatures using CoolProp
+
+    # Unit conversions
+    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
+
+    # temperatures & characteristic length
+    if fuel == "methane":
+        fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
+        characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+    elif fuel == "ethanol":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_ETHANOL / (c.R * c.DENSITY_ETHANOL)
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+    elif fuel == "jet-a":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_JET_A / (c.R * c.DENSITY_JET_A)
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+    elif fuel == "isopropyl alcohol":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_IPA / (c.R * c.DENSITY_IPA)
+
+    oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
+
+    # CEA run
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+    rocket = CEA.RocketProblem(
+        pressure=chamberPressure,
+        pip=exitPressureRatio,
+        materials=[fuel, oxidizer],
+        o_f=mixtureRatio,
+        filename="engineCEAoutput",
+        pressure_units="bar",
+    )
+
+    data = rocket.run()
+
+    # Extract CEA outputs
+    cstar = data.cstar
+    specificImpulse = data.isp
+    expansionRatio = data.ae
+
+    return [
+        cstar,
+        specificImpulse,
+        expansionRatio,
+        fuelTemp,
+        oxTemp,
+        characteristicLength,
+    ]
 
 def calculate_propulsion(
     thrustToWeight,
@@ -180,3 +286,23 @@ def calculate_propulsion(
         injectorMass,
         totalPropulsionMass,
     ]
+
+def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
+    volumetricFlowrate = massFlowRate / density  # convert from lbm/s to gpm
+    deltaP = inletPressure - exitPressure
+    developedHead = deltaP / density
+    pumpEfficiency = 0.5  # Constant??
+    # specificSpeed = (rpm * volumetricFlowrate**0.5) / developedHead**0.75
+    power = (massFlowRate * developedHead) / pumpEfficiency
+    torque = power / ((2 * np.pi / 60) * rpm)
+
+    return power, torque
+
+def pumps():
+    # Known fluid properties
+    fluid = "oxygen"  # fluid name
+    P = 101325  # Pressure [Pa]
+    T = 400  # Temperature [Kelvin]
+    # Use CoolProp to find density
+    D = PropsSI("D", "P", P, "T", T, fluid)  # Density [kg/m3]
+    print(D)
