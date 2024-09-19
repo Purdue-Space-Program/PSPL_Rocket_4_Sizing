@@ -17,15 +17,23 @@
 # \______/ |______/|________/|________/    |__/          |__/      |________/|______/|________/ \______/ |________/    |__/
 
 
-import progressbar as pb
+import os
+import sys
 import time
+import pandas as pd
 
-from scripts import fluids, trajectory
-from utils import rocket_defining_input_handler, output_folder
+import numpy as np
+import progressbar as pb
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import constants as c
+from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory
+from utils import output_folder, rocket_defining_input_handler
 
 
 def main():
-    startTime = output_folder.create_output_folder()  # Create a new output folder
+    output_folder.create_output_folder()  # Create a new output folder
 
     # Possible Rockets
     # This section uses the input reader to get the data from the input spreadsheet.
@@ -39,6 +47,34 @@ def main():
         "possible_rocket_combinations.xlsx"
     )  # Save the possible rockets to an Excel sheet
 
+    # Rocket results
+    # This section creates a dataframe to store the results of the rocket analysis
+    # Owner: Nick Nielsen
+    trajectoryDF = pd.DataFrame(
+        columns=["Altitude", "Max Mach", "Max Accel", "Rail Exit Velo"]
+    )
+
+    fluidsystemsDF = pd.DataFrame(
+        columns=[
+            "Fluid Systems Mass",
+            "Tank Pressure",
+            "Upper Plumbing Length",
+            "Tank Total Length",
+            "Lower Plumbing Length",
+            "Oxidizer Propellant Mass",
+            "Fuel Propellant Mass",
+            "Oxidizer Tank Volume",
+            "Fuel Tank Volume",
+        ]
+    )
+
+    vehicleDF = pd.DataFrame(
+        columns=[
+            "Total Dry Mass",
+            "Total Wet Mass",
+            "Total Length",
+        ]
+    )
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
     # Owner: Nick Nielsen
@@ -58,6 +94,8 @@ def main():
         chamberPressure = rocket[
             "Chamber pressure (psi)"
         ]  # Chamber pressure of the engine [psi]
+        chamberPressure = chamberPressure * c.PSI2PA
+
         thurstToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
         # Propellant Combinations
@@ -66,50 +104,226 @@ def main():
         ]  # Get the propellant combination
         fuel = propellants["Fuel"]  # Get the fuel properties
         oxidizer = propellants["Oxidizer"]
+        fuelCEA = propellants[
+            "Fuel CEA"
+        ]  # Get the fuel properties with CEA naming conventions
+        oxidizerCEA = propellants[
+            "Oxidizer CEA"
+        ]  # Get the oxidizer properties for CEA naming conventions
 
         # Tanks
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
 
-        tankOD = tank["Outer diameter (in)"]  # Get the outer diameter of the tank
-        tankWallThickness = tank[
+        tankOD = tank["Outer diameter (in)"]  # [in] Get the outer diameter of the tank
+        tankOD = tankOD * c.IN2M  # [m] Convert the outer diameter to meters
+        tankThickness = tank[
             "Wall thickness (in)"
-        ]  # Get the wall thickness of the tank
-        tankID = (
-            tankOD - 2 * tankWallThickness
-        )  # Calculate the inner diameter of the tank
+        ]  # [in] Get the wall thickness of the tank
+        tankThickness = (
+            tankThickness * c.IN2M
+        )  # [m] Convert the wall thickness to meters
 
-        # Copvs
+        # COPVs
         copv = copvs.loc[rocket["COPV"]]  # Get the COPV properties
-        copvVolume = copv["Volume (liters)"]
-        copvPressure = copv["Pressure (psi)"]
-        copvMass = copv["Mass (lbm)"]
-        copvLength = copv["Length (in)"]
-        copvOD = copv["Outer diameter (in)"]
 
-        # Fluids
-        (
+        copvVolume = copv["Volume (liters)"]  # [liters] Get the volume of the COPV
+        copvVolume = copvVolume * c.L2M3  # [m^3] Convert the volume to cubic meters
+
+        copvPressure = copv["Pressure (psi)"]  # [psi] Get the pressure of the COPV
+        copvPressure = copvPressure * c.PSI2PA  # [Pa] Convert the pressure to Pascals
+
+        copvMass = copv["Mass (lbm)"]  # [lbm] Get the mass of the COPV
+        copvMass = copvMass * c.LB2KG  # [kg] Convert the mass to kilograms
+
+        copvLength = copv["Length (in)"]  # [in] Get the length of the COPV
+        copvLength = copvLength * c.IN2M  # [m] Convert the length to meters
+
+        copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
+        copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
+
+        # GET RESULTS
+
+        # Avionics
+        [avionicsMass] = avionics.calculate_avionics()
+
+        # Fluid Systems
+        [
+            fluidsystemsMass,
             tankPressure,
-            fuelTankVolume,
+            upperPlumbingLength,
+            tankTotalLength,
+            lowerPlumbingLength,
+            oxPropMass,
+            fuelPropMass,
             oxTankVolume,
-            fuelTankLength,
-            oxTankLength,
-        ) = fluids.run_fluids(
-            pumps=False,
-            fuel=fuel,
-            oxidizer=oxidizer,
-            mixRatio=mixRatio,
-            chamberPressure=chamberPressure,
-            copvPressure=copvPressure,
-            copvVolume=copvVolume,
-            copvMass=copvMass,
-            tankOD=tankOD,
-            tankID=tankID,
+            fuelTankVolume,
+        ] = fluidsystems.calculate_fluid_systems(
+            oxidizer,
+            fuel,
+            mixRatio,
+            chamberPressure,
+            copvPressure,
+            copvVolume,
+            copvMass,
+            tankOD,
+            tankThickness,
         )
 
-        # Com
+        fluidsystemsDF = fluidsystemsDF.append(
+            {
+                "Fluid Systems Mass": fluidsystemsMass,
+                "Tank Pressure": tankPressure,
+                "Upper Plumbing Length": upperPlumbingLength,
+                "Tank Total Length": tankTotalLength,
+                "Lower Plumbing Length": lowerPlumbingLength,
+                "Oxidizer Propellant Mass": oxPropMass,
+                "Fuel Propellant Mass": fuelPropMass,
+                "Oxidizer Tank Volume": oxTankVolume,
+                "Fuel Tank Volume": fuelTankVolume,
+            },
+            ignore_index=True,
+        )
 
+        # Combustion
+        [
+            cstar,
+            specificImpulse,
+            expansionRatio,
+            fuelTemp,
+            oxTemp,
+            characteristicLength,
+        ] = propulsion.run_CEA(
+            chamberPressure,
+            mixRatio,
+            exitPressureRatio,
+            fuel,
+            oxidizer,
+            fuelCEA,
+            oxidizerCEA,
+        )
+
+        combustionDF = combustionDF.append(
+            {
+                "C*": cstar,
+                "Isp": specificImpulse,
+                "Expansion Ratio": expansionRatio,
+                "Fuel Temp": fuelTemp,
+                "Ox Temp": oxTemp,
+                "Char Length": characteristicLength,
+            },
+            ignore_index=True,
+        )
+
+        # Propulsion
+        [
+            idealThrust,
+            oxMassFlowRate,
+            fuelMassFlowRate,
+            burnTime,
+            chamberLength,
+            chamberMass,
+            injectorMass,
+            totalPropulsionMass,
+        ] = propulsion.calculate_propulsion(
+            thurstToWeight,
+            vehicleMass,
+            tankOD,
+            chamberPressure,
+            exitPressure,
+            cstar,
+            specificImpulse,
+            expansionRatio,
+            characteristicLength,
+            mixRatio,
+            oxPropMass,
+            fuelPropMass,
+            chamberDiameter,
+        )
+
+        propulsionDF = propulsionDF.append(
+            {
+                "Ideal Thrust": idealThrust,
+                "Ox Mass Flow Rate": oxMassFlowRate,
+                "Fuel Mass Flow Rate": fuelMassFlowRate,
+                "Burn Time": burnTime,
+                "Chamber Length": chamberLength,
+                "Chamber Mass": chamberMass,
+                "Injector Mass": injectorMass,
+                "Total Propulsion Mass": totalPropulsionMass,
+            },
+            ignore_index=True,
+        )
+
+        ## Structures
+        [] = structures.calculate_structures(
+            thurstToWeight, vehicleMass, tankOD, stabilityCaliber, railAccel
+        )
+
+        ## Mass
+        [totalDryMass, totalWetMass] = vehicle.calculate_mass(
+            avionicsMass,
+            fluidsystemsMass,
+            oxPropMass,
+            fuelPropMass,
+            totalPropulsionMass,
+            structuresMass,
+        )
+
+        ## Length
+        [totalLength] = vehicle.calculate_length(
+            noseconeLength,
+            copvLength,
+            recoveryBayLength,
+            upperAirframeLength,
+            tankTotalLength,
+            lowerAirframeLength,
+            chamberLength,
+        )
+
+        vehicleDF = vehicleDF.append(
+            {
+                "Total Dry Mass": totalDryMass,
+                "Total Wet Mass": totalWetMass,
+                "Total Length": totalLength,
+            },
+            ignore_index=True,
+        )
+
+        # Trajectory
+        [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
+            totalWetMass,
+            mDotTotal,
+            tankOD,
+            ascentDragCoeff,
+            exitArea,
+            exitPressure,
+            burnTime,
+            plots=0,
+        )
+
+        trajectoryDF = trajectoryDF.append(
+            {
+                "Altitude": altitude,
+                "Max Mach": maxMach,
+                "Max Accel": maxAccel,
+                "Rail Exit Velo": railExitVelo,
+            },
+            ignore_index=True,
+        )
+
+        # wait 0.1 seconds
+        time.sleep(0.1)
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
+
+    results_file.create_results_file(
+        combustionDF,
+        trajectoryDF,
+        propulsionDF,
+        structuresDF,
+    )  # Output the results
+
+    bar.finish()  # Finish the progress bar
 
 
 if __name__ == "__main__":

@@ -2,174 +2,309 @@
 # Daniel DeConti
 # 27 May 2024
 
-import math
+import os
+import sys
 
 import numpy as np
+import CEA_Wrap as CEA
+from CoolProp.CoolProp import PropsSI
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import constants as c
+
+# Inputs:
+#   chamberPressure:   [Pa] pressure within engine combustion chamber
+#   mixtureRatio:      [1] ratio of oxidizer to fuel by mass
+#   exitPressureRatio: [1] ratio of chamber pressure to nozzle exit pressure
+#   fuelName:          [N/A] name of fuel under CEA conventions
+#   oxName:            [N/A] name of oxidizer under CEA conventions
+#   fuelTemp:          [K] temperature of fuel upon injection into combustion
+#   oxTemp:            [K] temperature of oxidizer upon injection into combustion
+
+# Outputs:
+#   chamberTemperature:     [K] temperature of products in combustion chamber
+#   specificHeatRatio:      [1] ratio of specific heats for products at exit
+#   productMolecularWeight: [kg/kmol] molecular weight of products at exit
+#   specificGasConstant:    [J/kg-K] gas constant of products at exit
 
 
-def calculate_propulsion(
-    thrustToWeight,
-    vehicleMass,
-    chamberDiameter,
+def run_CEA(
     chamberPressure,
-    exitPressure,
-    cstar,
-    specificImpulse,
-    expansionRatio,
-    efficiencyFactor,
-    characteristicLength,
-    fuelMass,
-    oxMass,
-    fuelDensity,
-    oxDensity,
     mixtureRatio,
+    exitPressureRatio,
+    fuel,
+    oxidizer,
+    fuelCEA,
+    oxidizerCEA,
 ):
     """
     _summary_
 
     Parameters
     ----------
-    thrust : float
-        Design thrust for the engine [N].
-    chamberDiameter : float
-        Inner diameter of combustion chamber [m].
-    chamberTemperature : float
-        Temperature of products in combustion chamber [K].
     chamberPressure : float
-        Pressure within the combustion chamber [Pa].
-    exitPressure : float
-        Pressure of surroundings outside the nozzle [Pa].
-    characteristicLength : float
-        Length in chamber needed for full propellant reaction [m].
-    specificHeatRatio : float
-        Ratio of specific heats for products at exit [-].
-    specificGasConstant : float
-        Gas constant for products at exit [J/kg-K].
-    fuelTankVolume : float
-        Volume of fuel tank [m^3].
-    oxTankVolume : float
-        Volume of oxidizer tank [m^3].
+        Pressure within the engine combustion chamber [Pa].
     mixtureRatio : float
         Ratio of oxidizer to fuel by mass [-].
+    exitPressureRatio : float
+        Ratio of chamber pressure to nozzle exit pressure [-].
+    fuelName : str
+        Name of fuel under CEA conventions [N/A].
+    oxName : str
+        Name of oxidizer under CEA conventions [N/A].
+    fuelTemp : float
+        Temperature of fuel upon injection into combustion [K].
+    oxTemp : float
+        Temperature of oxidizer upon injection into combustion [K].
 
     Returns
     -------
-    chamberLength : float
-        Length of combustion chamber [m].
-    nozzleConvergingLength : float
-        Length of nozzle converging section [m].
-    nozzleDivergingSection : float
-        Length of nozzle diverging section [m].
-    throatDiameter : float
-        Diameter of nozzle throat [m].
-    exitDiameter : float
-        Diameter of nozzle exit [m].
-    fuelMassFlowRate : float
-        Mass flow rate of fuel [kg/s].
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    productMolecularWeight : float
+        Molecular weight of products at exit [kg/kmol].
+    specificGasConstant : float
+        Gas constant of products at exit [J/kg-K].
+
+    """
+    # Get the fuel and oxidizer temperatures using CoolProp
+
+    # Unit conversions
+    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
+
+    # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
+    if fuel == "methane":
+        fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
+        characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+    elif fuel == "ethanol":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_ETHANOL / (c.R * c.DENSITY_ETHANOL)
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+    elif fuel == "jet-a":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_JET_A / (c.R * c.DENSITY_JET_A)
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+    elif fuel == "isopropyl alcohol":
+        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_IPA / (c.R * c.DENSITY_IPA)
+
+    oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
+
+    # CEA run
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+    rocket = CEA.RocketProblem(
+        pressure=chamberPressure,
+        pip=exitPressureRatio,
+        materials=[fuel, oxidizer],
+        o_f=mixtureRatio,
+        filename="engineCEAoutput",
+        pressure_units="bar",
+    )
+
+    data = rocket.run()
+
+    # Extract CEA outputs
+    cstar = data.cstar
+    specificImpulse = data.isp
+    expansionRatio = data.ae
+
+    return [
+        cstar,
+        specificImpulse,
+        expansionRatio,
+        fuelTemp,
+        oxTemp,
+        characteristicLength,
+    ]
+
+
+def calculate_propulsion(
+    thrustToWeight,
+    vehicleMass,
+    chamberPressure,
+    exitPressure,
+    cstar,
+    specificImpulse,
+    expansionRatio,
+    characteristicLength,
+    mixtureRatio,
+    oxMass,
+    fuelMass,
+    chamberDiameter,
+):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    thrustToWeight : float
+        Required thrust to weight at launch [-].
+    vehicleMass : float
+        Vehicle wet mass [kg].
+    vehicleOuterDiameter : float
+        Vehicle outer diameter [m].
+    chamberPressure : float
+        Pressure within the combustion chamber [Pa].
+    exitPressure : float
+        Pressure of engine exhaust at nozzle exit [Pa].
+    cstar : float
+        Characteristic velocity of engine [m/s].
+    specificImpulse : float
+        Specific impulse of engine [s].
+    expansionRatio : float
+        Ratio of nozzle exit area to nozzle throat area [-].
+    characteristicLength : float
+        Length in chamber needed for full propellant reaction [m].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+    oxMass : float
+        Volume of oxidizer tank [m^3].
+    fuelMass : float
+        Volume of fuel tank [m^3].
+
+    Returns
+    -------
+    idealThrust : float
+        Ideally expanded engine thrust [N].
     oxMassFlowRate : float
         Mass flow rate of oxidizer [kg/s].
-    lineVelocities : list of float
-        Fuel and oxidizer line velocities for different tube sizes [m/s].
+    fuelMassFlowRate : float
+        Mass flow rate of fuel [kg/s].
     burnTime : float
         Duration of engine burn [s].
-    totalImpulse : float
-        Integral of thrust over duration of burn [N-s].
+    chamberLength : float
+        Total length of chamber [m].
+    chamberMass : float
+        Combustion chamber and nozzle mass [kg].
+    injectorMass : float
+        Mass of injector [kg].
     """
 
     # Constants
-    g = 9.81  # [m/s^2] acceleration due to gravity
-    groundLevelPressure = 101325  # [Pa] pressure at sea level
+    SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
+    EFFICIENCY_FACTOR = 0.9
+    CHAMBER_WALL_THICKNESS = 0.001  # [m] chamber wall thickness
 
     requiredSeaLevelThrust = (
-        thrustToWeight * vehicleMass * g
+        thrustToWeight * vehicleMass * c.GRAVITY
     )  # Required sea level thrust to meet initial thrust to weight ratio
+
     idealThrust = 0
     seaLevelThrustToWeight = 0
 
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
-        idealExhaustVelocity = specificImpulse * g  # [m/s] ideal exhaust velocity
+        idealExhaustVelocity = (
+            specificImpulse * c.GRAVITY
+        )  # [m/s] ideal exhaust velocity
         totalMassFlowRate = idealThrust / (
-            idealExhaustVelocity * efficiencyFactor**2
+            idealExhaustVelocity * EFFICIENCY_FACTOR
         )  # [kg/s] total mass flow rate
-        fuelMassFlowRate = totalMassFlowRate / (
-            1 + mixtureRatio
-        )  # [kg/s] fuel mass flow rate
-        oxMassFlowRate = (
-            mixtureRatio * fuelMassFlowRate
-        )  # [kg/s] oxidizer mass flow rate
 
         throatArea = cstar * totalMassFlowRate / chamberPressure  # [m^2] throat area
-        throatDiameter = 2 * (throatArea / math.pi) ** (1 / 2)  # [m] throat diameter
+        throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
-        exitDiameter = 2 * (exitArea / math.pi) ** (1 / 2)  # [m] exit diameter
+        exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
 
         seaLevelThrust = idealThrust + exitArea * (
-            exitPressure - groundLevelPressure
+            exitPressure - SEA_LEVEL_PRESSURE
         )  # [N] sea
         seaLevelThrustToWeight = seaLevelThrust / (
-            vehicleMass * g
+            vehicleMass * c.GRAVITY
         )  # sea level thrust to weight ratio
         idealThrust = requiredSeaLevelThrust - exitArea * (
-            exitPressure - groundLevelPressure
+            exitPressure - SEA_LEVEL_PRESSURE
         )  # [N] ideal thrust
 
-    chamberArea = math.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
+    fuelMassFlowRate = totalMassFlowRate / (
+        1 + mixtureRatio
+    )  # [kg/s] fuel mass flow rate
+    oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
+
+    chamberArea = np.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
-   # Thrust chamber size estimate, modeled as conical nozzle
-    divergeLength = 0.5 * (exitDiameter - throatDiameter) / math.tan(math.radians(15)) # [m] nozzle diverging section length
-    convergeLength = 0.5 * (chamberDiameter - throatDiameter) / math.tan(math.radians(25)) # [m] nozzle converging section length
-    convergeVolume = (1/3) * math.pi * convergeLength * ((chamberDiameter / 2)**2 + (throatDiameter / 2)**2 + ((chamberDiameter * throatDiameter) / 2)**2) # [m^3] nozzle converging section volume
-    chamberVolume = characteristicLength * throatArea - convergeVolume # [m^3] chamber volume
-    chamberLength = chamberVolume / chamberArea # [m] chamber length
-    thrustChamberLength = chamberLength + convergeLength + divergeLength # [m] overall thrust chamber length
+    # Thrust chamber size estimate, modeled as conical nozzle
+    divergeLength = (
+        0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
+    )  # [m] nozzle diverging section length
+    convergeLength = (
+        0.5 * (chamberDiameter - throatDiameter) / np.tan(np.radians(25))
+    )  # [m] nozzle converging section length
+    convergeVolume = (
+        (1 / 3)
+        * np.pi
+        * convergeLength
+        * (
+            (chamberDiameter / 2) ** 2
+            + (throatDiameter / 2) ** 2
+            + ((chamberDiameter * throatDiameter) / 2) ** 2
+        )
+    )  # [m^3] nozzle converging section volume
+    chamberVolume = (
+        characteristicLength * throatArea - convergeVolume
+    )  # [m^3] chamber volume
+    chamberLength = chamberVolume / chamberArea  # [m] chamber length
+    thrustChamberLength = (
+        chamberLength + convergeLength + divergeLength
+    )  # [m] overall thrust chamber length
 
     # Mass estimates
-    chamberWallThickness = 0.001 # [m] chamber wall thickness
-    chamberMaterialDensity = 8190 # [kg/m^3] chamber wall material density (Inconel 718)
-    chamberMass = chamberMaterialDensity * (math.pi / 4) * ((chamberDiameter + chamberWallThickness)**2 - chamberDiameter**2) * thrustChamberLength # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
+    chamberMaterialDensity = (
+        c.DENSITY_INCO  # [kg/m^3] chamber wall material density (Inconel 718)
+    )
+    chamberMass = (
+        chamberMaterialDensity
+        * (np.pi / 4)
+        * ((chamberDiameter + CHAMBER_WALL_THICKNESS) ** 2 - chamberDiameter**2)
+        * thrustChamberLength
+    )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
-    injectorMaterialDensity = 8190 # [kg/m^3] injector material density (Inconel 718)
-    injectorMass = injectorMaterialDensity * 0.0508 * (math.pi / 4) * chamberDiameter**2 # [kg] injector mass, modeled as solid disk w/ 2" height
+    injectorMaterialDensity = (
+        c.DENSITY_INCO
+    )  # [kg/m^3] injector material density (Inconel 718)
+    injectorMass = (
+        injectorMaterialDensity * 0.0508 * (np.pi / 4) * chamberDiameter**2
+    )  # [kg] injector mass, modeled as solid disk w/ 2" height
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
-    # rows are for 0.25", 0.50", and 0.75" respectively
-    tubeThickness = 0.065 * 0.0254  # [m] tube thicknesses
-    tubeODs = np.array([0.50, 0.75]) * 0.0254  # [m] tube outer diameters
-    tubeAreas = (math.pi / 4) * (tubeODs - (2 * tubeThickness))**2 # [m^2] tube areas
-    fuelVelocities = fuelMassFlowRate / (
-        fuelDensity * tubeAreas
-    )  # [m/s] fuel velocities
-    oxVelocities = oxMassFlowRate / (oxDensity * tubeAreas)  # [m/s] oxidizer velocities
-    lineVelocities = np.array([oxVelocities, fuelVelocities])
+    totalPropulsionMass = (
+        chamberMass + injectorMass
+    )  # [kg] total propulsion system mass
 
-    return idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass, lineVelocities
+    return [
+        idealThrust,
+        oxMassFlowRate,
+        fuelMassFlowRate,
+        burnTime,
+        chamberLength,
+        chamberMass,
+        injectorMass,
+        totalPropulsionMass,
+    ]
 
-idealThrust, oxMassFlowRate, fuelMassFlowRate, burnTime, chamberLength, chamberMass, injectorMass, lineVelocities = calculate_propulsion(
-    4,
-    150,
-    7 * 0.0254,
-    300 * 6895,
-    11 * 6895,
-    1783.9,
-    270.2,
-    4.9174,
-    0.9,
-    45 * 0.0254,
-    10 * 2.28,
-    10,
-    1100,
-    800,
-    2.38,
-)
 
-print(idealThrust)
-print(oxMassFlowRate)
-print(fuelMassFlowRate)
-print(burnTime)
-print(chamberLength)
-print(chamberMass)
-print(injectorMass)
-print(lineVelocities)
+def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
+    volumetricFlowrate = massFlowRate / density  # convert from lbm/s to gpm
+    deltaP = inletPressure - exitPressure
+    developedHead = deltaP / density
+    pumpEfficiency = 0.5  # Constant??
+    # specificSpeed = (rpm * volumetricFlowrate**0.5) / developedHead**0.75
+    power = (massFlowRate * developedHead) / pumpEfficiency
+    torque = power / ((2 * np.pi / 60) * rpm)
+
+    return power, torque
+
+
+def pumps():
+    # Known fluid properties
+    fluid = "oxygen"  # fluid name
+    P = 101325  # Pressure [Pa]
+    T = 400  # Temperature [Kelvin]
+    # Use CoolProp to find density
+    D = PropsSI("D", "P", P, "T", T, fluid)  # Density [kg/m3]
+    print(D)

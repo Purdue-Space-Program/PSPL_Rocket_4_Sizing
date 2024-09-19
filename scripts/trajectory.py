@@ -2,9 +2,15 @@
 # 24 July 2024
 
 
+import os
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 from ambiance import Atmosphere
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import constants as c
 
 
 def calculate_trajectory(
@@ -50,10 +56,11 @@ def calculate_trajectory(
         Maximum Mach number of the rocket [-].
     maxAccel : float
         Maximum acceleration of the rocket [m/s^2].
+    exitVelo : float
+        Exit velocity of the rocket [m/s].
     """
 
     # Constants
-    GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
     FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
     RAIL_HEIGHT = 18.29  # [m] height of the rail
 
@@ -65,13 +72,14 @@ def calculate_trajectory(
 
     # Initial Conditions
 
-    altitude = RAIL_HEIGHT + FAR_ALTITUDE  # [m] initial altitude of the rocket
+    altitude = FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
     dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed
 
     # Array Initialization:
     altitudeArray = []
+    velocityArray = []
     machArray = []
     accelArray = []
     timeArray = []
@@ -92,20 +100,29 @@ def calculate_trajectory(
         drag = (
             0.5 * rho * velocity**2 * ascentDragCoeff * referenceArea
         )  # [N] force of drag
-        grav = GRAVITY * mass  # [N] force of gravity
+        grav = c.GRAVITY * mass  # [N] force of gravity
 
         accel = (thrust - drag - grav) / mass  # acceleration equation of motion
         accelArray.append(accel)
 
         velocity = velocity + accel * dt  # velocity integration
+        velocityArray.append(velocity)
+
         mach = velocity / atmo.speed_of_sound
         machArray.append(mach)
 
         altitude = altitude + velocity * dt  # position integration
+
         altitudeArray.append(altitude)
 
         time = time + dt  # time step
         timeArray.append(time)
+
+    # Find the closest altitude to the RAIL_HEIGHT
+    for i in range(len(altitudeArray)):
+        if altitudeArray[i] >= RAIL_HEIGHT:
+            exitVelo = velocityArray[i]
+            break
 
     if plots == 1:
         plt.figure(1)
@@ -124,12 +141,4 @@ def calculate_trajectory(
         plt.grid()
         plt.show()
 
-    return altitude, max(machArray), max(accelArray)
-
-
-# altitude, maxMach, maxAccel = trajectory(
-#     74.69, 1.86, 3792, 0.168275, 0.48, 0.02, 100000, 13, 1
-# )
-# print("Max Altitude is: ", altitude)
-# print("Maximum Mach Number is:", maxMach)
-# print("Maximum Acceleration is", maxAccel)
+    return altitude, max(machArray), max(accelArray), exitVelo
