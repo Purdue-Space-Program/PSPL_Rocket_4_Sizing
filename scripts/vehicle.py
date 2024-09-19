@@ -20,6 +20,7 @@ import constants as c
 #   totalDryMass: [kg] total mass of the rocket without fuel
 #   totalWetMass: [kg] total mass of the rocket with fuel
 
+
 def calculate_mass(
     totalAvionicsMass,
     totalFluidSystemMass,
@@ -42,7 +43,8 @@ def calculate_mass(
         totalDryMass + oxidizerMass + fuelMass
     )  # [kg] total mass of the rocket with fuel
 
-    return (totalDryMass, totalWetMass)
+    return [totalDryMass, totalWetMass]
+
 
 # Rocket 4 length Script
 # Owners: Nick Nielsen
@@ -58,6 +60,7 @@ def calculate_mass(
 #   chamberLength: [m] length of the chamber
 # Outputs:
 #   totalLength: [m] total length of the rocket
+
 
 def calculate_length(
     noseconeLength,
@@ -78,4 +81,4 @@ def calculate_length(
         + chamberLength
     )
 
-    return (totalLength)
+    return [totalLength]

@@ -67,6 +67,14 @@ def main():
             "Fuel Tank Volume",
         ]
     )
+
+    vehicleDF = pd.DataFrame(
+        columns=[
+            "Total Dry Mass",
+            "Total Wet Mass",
+            "Total Length",
+        ]
+    )
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
     # Owner: Nick Nielsen
@@ -184,7 +192,7 @@ def main():
             fuelTemp,
             oxTemp,
             characteristicLength,
-        ] = propulsion.calculate_propulsion(
+        ] = propulsion.run_CEA(
             chamberPressure,
             mixRatio,
             exitPressureRatio,
@@ -251,9 +259,39 @@ def main():
             thurstToWeight, vehicleMass, tankOD, stabilityCaliber, railAccel
         )
 
+        ## Mass
+        [totalDryMass, totalWetMass] = vehicle.calculate_mass(
+            avionicsMass,
+            fluidsystemsMass,
+            oxPropMass,
+            fuelPropMass,
+            totalPropulsionMass,
+            structuresMass,
+        )
+
+        ## Length
+        [totalLength] = vehicle.calculate_length(
+            noseconeLength,
+            copvLength,
+            recoveryBayLength,
+            upperAirframeLength,
+            tankTotalLength,
+            lowerAirframeLength,
+            chamberLength,
+        )
+
+        vehicleDF = vehicleDF.append(
+            {
+                "Total Dry Mass": totalDryMass,
+                "Total Wet Mass": totalWetMass,
+                "Total Length": totalLength,
+            },
+            ignore_index=True,
+        )
+
         # Trajectory
         [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
-            wetMass,
+            totalWetMass,
             mDotTotal,
             tankOD,
             ascentDragCoeff,
@@ -278,14 +316,12 @@ def main():
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
 
-    # results_file.create_results_file(
-    #     avionicsDF,
-    #     combustionDF,
-    #     trajectoryDF,
-    #     propulsionDF,
-    #     pumpsDF,
-    #     structuresDF,
-    # )  # Output the results
+    results_file.create_results_file(
+        combustionDF,
+        trajectoryDF,
+        propulsionDF,
+        structuresDF,
+    )  # Output the results
 
     bar.finish()  # Finish the progress bar
 

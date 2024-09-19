@@ -47,4 +47,5 @@ def create_results_file(
         propulsionDF.to_excel(writer, sheet_name="propulsion")
         pumpsDF.to_excel(writer, sheet_name="pumps")
         structuresDF.to_excel(writer, sheet_name="structures")
+        vehicleDF.to_excel(writer, sheet_name="vehicle")
         writer.save()

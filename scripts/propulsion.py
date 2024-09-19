@@ -77,7 +77,7 @@ def run_CEA(
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
     fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
-    # temperatures & characteristic length
+    # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
     if fuel == "methane":
         fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
@@ -120,10 +120,10 @@ def run_CEA(
         characteristicLength,
     ]
 
+
 def calculate_propulsion(
     thrustToWeight,
     vehicleMass,
-    vehicleOuterDiameter,
     chamberPressure,
     exitPressure,
     cstar,
@@ -287,6 +287,7 @@ def calculate_propulsion(
         totalPropulsionMass,
     ]
 
+
 def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
     volumetricFlowrate = massFlowRate / density  # convert from lbm/s to gpm
     deltaP = inletPressure - exitPressure
@@ -297,6 +298,7 @@ def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
     torque = power / ((2 * np.pi / 60) * rpm)
 
     return power, torque
+
 
 def pumps():
     # Known fluid properties
