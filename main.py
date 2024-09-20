@@ -316,12 +316,12 @@ def main():
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
 
-    results_file.create_results_file(
-        combustionDF,
-        trajectoryDF,
-        propulsionDF,
-        structuresDF,
-    )  # Output the results
+    # results_file.create_results_file(
+    #     combustionDF,
+    #     trajectoryDF,
+    #     propulsionDF,
+    #     structuresDF,
+    # )  # Output the results
 
     bar.finish()  # Finish the progress bar
 
