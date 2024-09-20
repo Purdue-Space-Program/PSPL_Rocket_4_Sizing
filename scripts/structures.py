@@ -54,14 +54,14 @@ def structures(
     propLength,
     oxFlowRate,
     fuelFlowRate,
-    OD
+    OD,
 ):
 
-### Constants and Inputs
+    ### Constants and Inputs
 
-    rocketArea = (OD / 2) * math.pi # [in^2] area of the rocket body
+    rocketArea = (OD / 2) * np.pi  # [in^2] area of the rocket body
 
-    AoA_rail = 10 * math.pi / 180 # [rad] Worst angle of attack off the rail
+    AoA_rail = 10 * np.pi / 180  # [rad] Worst angle of attack off the rail
 
 
 ### Off-the Rail case

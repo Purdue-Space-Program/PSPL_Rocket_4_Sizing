@@ -82,13 +82,13 @@ def run_CEA(
         fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
     elif fuel == "ethanol":
-        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_ETHANOL / (c.R * c.DENSITY_ETHANOL)
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
     elif fuel == "jet-a":
-        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_JET_A / (c.R * c.DENSITY_JET_A)
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
     elif fuel == "isopropyl alcohol":
-        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_IPA / (c.R * c.DENSITY_IPA)
+        fuelTemp = c.TAMBIENT
 
     oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
 
