@@ -32,8 +32,8 @@ import constants as c
 
 def run_CEA(
     chamberPressure,
+    exitPressure,
     mixtureRatio,
-    exitPressureRatio,
     fuel,
     oxidizer,
     fuelCEA,
@@ -46,10 +46,10 @@ def run_CEA(
     ----------
     chamberPressure : float
         Pressure within the engine combustion chamber [Pa].
+    exitPressure : float
+        Pressure at nozzle exit [Pa].
     mixtureRatio : float
         Ratio of oxidizer to fuel by mass [-].
-    exitPressureRatio : float
-        Ratio of chamber pressure to nozzle exit pressure [-].
     fuelName : str
         Name of fuel under CEA conventions [N/A].
     oxName : str
@@ -75,6 +75,8 @@ def run_CEA(
 
     # Unit conversions
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    exitPressure = exitPressure * c.PA2BAR
+    pressureRatio  = chamberPressure / exitPressure
     fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
@@ -100,7 +102,7 @@ def run_CEA(
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
-        pip=exitPressureRatio,
+        pip=pressureRatio,
         materials=[fuel, oxidizer],
         o_f=mixtureRatio,
         filename="engineCEAoutput",
@@ -189,7 +191,7 @@ def calculate_propulsion(
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
     EFFICIENCY_FACTOR = 0.9
-    CHAMBER_WALL_THICKNESS = 0.001  # [m] chamber wall thickness
+    CHAMBER_WALL_THICKNESS = 0.01  # [m] chamber wall thickness
 
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
@@ -270,8 +272,8 @@ def calculate_propulsion(
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
     injectorMass = (
-        injectorMaterialDensity * 0.0508 * (np.pi / 4) * chamberDiameter**2
-    )  # [kg] injector mass, modeled as solid disk w/ 2" height
+        injectorMaterialDensity * (np.pi / 4) * (2*c.IN2M * (chamberDiameter**2 - (chamberDiameter - 1*c.IN2M)**2) + 2 * 0.5*c.IN2M * (chamberDiameter - 1*c.IN2M)**2)
+    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.5" thick walls
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
