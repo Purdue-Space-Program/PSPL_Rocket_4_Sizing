@@ -36,8 +36,6 @@ def run_CEA(
     mixtureRatio,
     fuel,
     oxidizer,
-    fuelCEA,
-    oxidizerCEA,
 ):
     """
     _summary_
@@ -76,7 +74,7 @@ def run_CEA(
     # Unit conversions
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
     exitPressure = exitPressure * c.PA2BAR
-    pressureRatio  = chamberPressure / exitPressure
+    pressureRatio = chamberPressure / exitPressure
     fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
@@ -96,6 +94,7 @@ def run_CEA(
         fuelTemp = c.TAMBIENT
 
     oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
+    oxidizerCEA = "O2(L)"
 
     # CEA run
     fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
@@ -272,7 +271,12 @@ def calculate_propulsion(
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
     injectorMass = (
-        injectorMaterialDensity * (np.pi / 4) * (2*c.IN2M * (chamberDiameter**2 - (chamberDiameter - 1*c.IN2M)**2) + 2 * 0.5*c.IN2M * (chamberDiameter - 1*c.IN2M)**2)
+        injectorMaterialDensity
+        * (np.pi / 4)
+        * (
+            2 * c.IN2M * (chamberDiameter**2 - (chamberDiameter - 1 * c.IN2M) ** 2)
+            + 2 * 0.5 * c.IN2M * (chamberDiameter - 1 * c.IN2M) ** 2
+        )
     )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.5" thick walls
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
