@@ -96,6 +96,9 @@ def run_CEA(
     oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
     oxidizerCEA = "O2(L)"
 
+    fuelTemp = 110  # [K] temperature of fuel upon injection into combustion
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+
     # CEA run
     fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
@@ -318,15 +321,15 @@ def pumps():
     D = PropsSI("D", "P", P, "T", T, fluid)  # Density [kg/m3]
     print(D)
 
-def main():
-    Pc = 200*c.PSI2PA
-    Pe = 11*c.PSI2PA
-    OF = 2.7
-    fuel = 'methane'
-    ox = 'oxygen'
-    fuelCEA = 'CH4(L)'
-    oxCEA = 'O2(L)'
 
+def main():
+    Pc = 200 * c.PSI2PA
+    Pe = 11 * c.PSI2PA
+    OF = 2.7
+    fuel = "methane"
+    ox = "oxygen"
+    fuelCEA = "CH4(L)"
+    oxCEA = "O2(L)"
 
     ceaDATA = run_CEA(Pc, Pe, OF, fuel, ox, fuelCEA, oxCEA)
     cstar = ceaDATA[0]
@@ -337,8 +340,11 @@ def main():
     TWR = 5.18
     vehicleMass = 74.69
 
-    prop = calculate_propulsion(TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7)
+    prop = calculate_propulsion(
+        TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7
+    )
     print(prop)
+
 
 if __name__ == "__main__":
     main()
