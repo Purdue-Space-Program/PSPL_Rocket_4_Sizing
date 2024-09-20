@@ -32,8 +32,8 @@ import constants as c
 
 def run_CEA(
     chamberPressure,
+    exitPressure,
     mixtureRatio,
-    exitPressureRatio,
     fuel,
     oxidizer,
     fuelCEA,
@@ -46,10 +46,10 @@ def run_CEA(
     ----------
     chamberPressure : float
         Pressure within the engine combustion chamber [Pa].
+    exitPressure : float
+        Pressure at nozzle exit [Pa].
     mixtureRatio : float
         Ratio of oxidizer to fuel by mass [-].
-    exitPressureRatio : float
-        Ratio of chamber pressure to nozzle exit pressure [-].
     fuelName : str
         Name of fuel under CEA conventions [N/A].
     oxName : str
@@ -75,6 +75,8 @@ def run_CEA(
 
     # Unit conversions
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    exitPressure = exitPressure * c.PA2BAR
+    pressureRatio  = chamberPressure / exitPressure
     fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
@@ -97,7 +99,7 @@ def run_CEA(
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
-        pip=exitPressureRatio,
+        pip=pressureRatio,
         materials=[fuel, oxidizer],
         o_f=mixtureRatio,
         filename="engineCEAoutput",
