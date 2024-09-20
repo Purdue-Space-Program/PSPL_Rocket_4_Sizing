@@ -4,7 +4,7 @@ import os
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from scripts import combustion
+from scripts import propulsion
 import constants as c
 
 # Test case inputs (based on CMS vehicle inputs)
@@ -14,18 +14,31 @@ mixRatio = 2.4  # [-]
 exitPressureRatio = 20  # [-]
 fuel = "methane"
 oxidizer = "oxygen"
-fuelCEA = "CH4(L)"
-oxidizerCEA = "O2(L)"
 
 
 # Run test case
 [
+    mixRatio,
     cstar,
     specificImpulse,
-    expansionRatio,
+    exitPressureRatio,
     fuelTemp,
     oxTemp,
     characteristicLength,
-] = combustion.run_CEA(
-    chamberPressure, exitPressureRatio, mixRatio, fuel, oxidizer, fuelCEA, oxidizerCEA
-)
+] = propulsion.run_CEA(chamberPressure, exitPressureRatio, fuel, oxidizer)
+
+# round to 2 decimal places
+
+cstar = round(cstar, 2)
+specificImpulse = round(specificImpulse, 2)
+fuelTemp = round(fuelTemp, 2)
+oxTemp = round(oxTemp, 2)
+characteristicL = round(characteristicLength, 2)
+
+# print results with units
+print(f"mix ratio: {mixRatio} [-]")
+print(f"cstar: {cstar} m/s")
+print(f"specific impulse: {specificImpulse} s")
+print(f"fuel temperature: {fuelTemp} K")
+print(f"oxidizer temperature: {oxTemp} K")
+print(f"characteristic length: {characteristicL} m")

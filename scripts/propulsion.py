@@ -33,7 +33,6 @@ import constants as c
 def run_CEA(
     chamberPressure,
     exitPressure,
-    mixtureRatio,
     fuel,
     oxidizer,
 ):
@@ -75,38 +74,63 @@ def run_CEA(
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
     exitPressure = exitPressure * c.PA2BAR
     pressureRatio = chamberPressure / exitPressure
+
     fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
+
     if fuel == "methane":
         fuelCEA = "CH4(L)"
-        fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
+        # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+        rangeOF = np.linspace(3.2, 4, 10)
+
     elif fuel == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
+        rangeOF = np.linspace(1.2, 1.8, 10)
+
     elif fuel == "jet-a":
-        fuelCEA = "Jet-A"
+        fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
-    elif fuel == "isopropyl alcohol":
-        fuelTemp = c.TAMBIENT
+        rangeOF = np.linspace(2.2, 2.8, 10)
 
-    oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
-    fuelTemp = 110  # [K] temperature of fuel upon injection into combustion
-    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
-
-    # CEA run
+    # CEA Propellant Object Setup
     fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+
+    maxISP = -np.inf
+    optimalMR = None
+
+    # Find optimal mixture ratio
+
+    for mixRatio in rangeOF:
+        rocket = CEA.RocketProblem(
+            pressure=chamberPressure,
+            pip=pressureRatio,
+            materials=[fuel, oxidizer],
+            o_f=mixRatio,
+            filename="engineCEAoutput",
+            pressure_units="bar",
+        )
+
+        data = rocket.run()
+        if data.isp > maxISP:
+            maxISP = data.isp
+            optimalMR = mixRatio
+
+    # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
         materials=[fuel, oxidizer],
-        o_f=mixtureRatio,
+        o_f=optimalMR,
         filename="engineCEAoutput",
         pressure_units="bar",
     )
@@ -118,7 +142,10 @@ def run_CEA(
     specificImpulse = data.isp
     expansionRatio = data.ae
 
+    mixRatio = optimalMR
+
     return [
+        mixRatio,
         cstar,
         specificImpulse,
         expansionRatio,
