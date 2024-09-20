@@ -186,7 +186,7 @@ def calculate_propulsion(
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
     EFFICIENCY_FACTOR = 0.9
-    CHAMBER_WALL_THICKNESS = 0.001  # [m] chamber wall thickness
+    CHAMBER_WALL_THICKNESS = 0.01  # [m] chamber wall thickness
 
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
@@ -267,8 +267,8 @@ def calculate_propulsion(
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
     injectorMass = (
-        injectorMaterialDensity * 0.0508 * (np.pi / 4) * chamberDiameter**2
-    )  # [kg] injector mass, modeled as solid disk w/ 2" height
+        injectorMaterialDensity * (np.pi / 4) * (2*c.IN2M * (chamberDiameter**2 - (chamberDiameter - 1*c.IN2M)**2) + 2 * 0.5*c.IN2M * (chamberDiameter - 1*c.IN2M)**2)
+    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.5" thick walls
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
