@@ -80,9 +80,9 @@ def read_inputs():
                 list(
                     np.round(
                         np.arange(
+                            propCombos.loc[propCombo].iloc[2],
+                            propCombos.loc[propCombo].iloc[3] + STEP_FACTOR,
                             propCombos.loc[propCombo].iloc[4],
-                            propCombos.loc[propCombo].iloc[5] + STEP_FACTOR,
-                            propCombos.loc[propCombo].iloc[6],
                         ),
                         INPUT_PRECISION,
                     )

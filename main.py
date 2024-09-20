@@ -90,11 +90,15 @@ def main():
     for idx, rocket in possibleRocketsDF.iterrows():
 
         # Continous Inputs
-        mixRatio = rocket["O:F (mass)"]  # Mixture ratio of the propellants
         chamberPressure = rocket[
             "Chamber pressure (psi)"
         ]  # Chamber pressure of the engine [psi]
         chamberPressure = chamberPressure * c.PSI2PA
+
+        exitPressure = rocket[
+            "Exit pressure (psi)"
+        ]  # Exit pressure of the engine [psi]
+        exitPressure = exitPressure * c.PSI2PA
 
         thurstToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
@@ -104,12 +108,6 @@ def main():
         ]  # Get the propellant combination
         fuel = propellants["Fuel"]  # Get the fuel properties
         oxidizer = propellants["Oxidizer"]
-        fuelCEA = propellants[
-            "Fuel CEA"
-        ]  # Get the fuel properties with CEA naming conventions
-        oxidizerCEA = propellants[
-            "Oxidizer CEA"
-        ]  # Get the oxidizer properties for CEA naming conventions
 
         # Tanks
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
