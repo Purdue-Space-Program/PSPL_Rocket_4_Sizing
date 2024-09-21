@@ -21,6 +21,9 @@ import os
 import sys
 import time
 import pandas as pd
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 import numpy as np
 import progressbar as pb
@@ -29,7 +32,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
 from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory
-from utils import output_folder, rocket_defining_input_handler
+from utils import output_folder, rocket_defining_input_handler, results_file
 
 vehicleMassEstimate = 110  # [lbs] Estimate of the vehicle mass
 vehicleMassEstimate = (
@@ -38,7 +41,7 @@ vehicleMassEstimate = (
 
 
 def main():
-    output_folder.create_output_folder()  # Create a new output folder
+    folderName = output_folder.create_output_folder()  # Create a new output folder
 
     # Possible Rockets
     # This section uses the input reader to get the data from the input spreadsheet.
@@ -74,11 +77,62 @@ def main():
         ]
     )
 
+    combustionDF = pd.DataFrame(
+        columns=[
+            "C*",
+            "Isp",
+            "Expansion Ratio",
+            "Fuel Temp",
+            "Ox Temp",
+            "Char Length",
+        ]
+    )
+
+    propulsionDF = pd.DataFrame(
+        columns=[
+            "Ideal Thrust",
+            "Oxidizer Mass Flow Rate",
+            "Fuel Mass Flow Rate",
+            "Burn Time",
+            "Chamber Length",
+            "Chamber Mass",
+            "Injector Mass",
+            "Total Propulsion Mass",
+            "Total Mass Flow Rate",
+            "Exit Area",
+        ]
+    )
+
+    structuresDF = pd.DataFrame(
+        columns=[
+            "Lower Airframe Length",
+            "Lower Airframe Mass",
+            "Upper Airframe Length",
+            "Upper Airframe Mass",
+            "Helium Bay Length",
+            "Helium Bay Mass",
+            "Recovery Bay Length",
+            "Recovery Bay Mass",
+            "Nosecone Length",
+            "Nosecone Mass",
+            "Structures Mass",
+        ]
+    )
+
     vehicleDF = pd.DataFrame(
         columns=[
             "Total Dry Mass",
             "Total Wet Mass",
             "Total Length",
+        ]
+    )
+
+    trajectoryDF = pd.DataFrame(
+        columns=[
+            "Altitude",
+            "Max Mach",
+            "Max Accel",
+            "Rail Exit Velo",
         ]
     )
     # Progress Bar
@@ -174,29 +228,29 @@ def main():
             tankThickness,
         )
 
-        # fluidsystemsDF = fluidsystemsDF._append(
-        #     {
-        #         "Fluid Systems Mass": fluidsystemsMass,
-        #         "Tank Pressure": tankPressure,
-        #         "Upper Plumbing Length": upperPlumbingLength,
-        #         "Tank Total Length": tankTotalLength,
-        #         "Lower Plumbing Length": lowerPlumbingLength,
-        #         "Oxidizer Propellant Mass": oxPropMass,
-        #         "Fuel Propellant Mass": fuelPropMass,
-        #         "Oxidizer Tank Volume": oxTankVolume,
-        #         "Fuel Tank Volume": fuelTankVolume,
-        #     },
-        #     ignore_index=True,
-        # )
+        fluidsystemsDF = fluidsystemsDF._append(
+            {
+                "Tank Pressure": tankPressure,
+                "Fluid Systems Mass": fluidsystemsMass,
+                "Upper Plumbing Length": upperPlumbingLength,
+                "Tank Total Length": tankTotalLength,
+                "Lower Plumbing Length": lowerPlumbingLength,
+                "Oxidizer Propellant Mass": oxPropMass,
+                "Fuel Propellant Mass": fuelPropMass,
+                "Oxidizer Tank Volume": oxTankVolume,
+                "Fuel Tank Volume": fuelTankVolume,
+            },
+            ignore_index=True,
+        )
 
         # Combustion
         [
             cstar,
             specificImpulse,
             expansionRatio,
-            characteristicLength,
             fuelTemp,
             oxTemp,
+            characteristicLength,
         ] = propulsion.run_CEA(
             chamberPressure,
             exitPressure,
@@ -205,17 +259,17 @@ def main():
             mixRatio,
         )
 
-        # combustionDF = combustionDF._append(
-        #     {
-        #         "C*": cstar,
-        #         "Isp": specificImpulse,
-        #         "Expansion Ratio": expansionRatio,
-        #         "Fuel Temp": fuelTemp,
-        #         "Ox Temp": oxTemp,
-        #         "Char Length": characteristicLength,
-        #     },
-        #     ignore_index=True,
-        # )
+        combustionDF = combustionDF._append(
+            {
+                "C*": cstar,
+                "Isp": specificImpulse,
+                "Expansion Ratio": expansionRatio,
+                "Fuel Temp": fuelTemp,
+                "Ox Temp": oxTemp,
+                "Char Length": characteristicLength,
+            },
+            ignore_index=True,
+        )
 
         # Propulsion
         [
@@ -229,7 +283,6 @@ def main():
             totalPropulsionMass,
             totalMassFlowRate,
             exitArea,
-            chamberLength,
         ] = propulsion.calculate_propulsion(
             thurstToWeight,
             vehicleMassEstimate,
@@ -245,31 +298,55 @@ def main():
             tankOD,
         )
 
-        # propulsionDF = propulsionDF._append(
-        #     {
-        #         "Ideal Thrust": idealThrust,
-        #         "Ox Mass Flow Rate": oxMassFlowRate,
-        #         "Fuel Mass Flow Rate": fuelMassFlowRate,
-        #         "Burn Time": burnTime,
-        #         "Chamber Length": chamberLength,
-        #         "Chamber Mass": chamberMass,
-        #         "Injector Mass": injectorMass,
-        #         "Total Propulsion Mass": totalPropulsionMass,
-        #     },
-        #     ignore_index=True,
-        # )
+        propulsionDF = propulsionDF._append(
+            {
+                "Ideal Thrust": idealThrust,
+                "Oxidizer Mass Flow Rate": oxMassFlowRate,
+                "Fuel Mass Flow Rate": fuelMassFlowRate,
+                "Burn Time": burnTime,
+                "Chamber Length": chamberLength,
+                "Chamber Mass": chamberMass,
+                "Injector Mass": injectorMass,
+                "Total Propulsion Mass": totalPropulsionMass,
+                "Total Mass Flow Rate": totalMassFlowRate,
+                "Exit Area": exitArea,
+            },
+            ignore_index=True,
+        )
 
         ## Structures
         [
             lowerAirframeLength,
+            lowerAirframeMass,
             upperAirframeLength,
+            upperAirframeMass,
             heliumBayLength,
+            heliumBayMass,
             recoveryBayLength,
+            recoveryBayMass,
             noseconeLength,
+            noseconeMass,
             structuresMass,
             dragCoeff,
         ] = structures.calculate_structures(
             lowerPlumbingLength, upperPlumbingLength, copvLength, tankOD
+        )
+
+        structuresDF = structuresDF._append(
+            {
+                "Lower Airframe Length": lowerAirframeLength,
+                "Lower Airframe Mass": lowerAirframeMass,
+                "Upper Airframe Length": upperAirframeLength,
+                "Upper Airframe Mass": upperAirframeMass,
+                "Helium Bay Length": heliumBayLength,
+                "Helium Bay Mass": heliumBayMass,
+                "Recovery Bay Length": recoveryBayLength,
+                "Recovery Bay Mass": recoveryBayMass,
+                "Nosecone Length": noseconeLength,
+                "Nosecone Mass": noseconeMass,
+                "Structures Mass": structuresMass,
+            },
+            ignore_index=True,
         )
 
         ## Mass
@@ -294,14 +371,14 @@ def main():
             chamberLength,
         )
 
-        # vehicleDF = vehicleDF._append(
-        #     {
-        #         "Total Dry Mass": totalDryMass,
-        #         "Total Wet Mass": totalWetMass,
-        #         "Total Length": totalLength,
-        #     },
-        #     ignore_index=True,
-        # )
+        vehicleDF = vehicleDF._append(
+            {
+                "Total Dry Mass": totalDryMass,
+                "Total Wet Mass": totalWetMass,
+                "Total Length": totalLength,
+            },
+            ignore_index=True,
+        )
 
         # Trajectory
         [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
@@ -316,27 +393,28 @@ def main():
             plots=0,
         )
 
-        # trajectoryDF = trajectoryDF._append(
-        #     {
-        #         "Altitude": altitude,
-        #         "Max Mach": maxMach,
-        #         "Max Accel": maxAccel,
-        #         "Rail Exit Velo": railExitVelo,
-        #     },
-        #     ignore_index=True,
-        # )
+        trajectoryDF = trajectoryDF._append(
+            {
+                "Altitude": altitude,
+                "Max Mach": maxMach,
+                "Max Accel": maxAccel,
+                "Rail Exit Velo": railExitVelo,
+            },
+            ignore_index=True,
+        )
 
-        # wait 0.1 seconds
-        time.sleep(0.1)
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
 
-    # results_file.create_results_file(
-    #     combustionDF,
-    #     trajectoryDF,
-    #     propulsionDF,
-    #     structuresDF,
-    # )  # Output the results
+    results_file.create_results_file(
+        folderName,
+        fluidsystemsDF,
+        combustionDF,
+        propulsionDF,
+        structuresDF,
+        vehicleDF,
+        trajectoryDF,
+    )  # Output the results
 
     bar.finish()  # Finish the progress bar
 

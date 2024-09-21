@@ -301,7 +301,6 @@ def calculate_propulsion(
         totalPropulsionMass,
         totalMassFlowRate,
         exitArea,
-        chamberLength,
     ]
 
 

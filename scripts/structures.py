@@ -61,7 +61,10 @@ def calculate_structures(
     ### Constants and Inputs
 
     CD_NOSECODE = 0.5  # [-] Drag coefficient of the nosecone
+
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
+    STRUT_WIDTH = 1 * c.IN2M  # [m] Width of the struts
+    STRUT_HEIGHT = 1.5 * c.IN2M  # [m] Height of the struts
 
     ### MASS ESTIMATES
     COUPLER_MASS_ESTIMATE = (
@@ -87,7 +90,7 @@ def calculate_structures(
 
     ### Layup Properties
 
-    layerThickness = 0.00025  # [m] Thickness of each layer
+    LAYER_THICKNESS = 0.00025  # [m] Thickness of each layer
 
     ### Nosecone Properties
     noseconeLength = (
@@ -98,7 +101,7 @@ def calculate_structures(
     )  # [m^2] Surface area of the nosecone based on a cone
 
     noseconeMass = (
-        noseconeSA * c.DENSITY_CF * layerThickness * NOSECONE_LAYER_COUNT
+        noseconeSA * c.DENSITY_CF * LAYER_THICKNESS * NOSECONE_LAYER_COUNT
     ) + TIP_MASS_ESTIMATE  # [kg]
 
     ### Helium Tube Calculations
@@ -109,18 +112,24 @@ def calculate_structures(
         * tankOD
         * HELIUM_TUBE_LAYER_COUNT
         * c.DENSITY_CF
-        * layerThickness
+        * LAYER_THICKNESS
     )  # [kg]
     heliumBayLength += 2 * COUPLER_MASS_ESTIMATE  # [kg]
 
     ### Upper Airframe Calculations
     upperAirframeLength = upperPlumbingLength  # [m]
     upperAirframeStrutMass = (
-        NUMBER_OF_STRUTS * upperAirframeLength * 1.5 * 1 * c.DENSITY_AL
-    )  # [kg] [assuming 1.5" x 1" struts]
-
+        NUMBER_OF_STRUTS
+        * (upperAirframeLength * STRUT_WIDTH * STRUT_HEIGHT)
+        * c.DENSITY_AL
+    )  # [kg]
     upperAirframeMass = (
-        np.pi * tankOD * upperPlumbingLength * UPPER_AIRFRAME_LAYER_COUNT * c.DENSITY_CF
+        np.pi
+        * tankOD
+        * upperPlumbingLength
+        * UPPER_AIRFRAME_LAYER_COUNT
+        * c.DENSITY_CF
+        * LAYER_THICKNESS
     )  # [kg]
 
     upperAirframeMass += upperAirframeStrutMass  # [kg]
@@ -130,13 +139,16 @@ def calculate_structures(
     lowerAirframeLength = lowerPlumbingLength  # [m]
     lowerAirframeStrutMass = (
         NUMBER_OF_STRUTS
-        * lowerAirframeLength
-        * 1
-        * 1.5
+        * (lowerAirframeLength * STRUT_WIDTH * STRUT_HEIGHT)
         * c.DENSITY_AL  # [assuming 1.5" x 1" struts]
     )  # [kg]
     lowerAirframeMass = (
-        np.pi * tankOD * lowerAirframeLength * LOWER_AIRFRAME_LAYER_COUNT * c.DENSITY_CF
+        np.pi
+        * tankOD
+        * lowerAirframeLength
+        * LOWER_AIRFRAME_LAYER_COUNT
+        * LAYER_THICKNESS
+        * c.DENSITY_CF
     )  # [kg]
 
     lowerAirframeMass = (
@@ -153,10 +165,15 @@ def calculate_structures(
 
     return [
         lowerAirframeLength,
+        lowerAirframeMass,
         upperAirframeLength,
+        upperAirframeMass,
         heliumBayLength,
+        heliumBayMass,
         RECOVERY_BAY_LENGTH,
+        RECOVERY_MASS_ESTIMATE,
         noseconeLength,
+        noseconeMass,
         totalStructuresMass,
         CD_NOSECODE,
     ]

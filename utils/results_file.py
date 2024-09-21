@@ -3,49 +3,28 @@
 
 
 import pandas as pd
+import os
 
 
 def create_results_file(
-    avionicsDF,
+    folderName,
+    fluidsystemsDF,
     combustionDF,
-    trajectoryDF,
     propulsionDF,
-    pumpsDF,
     structuresDF,
+    vehicleDF,
+    trajectoryDF,
 ):
-    """
-    _summary_
-      This function creates a results file to store the results of the simulation.
 
-    Parameters
-    ----------
-    avionicsDF : pandas.DataFrame
-      The avionics data frame.
-    combustionDF : pandas.DataFrame
-      The combustion data frame.
-    trajectoryDF : pandas.DataFrame
-      The trajectory data frame.
-    propulsionDF : pandas.DataFrame
-      The propulsion data frame.
-    pumpsDF : pandas.DataFrame
-      The pumps data frame.
-    structuresDF : pandas.DataFrame
-      The structures data frame.
+    os.chdir(os.path.join("data/outputs", folderName))
 
-    Returns
-    -------
-    None
-
-
-    """
     with pd.ExcelWriter(
         "results.xlsx",
     ) as writer:
-        avionicsDF.to_excel(writer, sheet_name="avionics")
-        combustionDF.to_excel(writer, sheet_name="combustion")
-        trajectoryDF.to_excel(writer, sheet_name="trajectory")
-        propulsionDF.to_excel(writer, sheet_name="propulsion")
-        pumpsDF.to_excel(writer, sheet_name="pumps")
-        structuresDF.to_excel(writer, sheet_name="structures")
-        vehicleDF.to_excel(writer, sheet_name="vehicle")
-        writer.save()
+        fluidsystemsDF.to_excel(writer, sheet_name="Fluid Systems", index=False)
+        combustionDF.to_excel(writer, sheet_name="Combustion", index=False)
+        propulsionDF.to_excel(writer, sheet_name="Propulsion", index=False)
+        structuresDF.to_excel(writer, sheet_name="Structures", index=False)
+        vehicleDF.to_excel(writer, sheet_name="Vehicle", index=False)
+        trajectoryDF.to_excel(writer, sheet_name="Trajectory", index=False)
+        writer._save()

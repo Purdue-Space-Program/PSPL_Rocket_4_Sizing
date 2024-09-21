@@ -270,6 +270,8 @@ def fluids_sizing(
         * tankThickness
         / (tankOD * 0.5)
     )  # [Pa] critical buckling stress for tank
+
+    # [We do not have the thrust at the time this script is called]
     # sigma_ax = (
     #     thrust * K_AXIAL_FORCE / (m.pi / 4 * (tankOD**2 - tankID**2))
     # )  # [1] estimated stress on tank from axial loads

@@ -34,4 +34,4 @@ def create_output_folder():
 
     os.chdir(os.path.join("../outputs", folderName))
 
-    return currentDatetime
+    return folderName
