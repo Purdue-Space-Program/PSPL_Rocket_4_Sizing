@@ -84,19 +84,19 @@ def run_CEA(
         # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
-        rangeOF = np.linspace(3.2, 4, 10)
+        rangeOF = np.linspace(3.2, 4.2, 10)
 
     elif fuel == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
-        rangeOF = np.linspace(1.2, 1.8, 10)
+        rangeOF = np.linspace(1.2, 2.2, 10)
 
     elif fuel == "jet-a":
         fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
-        rangeOF = np.linspace(2.2, 2.8, 10)
+        rangeOF = np.linspace(3, 4, 10)
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
