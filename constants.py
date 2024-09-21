@@ -15,6 +15,7 @@ BAR2PA = 1 / PA2BAR  # [Pa/bar] Conversion factor from bar to Pa
 
 RANK2KELVIN = 5 / 9  # [K/R] Conversion factor from R to K
 KELVIN2RANK = 1 / RANK2KELVIN  # [R/K] Conversion factor from K to R
+TAMBIENT = 297.15  # [K] Ambient temperature
 
 ## Mass
 
@@ -47,7 +48,7 @@ DENSITY_AL = 2700  # [kg/m^3] Density
 YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength
 ULTIMATE_STRENGTH_AL = 310 * 10**6  # [Pa] Ultimate tensile strength
 YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
-POISSON_RATIO_AL = 0.33 # [1] Poisson's ratio
+POISSON_RATIO_AL = 0.33  # [1] Poisson's ratio
 
 ## Inconel 718
 
@@ -70,6 +71,9 @@ MOLAR_MASS_ETHANOL = 0.04607  # [kg/mol] Ethanol molar mass
 MOLAR_MASS_JET_A = 0.170  # [kg/mol] Jet-A molar mass
 MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 
+# FAR Properties
+FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
+RAIL_HEIGHT = 18.29  # [m] height of the rail
 
 # Other Constants
 

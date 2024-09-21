@@ -62,10 +62,10 @@ def structures(
     propLength,
     oxFlowRate,
     fuelFlowRate,
-    OD
+    OD,
 ):
 
-### Constants and Inputs
+    ### Constants and Inputs
 
     rocketArea = (OD / 2) * np.pi # [in^2] area of the rocket body
 

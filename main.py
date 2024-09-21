@@ -90,11 +90,15 @@ def main():
     for idx, rocket in possibleRocketsDF.iterrows():
 
         # Continous Inputs
-        mixRatio = rocket["O:F (mass)"]  # Mixture ratio of the propellants
         chamberPressure = rocket[
             "Chamber pressure (psi)"
         ]  # Chamber pressure of the engine [psi]
         chamberPressure = chamberPressure * c.PSI2PA
+
+        exitPressure = rocket[
+            "Exit pressure (psi)"
+        ]  # Exit pressure of the engine [psi]
+        exitPressure = exitPressure * c.PSI2PA
 
         thurstToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
@@ -104,12 +108,6 @@ def main():
         ]  # Get the propellant combination
         fuel = propellants["Fuel"]  # Get the fuel properties
         oxidizer = propellants["Oxidizer"]
-        fuelCEA = propellants[
-            "Fuel CEA"
-        ]  # Get the fuel properties with CEA naming conventions
-        oxidizerCEA = propellants[
-            "Oxidizer CEA"
-        ]  # Get the oxidizer properties for CEA naming conventions
 
         # Tanks
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
@@ -143,185 +141,185 @@ def main():
 
         # GET RESULTS
 
-        # Avionics
-        [avionicsMass] = avionics.calculate_avionics()
+        # # Avionics
+        # [avionicsMass] = avionics.calculate_avionics()
 
-        # Fluid Systems
-        [
-            fluidsystemsMass,
-            tankPressure,
-            upperPlumbingLength,
-            tankTotalLength,
-            lowerPlumbingLength,
-            oxPropMass,
-            fuelPropMass,
-            oxTankVolume,
-            fuelTankVolume,
-        ] = fluidsystems.calculate_fluid_systems(
-            oxidizer,
-            fuel,
-            mixRatio,
-            chamberPressure,
-            copvPressure,
-            copvVolume,
-            copvMass,
-            tankOD,
-            tankThickness,
-        )
+        # # Fluid Systems
+        # [
+        #     fluidsystemsMass,
+        #     tankPressure,
+        #     upperPlumbingLength,
+        #     tankTotalLength,
+        #     lowerPlumbingLength,
+        #     oxPropMass,
+        #     fuelPropMass,
+        #     oxTankVolume,
+        #     fuelTankVolume,
+        # ] = fluidsystems.calculate_fluid_systems(
+        #     oxidizer,
+        #     fuel,
+        #     mixRatio,
+        #     chamberPressure,
+        #     copvPressure,
+        #     copvVolume,
+        #     copvMass,
+        #     tankOD,
+        #     tankThickness,
+        # )
 
-        fluidsystemsDF = fluidsystemsDF.append(
-            {
-                "Fluid Systems Mass": fluidsystemsMass,
-                "Tank Pressure": tankPressure,
-                "Upper Plumbing Length": upperPlumbingLength,
-                "Tank Total Length": tankTotalLength,
-                "Lower Plumbing Length": lowerPlumbingLength,
-                "Oxidizer Propellant Mass": oxPropMass,
-                "Fuel Propellant Mass": fuelPropMass,
-                "Oxidizer Tank Volume": oxTankVolume,
-                "Fuel Tank Volume": fuelTankVolume,
-            },
-            ignore_index=True,
-        )
+        # fluidsystemsDF = fluidsystemsDF.append(
+        #     {
+        #         "Fluid Systems Mass": fluidsystemsMass,
+        #         "Tank Pressure": tankPressure,
+        #         "Upper Plumbing Length": upperPlumbingLength,
+        #         "Tank Total Length": tankTotalLength,
+        #         "Lower Plumbing Length": lowerPlumbingLength,
+        #         "Oxidizer Propellant Mass": oxPropMass,
+        #         "Fuel Propellant Mass": fuelPropMass,
+        #         "Oxidizer Tank Volume": oxTankVolume,
+        #         "Fuel Tank Volume": fuelTankVolume,
+        #     },
+        #     ignore_index=True,
+        # )
 
-        # Combustion
-        [
-            cstar,
-            specificImpulse,
-            expansionRatio,
-            fuelTemp,
-            oxTemp,
-            characteristicLength,
-        ] = propulsion.run_CEA(
-            chamberPressure,
-            mixRatio,
-            exitPressureRatio,
-            fuel,
-            oxidizer,
-            fuelCEA,
-            oxidizerCEA,
-        )
+        # # Combustion
+        # [
+        #     cstar,
+        #     specificImpulse,
+        #     expansionRatio,
+        #     fuelTemp,
+        #     oxTemp,
+        #     characteristicLength,
+        # ] = propulsion.run_CEA(
+        #     chamberPressure,
+        #     mixRatio,
+        #     exitPressureRatio,
+        #     fuel,
+        #     oxidizer,
+        #     fuelCEA,
+        #     oxidizerCEA,
+        # )
 
-        combustionDF = combustionDF.append(
-            {
-                "C*": cstar,
-                "Isp": specificImpulse,
-                "Expansion Ratio": expansionRatio,
-                "Fuel Temp": fuelTemp,
-                "Ox Temp": oxTemp,
-                "Char Length": characteristicLength,
-            },
-            ignore_index=True,
-        )
+        # combustionDF = combustionDF.append(
+        #     {
+        #         "C*": cstar,
+        #         "Isp": specificImpulse,
+        #         "Expansion Ratio": expansionRatio,
+        #         "Fuel Temp": fuelTemp,
+        #         "Ox Temp": oxTemp,
+        #         "Char Length": characteristicLength,
+        #     },
+        #     ignore_index=True,
+        # )
 
-        # Propulsion
-        [
-            idealThrust,
-            oxMassFlowRate,
-            fuelMassFlowRate,
-            burnTime,
-            chamberLength,
-            chamberMass,
-            injectorMass,
-            totalPropulsionMass,
-        ] = propulsion.calculate_propulsion(
-            thurstToWeight,
-            vehicleMass,
-            tankOD,
-            chamberPressure,
-            exitPressure,
-            cstar,
-            specificImpulse,
-            expansionRatio,
-            characteristicLength,
-            mixRatio,
-            oxPropMass,
-            fuelPropMass,
-            chamberDiameter,
-        )
+        # # Propulsion
+        # [
+        #     idealThrust,
+        #     oxMassFlowRate,
+        #     fuelMassFlowRate,
+        #     burnTime,
+        #     chamberLength,
+        #     chamberMass,
+        #     injectorMass,
+        #     totalPropulsionMass,
+        # ] = propulsion.calculate_propulsion(
+        #     thurstToWeight,
+        #     vehicleMass,
+        #     tankOD,
+        #     chamberPressure,
+        #     exitPressure,
+        #     cstar,
+        #     specificImpulse,
+        #     expansionRatio,
+        #     characteristicLength,
+        #     mixRatio,
+        #     oxPropMass,
+        #     fuelPropMass,
+        #     chamberDiameter,
+        # )
 
-        propulsionDF = propulsionDF.append(
-            {
-                "Ideal Thrust": idealThrust,
-                "Ox Mass Flow Rate": oxMassFlowRate,
-                "Fuel Mass Flow Rate": fuelMassFlowRate,
-                "Burn Time": burnTime,
-                "Chamber Length": chamberLength,
-                "Chamber Mass": chamberMass,
-                "Injector Mass": injectorMass,
-                "Total Propulsion Mass": totalPropulsionMass,
-            },
-            ignore_index=True,
-        )
+        # propulsionDF = propulsionDF.append(
+        #     {
+        #         "Ideal Thrust": idealThrust,
+        #         "Ox Mass Flow Rate": oxMassFlowRate,
+        #         "Fuel Mass Flow Rate": fuelMassFlowRate,
+        #         "Burn Time": burnTime,
+        #         "Chamber Length": chamberLength,
+        #         "Chamber Mass": chamberMass,
+        #         "Injector Mass": injectorMass,
+        #         "Total Propulsion Mass": totalPropulsionMass,
+        #     },
+        #     ignore_index=True,
+        # )
 
-        ## Structures
-        [] = structures.calculate_structures(
-            thurstToWeight, vehicleMass, tankOD, stabilityCaliber, railAccel
-        )
+        # ## Structures
+        # [] = structures.calculate_structures(
+        #     thurstToWeight, vehicleMass, tankOD, stabilityCaliber, railAccel
+        # )
 
-        ## Mass
-        [totalDryMass, totalWetMass] = vehicle.calculate_mass(
-            avionicsMass,
-            fluidsystemsMass,
-            oxPropMass,
-            fuelPropMass,
-            totalPropulsionMass,
-            structuresMass,
-        )
+        # ## Mass
+        # [totalDryMass, totalWetMass] = vehicle.calculate_mass(
+        #     avionicsMass,
+        #     fluidsystemsMass,
+        #     oxPropMass,
+        #     fuelPropMass,
+        #     totalPropulsionMass,
+        #     structuresMass,
+        # )
 
-        ## Length
-        [totalLength] = vehicle.calculate_length(
-            noseconeLength,
-            copvLength,
-            recoveryBayLength,
-            upperAirframeLength,
-            tankTotalLength,
-            lowerAirframeLength,
-            chamberLength,
-        )
+        # ## Length
+        # [totalLength] = vehicle.calculate_length(
+        #     noseconeLength,
+        #     copvLength,
+        #     recoveryBayLength,
+        #     upperAirframeLength,
+        #     tankTotalLength,
+        #     lowerAirframeLength,
+        #     chamberLength,
+        # )
 
-        vehicleDF = vehicleDF.append(
-            {
-                "Total Dry Mass": totalDryMass,
-                "Total Wet Mass": totalWetMass,
-                "Total Length": totalLength,
-            },
-            ignore_index=True,
-        )
+        # vehicleDF = vehicleDF.append(
+        #     {
+        #         "Total Dry Mass": totalDryMass,
+        #         "Total Wet Mass": totalWetMass,
+        #         "Total Length": totalLength,
+        #     },
+        #     ignore_index=True,
+        # )
 
-        # Trajectory
-        [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
-            totalWetMass,
-            mDotTotal,
-            tankOD,
-            ascentDragCoeff,
-            exitArea,
-            exitPressure,
-            burnTime,
-            plots=0,
-        )
+        # # Trajectory
+        # [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
+        #     totalWetMass,
+        #     mDotTotal,
+        #     tankOD,
+        #     ascentDragCoeff,
+        #     exitArea,
+        #     exitPressure,
+        #     burnTime,
+        #     plots=0,
+        # )
 
-        trajectoryDF = trajectoryDF.append(
-            {
-                "Altitude": altitude,
-                "Max Mach": maxMach,
-                "Max Accel": maxAccel,
-                "Rail Exit Velo": railExitVelo,
-            },
-            ignore_index=True,
-        )
+        # trajectoryDF = trajectoryDF.append(
+        #     {
+        #         "Altitude": altitude,
+        #         "Max Mach": maxMach,
+        #         "Max Accel": maxAccel,
+        #         "Rail Exit Velo": railExitVelo,
+        #     },
+        #     ignore_index=True,
+        # )
 
         # wait 0.1 seconds
         time.sleep(0.1)
         number = idx.split("#")[1]  # Get the number of the rocket
         bar.update(int(number))  # Update the progress bar
 
-    results_file.create_results_file(
-        combustionDF,
-        trajectoryDF,
-        propulsionDF,
-        structuresDF,
-    )  # Output the results
+    # results_file.create_results_file(
+    #     combustionDF,
+    #     trajectoryDF,
+    #     propulsionDF,
+    #     structuresDF,
+    # )  # Output the results
 
     bar.finish()  # Finish the progress bar
 

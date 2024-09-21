@@ -124,6 +124,8 @@ def calculate_trajectory(
             exitVelo = velocityArray[i]
             break
 
+    # find max. q where dynamic pressure is max
+
     if plots == 1:
         plt.figure(1)
         plt.title("Height v. Time")

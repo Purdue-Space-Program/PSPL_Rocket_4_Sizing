@@ -32,12 +32,9 @@ import constants as c
 
 def run_CEA(
     chamberPressure,
-    mixtureRatio,
-    exitPressureRatio,
+    exitPressure,
     fuel,
     oxidizer,
-    fuelCEA,
-    oxidizerCEA,
 ):
     """
     _summary_
@@ -46,10 +43,10 @@ def run_CEA(
     ----------
     chamberPressure : float
         Pressure within the engine combustion chamber [Pa].
+    exitPressure : float
+        Pressure at nozzle exit [Pa].
     mixtureRatio : float
         Ratio of oxidizer to fuel by mass [-].
-    exitPressureRatio : float
-        Ratio of chamber pressure to nozzle exit pressure [-].
     fuelName : str
         Name of fuel under CEA conventions [N/A].
     oxName : str
@@ -75,31 +72,65 @@ def run_CEA(
 
     # Unit conversions
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    exitPressure = exitPressure * c.PA2BAR
+    pressureRatio = chamberPressure / exitPressure
+
     fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
+
     if fuel == "methane":
-        fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel)
+        fuelCEA = "CH4(L)"
+        # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+        rangeOF = np.linspace(3.2, 4.2, 10)
+
     elif fuel == "ethanol":
-        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_ETHANOL / (c.R * c.DENSITY_ETHANOL)
+        fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
+        rangeOF = np.linspace(1.2, 2.2, 10)
+
     elif fuel == "jet-a":
-        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_JET_A / (c.R * c.DENSITY_JET_A)
+        fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
-    elif fuel == "isopropyl alcohol":
-        fuelTemp = c.FILL_PRESSURE * c.MOLAR_MASS_IPA / (c.R * c.DENSITY_IPA)
+        fuelTemp = c.TAMBIENT
+        rangeOF = np.linspace(3, 4, 10)
 
-    oxTemp = PropsSI("T", "P", fillPressure, "Q", 0, oxidizer)
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+    oxidizerCEA = "O2(L)"
 
-    # CEA run
+    # CEA Propellant Object Setup
     fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+
+    maxISP = -np.inf
+    optimalMR = None
+
+    # Find optimal mixture ratio
+
+    for mixRatio in rangeOF:
+        rocket = CEA.RocketProblem(
+            pressure=chamberPressure,
+            pip=pressureRatio,
+            materials=[fuel, oxidizer],
+            o_f=mixRatio,
+            filename="engineCEAoutput",
+            pressure_units="bar",
+        )
+
+        data = rocket.run()
+        if data.isp > maxISP:
+            maxISP = data.isp
+            optimalMR = mixRatio
+
+    # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
-        pip=exitPressureRatio,
+        pip=pressureRatio,
         materials=[fuel, oxidizer],
-        o_f=mixtureRatio,
+        o_f=optimalMR,
         filename="engineCEAoutput",
         pressure_units="bar",
     )
@@ -111,7 +142,10 @@ def run_CEA(
     specificImpulse = data.isp
     expansionRatio = data.ae
 
+    mixRatio = optimalMR
+
     return [
+        mixRatio,
         cstar,
         specificImpulse,
         expansionRatio,
@@ -186,7 +220,7 @@ def calculate_propulsion(
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
     EFFICIENCY_FACTOR = 0.9
-    CHAMBER_WALL_THICKNESS = 0.001  # [m] chamber wall thickness
+    CHAMBER_WALL_THICKNESS = 0.01  # [m] chamber wall thickness
 
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
@@ -267,8 +301,13 @@ def calculate_propulsion(
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
     injectorMass = (
-        injectorMaterialDensity * 0.0508 * (np.pi / 4) * chamberDiameter**2
-    )  # [kg] injector mass, modeled as solid disk w/ 2" height
+        injectorMaterialDensity
+        * (np.pi / 4)
+        * (
+            2 * c.IN2M * (chamberDiameter**2 - (chamberDiameter - 1 * c.IN2M) ** 2)
+            + 2 * 0.5 * c.IN2M * (chamberDiameter - 1 * c.IN2M) ** 2
+        )
+    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.5" thick walls
 
     burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
@@ -308,3 +347,31 @@ def pumps():
     # Use CoolProp to find density
     D = PropsSI("D", "P", P, "T", T, fluid)  # Density [kg/m3]
     print(D)
+
+
+def main():
+    Pc = 200 * c.PSI2PA
+    Pe = 11 * c.PSI2PA
+    OF = 2.7
+    fuel = "methane"
+    ox = "oxygen"
+    fuelCEA = "CH4(L)"
+    oxCEA = "O2(L)"
+
+    ceaDATA = run_CEA(Pc, Pe, OF, fuel, ox, fuelCEA, oxCEA)
+    cstar = ceaDATA[0]
+    Isp = ceaDATA[1]
+    expRatio = ceaDATA[2]
+    Lstar = ceaDATA[-1]
+
+    TWR = 5.18
+    vehicleMass = 74.69
+
+    prop = calculate_propulsion(
+        TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7
+    )
+    print(prop)
+
+
+if __name__ == "__main__":
+    main()
