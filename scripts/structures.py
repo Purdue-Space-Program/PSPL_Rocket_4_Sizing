@@ -42,6 +42,14 @@
 
 import numpy as np
 
+import os
+import sys
+
+
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import constants as c
+
 
 def structures(
     thrust,
@@ -59,12 +67,17 @@ def structures(
 
 ### Constants and Inputs
 
-    rocketArea = (OD / 2) * math.pi # [in^2] area of the rocket body
+    rocketArea = (OD / 2) * np.pi # [in^2] area of the rocket body
 
-    AoA_rail = 10 * math.pi / 180 # [rad] Worst angle of attack off the rail
+    rocketArea = rocketArea * c.
+
 
 
 ### Off-the Rail case
+
+    AoARail = 10 * np.pi / 180 # [rad] Worst angle of attack off the rail
+    railThrust = thrust #[N]
+    
 
 ### Max Q Case
 

@@ -26,6 +26,11 @@ KG2LB = 1 / LB2KG  # [lbm/kg] Conversion factor from kg to lbm
 IN2M = 0.0254  # [m/in] Conversion factor from in to m
 M2IN = 1 / IN2M  # [in/m] Conversion factor from m to in
 
+## Area
+
+IN22M2 = 0.0064516 # [m^2/in^2] Conversion factor from in^2 to m^2
+M22IN2 = 1550.0031 # [in^2/m^2] Conversion factor from m^2 to in^2
+
 ## Volume
 
 L2M3 = 0.001  # [m^3/l] Conversion factor from L to m^3
