@@ -9,11 +9,10 @@ import constants as c
 
 # Test case inputs (based on CMS vehicle inputs)
 
-chamberPressure = 300  # [psi]
-chamberPressure = chamberPressure * c.PSI2PA  # [Pa]
-mixRatio = 2.4  # [-]
-exitPressureRatio = 20  # [-]
-fuels = ["methane", "ethanol", "jet-a"]
+chamberPressure = 689476  # [Pa]
+mixRatio = 2.0  # [-]
+exitPressure = 55158  # [Pa]
+fuels = ["methane"]
 oxidizer = "oxygen"
 
 
@@ -23,10 +22,10 @@ for fuel in fuels:
         cstar,
         specificImpulse,
         expansionRatio,
+        characteristicLength,
         fuelTemp,
         oxTemp,
-        characteristicLength,
-    ] = propulsion.run_CEA(chamberPressure, exitPressureRatio, fuel, oxidizer, mixRatio)
+    ] = propulsion.run_CEA(chamberPressure, exitPressure, fuel, oxidizer, mixRatio)
 
     # round to 2 decimal places
 

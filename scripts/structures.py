@@ -52,7 +52,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
 
 
-def structures(
+def calculate_structures(
     lowerPlumbingLength,
     upperPlumbingLength,
     COPVLength,
@@ -64,13 +64,15 @@ def structures(
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
 
     ### MASS ESTIMATES
-    COUPLER_MASS_ESTIMATE = 2 * c.LB2KG  # [kg] Estimated mass of the aluminum tube couplers
+    COUPLER_MASS_ESTIMATE = (
+        2 * c.LB2KG
+    )  # [kg] Estimated mass of the aluminum tube couplers
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
     FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
 
     RECOVERY_MASS_ESTIMATE = 25  # [lbm] Estimated mass of the recovery bay
     RECOVERY_MASS_ESTIMATE = (
-        RECOVERY_MASS_ESTIMATE * c.LBS2KG
+        RECOVERY_MASS_ESTIMATE * c.LB2KG
     )  # [kg] Estimated mass of the recovery bay
 
     ### Length Estimates
@@ -100,16 +102,16 @@ def structures(
     ) + TIP_MASS_ESTIMATE  # [kg]
 
     ### Helium Tube Calculations
-    heliumTubeLength = COPVLength  # [m] Length of the helium tube
-    heliumTubeMass = (
+    heliumBayLength = COPVLength  # [m] Length of the helium tube
+    heliumBayMass = (
         np.pi
-        * heliumTubeLength
+        * heliumBayLength
         * tankOD
         * HELIUM_TUBE_LAYER_COUNT
         * c.DENSITY_CF
         * layerThickness
     )  # [kg]
-    heliumTubeMass += 2 * COUPLER_MASS_ESTIMATE  # [kg]
+    heliumBayLength += 2 * COUPLER_MASS_ESTIMATE  # [kg]
 
     ### Upper Airframe Calculations
     upperAirframeLength = upperPlumbingLength  # [m]
@@ -142,7 +144,7 @@ def structures(
     )  # [kg]
 
     totalStructuresMass = (
-        heliumTubeMass
+        heliumBayMass
         + upperAirframeMass
         + lowerAirframeMass
         + noseconeMass
@@ -152,6 +154,7 @@ def structures(
     return [
         lowerAirframeLength,
         upperAirframeLength,
+        heliumBayLength,
         RECOVERY_BAY_LENGTH,
         noseconeLength,
         totalStructuresMass,

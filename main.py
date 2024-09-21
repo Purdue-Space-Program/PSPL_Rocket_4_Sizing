@@ -51,6 +51,7 @@ def main():
     possibleRocketsDF.to_excel(
         "possible_rocket_combinations.xlsx"
     )  # Save the possible rockets to an Excel sheet
+    os.chdir("../../../")  # Change directory to the main folder
 
     # Rocket results
     # This section creates a dataframe to store the results of the rocket analysis
@@ -173,29 +174,29 @@ def main():
             tankThickness,
         )
 
-        fluidsystemsDF = fluidsystemsDF._append(
-            {
-                "Fluid Systems Mass": fluidsystemsMass,
-                "Tank Pressure": tankPressure,
-                "Upper Plumbing Length": upperPlumbingLength,
-                "Tank Total Length": tankTotalLength,
-                "Lower Plumbing Length": lowerPlumbingLength,
-                "Oxidizer Propellant Mass": oxPropMass,
-                "Fuel Propellant Mass": fuelPropMass,
-                "Oxidizer Tank Volume": oxTankVolume,
-                "Fuel Tank Volume": fuelTankVolume,
-            },
-            ignore_index=True,
-        )
+        # fluidsystemsDF = fluidsystemsDF._append(
+        #     {
+        #         "Fluid Systems Mass": fluidsystemsMass,
+        #         "Tank Pressure": tankPressure,
+        #         "Upper Plumbing Length": upperPlumbingLength,
+        #         "Tank Total Length": tankTotalLength,
+        #         "Lower Plumbing Length": lowerPlumbingLength,
+        #         "Oxidizer Propellant Mass": oxPropMass,
+        #         "Fuel Propellant Mass": fuelPropMass,
+        #         "Oxidizer Tank Volume": oxTankVolume,
+        #         "Fuel Tank Volume": fuelTankVolume,
+        #     },
+        #     ignore_index=True,
+        # )
 
         # Combustion
         [
             cstar,
             specificImpulse,
             expansionRatio,
+            characteristicLength,
             fuelTemp,
             oxTemp,
-            characteristicLength,
         ] = propulsion.run_CEA(
             chamberPressure,
             exitPressure,
@@ -204,17 +205,17 @@ def main():
             mixRatio,
         )
 
-        combustionDF = combustionDF._append(
-            {
-                "C*": cstar,
-                "Isp": specificImpulse,
-                "Expansion Ratio": expansionRatio,
-                "Fuel Temp": fuelTemp,
-                "Ox Temp": oxTemp,
-                "Char Length": characteristicLength,
-            },
-            ignore_index=True,
-        )
+        # combustionDF = combustionDF._append(
+        #     {
+        #         "C*": cstar,
+        #         "Isp": specificImpulse,
+        #         "Expansion Ratio": expansionRatio,
+        #         "Fuel Temp": fuelTemp,
+        #         "Ox Temp": oxTemp,
+        #         "Char Length": characteristicLength,
+        #     },
+        #     ignore_index=True,
+        # )
 
         # Propulsion
         [
@@ -228,6 +229,7 @@ def main():
             totalPropulsionMass,
             totalMassFlowRate,
             exitArea,
+            chamberLength,
         ] = propulsion.calculate_propulsion(
             thurstToWeight,
             vehicleMassEstimate,
@@ -243,24 +245,25 @@ def main():
             tankOD,
         )
 
-        propulsionDF = propulsionDF._append(
-            {
-                "Ideal Thrust": idealThrust,
-                "Ox Mass Flow Rate": oxMassFlowRate,
-                "Fuel Mass Flow Rate": fuelMassFlowRate,
-                "Burn Time": burnTime,
-                "Chamber Length": chamberLength,
-                "Chamber Mass": chamberMass,
-                "Injector Mass": injectorMass,
-                "Total Propulsion Mass": totalPropulsionMass,
-            },
-            ignore_index=True,
-        )
+        # propulsionDF = propulsionDF._append(
+        #     {
+        #         "Ideal Thrust": idealThrust,
+        #         "Ox Mass Flow Rate": oxMassFlowRate,
+        #         "Fuel Mass Flow Rate": fuelMassFlowRate,
+        #         "Burn Time": burnTime,
+        #         "Chamber Length": chamberLength,
+        #         "Chamber Mass": chamberMass,
+        #         "Injector Mass": injectorMass,
+        #         "Total Propulsion Mass": totalPropulsionMass,
+        #     },
+        #     ignore_index=True,
+        # )
 
         ## Structures
         [
             lowerAirframeLength,
             upperAirframeLength,
+            heliumBayLength,
             recoveryBayLength,
             noseconeLength,
             structuresMass,
@@ -283,6 +286,7 @@ def main():
         [totalLength] = vehicle.calculate_length(
             noseconeLength,
             copvLength,
+            heliumBayLength,
             recoveryBayLength,
             upperAirframeLength,
             tankTotalLength,
@@ -290,19 +294,20 @@ def main():
             chamberLength,
         )
 
-        vehicleDF = vehicleDF._append(
-            {
-                "Total Dry Mass": totalDryMass,
-                "Total Wet Mass": totalWetMass,
-                "Total Length": totalLength,
-            },
-            ignore_index=True,
-        )
+        # vehicleDF = vehicleDF._append(
+        #     {
+        #         "Total Dry Mass": totalDryMass,
+        #         "Total Wet Mass": totalWetMass,
+        #         "Total Length": totalLength,
+        #     },
+        #     ignore_index=True,
+        # )
 
         # Trajectory
         [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
             totalWetMass,
             totalMassFlowRate,
+            idealThrust,
             tankOD,
             dragCoeff,
             exitArea,
@@ -311,15 +316,15 @@ def main():
             plots=0,
         )
 
-        trajectoryDF = trajectoryDF._append(
-            {
-                "Altitude": altitude,
-                "Max Mach": maxMach,
-                "Max Accel": maxAccel,
-                "Rail Exit Velo": railExitVelo,
-            },
-            ignore_index=True,
-        )
+        # trajectoryDF = trajectoryDF._append(
+        #     {
+        #         "Altitude": altitude,
+        #         "Max Mach": maxMach,
+        #         "Max Accel": maxAccel,
+        #         "Rail Exit Velo": railExitVelo,
+        #     },
+        #     ignore_index=True,
+        # )
 
         # wait 0.1 seconds
         time.sleep(0.1)

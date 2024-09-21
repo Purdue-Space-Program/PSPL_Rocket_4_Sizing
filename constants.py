@@ -29,8 +29,8 @@ M2IN = 1 / IN2M  # [in/m] Conversion factor from m to in
 
 ## Area
 
-IN22M2 = 0.0064516 # [m^2/in^2] Conversion factor from in^2 to m^2
-M22IN2 = 1550.0031 # [in^2/m^2] Conversion factor from m^2 to in^2
+IN22M2 = 0.0064516  # [m^2/in^2] Conversion factor from in^2 to m^2
+M22IN2 = 1550.0031  # [in^2/m^2] Conversion factor from m^2 to in^2
 
 ## Volume
 
@@ -53,6 +53,9 @@ POISSON_RATIO_AL = 0.33  # [1] Poisson's ratio
 ## Inconel 718
 
 DENSITY_INCO = 8190  # [kg/m^3] Density
+
+## Carbon Fiber
+DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
 # Fluids Constants
 

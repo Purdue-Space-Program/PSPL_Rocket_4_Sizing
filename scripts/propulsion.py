@@ -76,8 +76,6 @@ def run_CEA(
     exitPressure = exitPressure * c.PA2BAR
     pressureRatio = chamberPressure / exitPressure
 
-    fillPressure = c.FILL_PRESSURE * c.PSI2PA  # [psi] to [Pa]
-
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
 
     if fuel == "methane":
@@ -303,6 +301,7 @@ def calculate_propulsion(
         totalPropulsionMass,
         totalMassFlowRate,
         exitArea,
+        chamberLength,
     ]
 
 
