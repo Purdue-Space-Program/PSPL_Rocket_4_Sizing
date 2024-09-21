@@ -51,61 +51,125 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
 
+
 def structures(
     thrust,
     lowerPlumbingLength,
     upperPlumbingLength,
-    fluidSystemMass,
     COPVMass,
     COPVLength,
-    propMass,
-    propLength,
     oxFlowRate,
     fuelFlowRate,
-    OD,
+    tankOD,
     burnTime,
-    tankLength
+    tankLength,
 ):
-    
     ### Constants and Inputs
 
-    rocketArea = (OD / 2) * np.pi # [in^2] area of the rocket body
-    rocketArea = rocketArea * c.IN22M2 # [m^2]
-    alumDens = 2710 #[kg/m^3]
-    alumYoungMod = 69 * 10^9 #[Pa]
+    CD_NOSECODE = 0.5  # [-] Drag coefficient of the nosecone
+    NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
 
-    recoveryMass = 10 #####################
-    structuresMassGuess = recoveryMass + 40 #[kg]
-    totMass = fluidSystemMass + propMass + (oxFlowRate + fuelFlowRate) * burnTime + COPVMass * c.LB2KG + structuresMassGuess #[kg]
+    ### MASS ESTIMATES
+    COUPLER_MASS_ESTIMATE = 2.26  # [kg] Estimated mass of the aluminum tube couplers
+    TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
+    FIN_MASS_ESTIMATE = 2.72  # [kg] Estimated mass of the fins
 
-    CMSRecoveryLength = 12 * c.IN2M ############
-    CMSOD = 6.625 * c.IN2M #[m]
-    recoveryLength = (8 * CMSOD^2 * CMSRecoveryLength) / (OD^2) # [m]
-    noseConeLength = 30 * c.IN2M ################
-    totLength = propLength + lowerPlumbingLength + tankLength + upperPlumbingLength + COPVLength * c.IN2M + recoveryLength + noseConeLength #[m]
+    RECOVERY_MASS_ESTIMATE = 15  # [lbm] Estimated mass of the recovery bay
+    RECOVERY_MASS_ESTIMATE = (
+        RECOVERY_MASS_ESTIMATE * c.LBS2KG
+    )  # [kg] Estimated mass of the recovery bay
 
-    CdNoseCone = 0.45
+    ### Length Estimates
+    RECOVERY_BAY_LENGTH = 0.5  # [m] Length of the recovery bay
 
+    ### Layer Counts
 
+    HELIUM_TUBE_LAYER_COUNT = 3  # [-] Number of layers in the helium tube
+    LOWER_AIRFRAME_LAYER_COUNT = 3  # [-] Number of layers in the lower airframe
+    UPPER_AIRFRAME_LAYER_COUNT = 3  # [-] Number of layers in the upper airframe
+    NOSECONE_LAYER_COUNT = 3  # [-] Number of layers in the nosecone
 
-    loop = True
-    while loop:
-        ### Off-the Rail Constants
+    rocketArea = (tankOD / 2) * np.pi  # [in^2] area of the rocket body
+    rocketArea = rocketArea * c.IN2M2  # [m^2] area of the rocket body
+    AoA_rail = 10 * np.pi / 180  # [rad] Worst angle of attack off the rail
 
-        AoARail = 10 * np.pi / 180 # [rad] Worst angle of attack off the rail
-        railThrust = thrust #[N]
-        airDensityRail = 1.112 #[kg/m^3]
+    ### Layup Properties
 
-        inLineAccel = (-totMass + (totMass^2 + 2 * CdNoseCone * airDensityRail * rocketArea * railThrust)^0.5) / (CdNoseCone*airDensityRail*rocketArea) #[m/s^2]
+    layerThickness = 0.25 / 3  # [in] Thickness of each layer
+    layerThickness = layerThickness * c.IN2M  # [m] Thickness of each layer
 
-        
-        
+    ### Nosecone Properties
+    noseconeLength = (
+        tankOD * 5
+    )  # [m] Length of the nosecone based on a 5:1 fineness ratio
+    noseconeSA = (
+        np.pi * (tankOD / 2) * np.pi * np.sqrt((tankOD / 2) ** 2 + noseconeLength**2)
+    )  # [m^2] Surface area of the nosecone based on a cone
 
-        ### Max Q Constants
+    noseconeMass = (
+        noseconeSA * c.DENSITY_CF * layerThickness * NOSECONE_LAYER_COUNT
+    ) + TIP_MASS_ESTIMATE  # [kg]
 
-    
+    ### Helium Tube Calculations
+    heliumTubeLength = COPVLength  # [m] Length of the helium tube
 
-        ### Axial Loads
+    heliumTubeMass = (
+        2 * np.pi * COPVLength * tankOD * HELIUM_TUBE_LAYER_COUNT * c.DENSITY_CF
+    )  # [kg]
+    heliumTubeMass += 2 * COUPLER_MASS_ESTIMATE  # [kg]
 
-        
+    ### Upper Airframe Calculations
+    upperAirframeLength = upperPlumbingLength  # [m]
+    upperAirframeStrutMass = (
+        NUMBER_OF_STRUTS * upperAirframeLength * c.DENSITY_AL
+    )  # [kg]
+    upperAirframeMass = (
+        2
+        * np.pi
+        * tankOD
+        * upperPlumbingLength
+        * UPPER_AIRFRAME_LAYER_COUNT
+        * c.DENSITY_CF
+    )  # [kg]
 
+    upperAirframeMass += upperAirframeStrutMass  # [kg]
+
+    ### Lower Airframe Calculations
+
+    lowerAirframeLength = lowerPlumbingLength  # [m]
+    lowerAirframeStrutMass = (
+        NUMBER_OF_STRUTS * lowerAirframeLength * c.DENSITY_AL
+    )  # [kg]
+    lowerAirframeMass = (
+        2
+        * np.pi
+        * tankOD
+        * lowerAirframeLength
+        * LOWER_AIRFRAME_LAYER_COUNT
+        * c.DENSITY_CF
+    )  # [kg]
+
+    lowerAirframeMass = (
+        lowerAirframeMass + lowerAirframeStrutMass + FIN_MASS_ESTIMATE
+    )  # [kg]
+
+    totalStructuresMass = (
+        heliumTubeMass
+        + upperAirframeMass
+        + lowerAirframeMass
+        + noseconeMass
+        + RECOVERY_MASS_ESTIMATE
+    )  # [kg]
+
+    return [
+        lowerAirframeLength,
+        lowerAirframeMass,
+        upperAirframeLength,
+        upperAirframeMass,
+        heliumTubeMass,
+        RECOVERY_BAY_LENGTH,
+        RECOVERY_MASS_ESTIMATE,
+        noseconeLength,
+        noseconeMass,
+        totalStructuresMass,
+    ]

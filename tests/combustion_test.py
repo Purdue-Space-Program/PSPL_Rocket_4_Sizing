@@ -9,7 +9,8 @@ import constants as c
 
 # Test case inputs (based on CMS vehicle inputs)
 
-chamberPressure = 2e6  # [Pa]
+chamberPressure = 300  # [psi]
+chamberPressure = chamberPressure * c.PSI2PA  # [Pa]
 mixRatio = 2.4  # [-]
 exitPressureRatio = 20  # [-]
 fuels = ["methane", "ethanol", "jet-a"]
