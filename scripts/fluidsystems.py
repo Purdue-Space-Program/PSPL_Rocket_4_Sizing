@@ -45,7 +45,6 @@ def fluids_sizing(
     copvMass,
     tankOD,
     tankThickness,
-    thrust,
 ):
     """
     _summary_
@@ -113,7 +112,7 @@ def fluids_sizing(
         2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
     )
     K_PRESSURIZATION = 0.65  # [1] Ratio of ideal tank volume to actual tank volume [TEMPORARY, NEED TO FIND ACTUAL VALUE]
-    K_AXIAL_FORCE = 3.0 # [1] Approximate ratio of total axial force on tanks to vehicle thrust [ESTIMATE, NOT DRIVING]
+    K_AXIAL_FORCE = 3.0  # [1] Approximate ratio of total axial force on tanks to vehicle thrust [ESTIMATE, NOT DRIVING]
 
     # Tank structure
     NUM_BULKHEADS = 4  # [1] Number of bulkheads the tanks use
@@ -264,13 +263,18 @@ def fluids_sizing(
         - 1
     )  # [1] Margin to ultimate under hoop stress
 
-    sigma_cr = 0.4 * c.YOUNGS_MODULUS / (m.sqrt(3) * m.sqrt(1 - 
-        c.POISSON_RATIO_AL**2)) * tankThickness / (tankOD * 0.5) # [Pa] critical buckling stress for tank
-    sigma_ax = thrust * K_AXIAL_FORCE / (m.pi / 4 * (tankOD**2 - tankID**2)) # [1] estimated stress on tank from axial loads
+    sigma_cr = (
+        0.4
+        * c.YOUNGS_MODULUS
+        / (m.sqrt(3) * m.sqrt(1 - c.POISSON_RATIO_AL**2))
+        * tankThickness
+        / (tankOD * 0.5)
+    )  # [Pa] critical buckling stress for tank
+    # sigma_ax = (
+    #     thrust * K_AXIAL_FORCE / (m.pi / 4 * (tankOD**2 - tankID**2))
+    # )  # [1] estimated stress on tank from axial loads
 
-    bucklingLoad = (
-        sigma_cr / (sigma_ax * ultimateMargin) - 1
-    )  # [1] Margin to buckling
+    # bucklingLoad = sigma_cr / (sigma_ax * ultimateMargin) - 1  # [1] Margin to buckling
 
     # Return outputs
     return (

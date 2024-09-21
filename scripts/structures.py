@@ -152,14 +152,9 @@ def structures(
 
     return [
         lowerAirframeLength,
-        lowerAirframeMass,
         upperAirframeLength,
-        upperAirframeMass,
-        heliumTubeMass,
         RECOVERY_BAY_LENGTH,
-        RECOVERY_MASS_ESTIMATE,
         noseconeLength,
-        noseconeMass,
         totalStructuresMass,
         CD_NOSECODE,
     ]

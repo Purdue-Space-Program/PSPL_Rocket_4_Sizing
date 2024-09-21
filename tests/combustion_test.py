@@ -20,14 +20,13 @@ oxidizer = "oxygen"
 for fuel in fuels:
     # Run test case
     [
-        mixRatio,
         cstar,
         specificImpulse,
-        exitPressureRatio,
+        expansionRatio,
         fuelTemp,
         oxTemp,
         characteristicLength,
-    ] = propulsion.run_CEA(chamberPressure, exitPressureRatio, fuel, oxidizer)
+    ] = propulsion.run_CEA(chamberPressure, exitPressureRatio, fuel, oxidizer, mixRatio)
 
     # round to 2 decimal places
 

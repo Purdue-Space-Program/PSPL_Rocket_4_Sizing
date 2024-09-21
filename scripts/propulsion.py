@@ -35,6 +35,7 @@ def run_CEA(
     exitPressure,
     fuel,
     oxidizer,
+    mixRatio,
 ):
     """
     _summary_
@@ -84,19 +85,16 @@ def run_CEA(
         # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
-        rangeOF = np.linspace(2, 3.5, 15)
 
     elif fuel == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
-        rangeOF = np.linspace(1, 2, 10)
 
     elif fuel == "jet-a":
         fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
-        rangeOF = np.linspace(2, 3.5, 10)
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
@@ -105,32 +103,12 @@ def run_CEA(
     fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
 
-    maxISP = -np.inf
-    optimalMR = None
-
-    # Find optimal mixture ratio
-
-    for mixRatio in rangeOF:
-        rocket = CEA.RocketProblem(
-            pressure=chamberPressure,
-            pip=pressureRatio,
-            materials=[fuel, oxidizer],
-            o_f=mixRatio,
-            filename="engineCEAoutput",
-            pressure_units="bar",
-        )
-
-        data = rocket.run()
-        if data.isp > maxISP:
-            maxISP = data.isp
-            optimalMR = mixRatio
-
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
         materials=[fuel, oxidizer],
-        o_f=optimalMR,
+        o_f=mixRatio,
         filename="engineCEAoutput",
         pressure_units="bar",
     )
@@ -142,10 +120,7 @@ def run_CEA(
     specificImpulse = data.isp
     expansionRatio = data.ae
 
-    mixRatio = optimalMR
-
     return [
-        mixRatio,
         cstar,
         specificImpulse,
         expansionRatio,
@@ -167,7 +142,7 @@ def calculate_propulsion(
     mixtureRatio,
     oxMass,
     fuelMass,
-    chamberDiameter,
+    tankOD,
 ):
     """
     _summary_
@@ -258,6 +233,8 @@ def calculate_propulsion(
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
 
+    chamberDiameter = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
+
     chamberArea = np.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
@@ -324,6 +301,8 @@ def calculate_propulsion(
         chamberMass,
         injectorMass,
         totalPropulsionMass,
+        totalMassFlowRate,
+        exitArea,
     ]
 
 
