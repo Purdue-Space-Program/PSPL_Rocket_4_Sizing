@@ -114,7 +114,7 @@ def calculate_structures(
         * c.DENSITY_CF
         * LAYER_THICKNESS
     )  # [kg]
-    heliumBayLength += 2 * COUPLER_MASS_ESTIMATE  # [kg]
+    heliumBayMass += 2 * COUPLER_MASS_ESTIMATE  # [kg]
 
     ### Upper Airframe Calculations
     upperAirframeLength = upperPlumbingLength  # [m]

@@ -75,7 +75,7 @@ def calculate_trajectory(
     altitude = FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
-    dt = 0.1  # [s] time step of the rocket. 0.025 is good for both accuracy and speed NICK CHANGED 9/21 TO 0.1
+    dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed NICK CHANGED 9/21 TO 0.1
 
     # Array Initialization:
     altitudeArray = []
@@ -124,8 +124,6 @@ def calculate_trajectory(
             exitVelo = velocityArray[i]
             break
 
-    # find max. q where dynamic pressure is max
-
     if plots == 1:
         plt.figure(1)
         plt.title("Height v. Time")
@@ -143,4 +141,9 @@ def calculate_trajectory(
         plt.grid()
         plt.show()
 
-    return altitude, max(machArray), max(accelArray), exitVelo
+    return [
+        float(altitude),
+        float(max(machArray)),
+        float(max(accelArray)),
+        float(exitVelo),
+    ]

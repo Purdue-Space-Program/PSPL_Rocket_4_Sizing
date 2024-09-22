@@ -279,7 +279,7 @@ def fluids_sizing(
     # bucklingLoad = sigma_cr / (sigma_ax * ultimateMargin) - 1  # [1] Margin to buckling
 
     # Return outputs
-    return (
+    return [
         fluidSystemsMass,
         tankPressure,
         upperPlumbingLength,
@@ -289,7 +289,7 @@ def fluids_sizing(
         fuelPropMass,
         oxTankVolume,
         fuelTankVolume,
-    )
+    ]
 
 
 # Fluids pump resizing script

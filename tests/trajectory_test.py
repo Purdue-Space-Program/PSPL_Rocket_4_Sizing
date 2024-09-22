@@ -19,7 +19,7 @@ plots = 0  # [-]
 
 
 # Run Test Case
-altitude, maxMach, maxAccel, exitVelo = trajectory.calculate_trajectory(
+[altitude, maxMach, maxAccel, exitVelo] = trajectory.calculate_trajectory(
     wetMass,
     mDotTotal,
     jetThrust,
@@ -30,7 +30,7 @@ altitude, maxMach, maxAccel, exitVelo = trajectory.calculate_trajectory(
     burnTime,
     plots,
 )
-print("Max Altitude is: ", altitude)
-print("Maximum Mach Number is:", maxMach)
-print("Maximum Acceleration is", maxAccel)
-print("Exit Velocity is", exitVelo)
+print(f"Max Altitude is: ", altitude)
+print(f"Maximum Mach Number is:", maxMach)
+print(f"Maximum Acceleration is", maxAccel)
+print(f"Exit Velocity is", exitVelo)
