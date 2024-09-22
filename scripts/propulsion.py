@@ -292,6 +292,7 @@ def calculate_propulsion(
 
     return [
         idealThrust,
+        seaLevelThrust,
         oxMassFlowRate,
         fuelMassFlowRate,
         burnTime,

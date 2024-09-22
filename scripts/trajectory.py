@@ -71,7 +71,7 @@ def calculate_trajectory(
     altitude = c.FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
-    dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed
+    dt = 0.1  # [s] time step of the rocket. 0.025 is good for both accuracy and speed CHANGED TO 0.1 BY NICK 9/22 FOR TESTING
 
     # Array Initialization:
     altitudeArray = []

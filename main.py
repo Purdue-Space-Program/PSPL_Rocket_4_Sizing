@@ -51,7 +51,7 @@ def main():
 
     possibleRocketsDF.to_excel(
         "possible_rocket_combinations.xlsx"
-    )  # Save the possible rockets to an Excel sheet
+    )  # Save the possible rockets to an Excel sheet [WHAT IS THE POINT OF THIS SHEET?]
     os.chdir("../../../")  # Change directory to the main folder
 
     # Rocket results
@@ -86,6 +86,7 @@ def main():
     propulsionDF = pd.DataFrame(
         columns=[
             "Ideal Thrust [N]",
+            "Sea Level Thrust [N]",
             "Oxidizer Mass Flow Rate [kg/s]",
             "Fuel Mass Flow Rate [kg/s]",
             "Burn Time [s]",
@@ -315,6 +316,7 @@ def main():
             vehicleMass = vehicleMassEstimate
             [
                 idealThrust,
+                seaLevelThrust,
                 oxMassFlowRate,
                 fuelMassFlowRate,
                 burnTime,
@@ -354,6 +356,7 @@ def main():
         propulsionDF = propulsionDF._append(
             {
                 "Ideal Thrust [N]": idealThrust,
+                "Sea Level Thrust [N]": seaLevelThrust,
                 "Oxidizer Mass Flow Rate [kg/s]": oxMassFlowRate,
                 "Fuel Mass Flow Rate [kg/s]": fuelMassFlowRate,
                 "Burn Time [s]": burnTime,
@@ -446,4 +449,5 @@ if __name__ == "__main__":
         ps.sort_stats("cumtime")  # Sort by cumulative time
         ps.print_stats()
 
+    # folder name
     print(f"Profiling results saved to {profile_output_file}")
