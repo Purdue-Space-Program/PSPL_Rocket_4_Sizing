@@ -34,7 +34,7 @@ import constants as c
 from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory
 from utils import output_folder, rocket_defining_input_handler, results_file
 
-vehicleMassEstimate = 110  # [lbs] Estimate of the vehicle mass
+vehicleMassEstimate = 164  # [lbs] Estimate of the vehicle mass
 vehicleMassEstimate = (
     vehicleMassEstimate * c.LB2KG
 )  # [kg] Convert the vehicle mass to kilograms
