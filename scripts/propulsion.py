@@ -16,12 +16,10 @@ import constants as c
 
 # Inputs:
 #   chamberPressure:   [Pa] pressure within engine combustion chamber
-#   mixtureRatio:      [1] ratio of oxidizer to fuel by mass
 #   exitPressureRatio: [1] ratio of chamber pressure to nozzle exit pressure
-#   fuelName:          [N/A] name of fuel under CEA conventions
-#   oxName:            [N/A] name of oxidizer under CEA conventions
-#   fuelTemp:          [K] temperature of fuel upon injection into combustion
-#   oxTemp:            [K] temperature of oxidizer upon injection into combustion
+#   fuel:              [N/A] name of fuel under CEA conventions
+#   oxidizer:          [N/A] name of oxidizer under CEA conventions
+#   mixRatio:          [1] core ratio of oxidizer to fuel by mass
 
 # Outputs:
 #   chamberTemperature:     [K] temperature of products in combustion chamber

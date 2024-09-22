@@ -1,4 +1,9 @@
-# Conversion factors
+# Main function
+
+CONVERGE_TOLERANCE = 0.01 # [kg] Allowable difference between masses for Structures and Propulsion to converge
+OUTPUT_PRECISION = 3 # [1] Number of digits to round outputs to
+
+# Conversion Factors
 
 ## Pressure
 
@@ -62,6 +67,7 @@ POISSON_RATIO_AL = 0.33  # [1] Poisson's ratio
 DENSITY_INCO = 8190  # [kg/m^3] Density
 
 ## Carbon Fiber
+
 DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
 # Fluids Constants
@@ -72,7 +78,7 @@ ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 FILL_PRESSURE = 60  # psi
 
-# Propellant Constants
+# Propellant Properties
 
 DENSITY_ETHANOL = 789  # [kg/m^3] Ethanol density at STP
 DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP
@@ -83,6 +89,7 @@ MOLAR_MASS_JET_A = 0.170  # [kg/mol] Jet-A molar mass
 MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 
 # FAR Properties
+
 FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
 RAIL_HEIGHT = 18.29  # [m] height of the rail
 
@@ -93,7 +100,6 @@ R = 8.314  # [J/mol-K] Universal gas constant
 COPV_OD_MARGIN = (
     0.061 * 1.5
 )  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube [TEMPORARY, NEED TO ADD]
-
 
 # Assumptions
 MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]

@@ -82,8 +82,8 @@ def main():
             "Tank O:F Ratio (mass) [-]",
             "Oxidizer Propellant Mass [lbm]",
             "Fuel Propellant Mass [lbm]",
-            "Oxidizer Tank Volume [liters]",
-            "Fuel Tank Volume [liters]",
+            "Oxidizer Tank Volume [in^3]",
+            "Fuel Tank Volume [in^3]",
         ]
     )
 
@@ -92,9 +92,9 @@ def main():
             "C* [m/s]",
             "Isp [s]",
             "Expansion Ratio [-]",
-            "Fuel Temp [K]",
-            "Ox Temp [K]",
-            "Char Length [m]",
+            "Fuel Temperature [K]",
+            "Oxidizer Temperature [K]",
+            "Characteristic Length [m]",
         ]
     )
 
@@ -142,7 +142,7 @@ def main():
         columns=[
             "Altitude [ft]",
             "Max Mach [-]",
-            "Max Acceleration [ft/s^2]",
+            "Max Acceleration [g]",
             "Rail Exit Velocity [ft/s]",
         ]
     )
@@ -181,7 +181,7 @@ def main():
         ]  # Exit pressure of the engine [psi]
         exitPressure = exitPressure * c.PSI2PA
 
-        thurstToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
+        thrustToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
         # Propellant Combinations
         propellants = propCombos.loc[
@@ -285,7 +285,7 @@ def main():
             lowerPlumbingLength, upperPlumbingLength, copvLength, tankOD
         )
 
-        while abs(vehicleMassEstimate - vehicleMass) > (0.01):
+        while abs(vehicleMassEstimate - vehicleMass) > c.CONVERGE_TOLERANCE:
             vehicleMass = vehicleMassEstimate
             [
                 idealThrust,
@@ -300,7 +300,7 @@ def main():
                 totalMassFlowRate,
                 exitArea,
             ] = propulsion.calculate_propulsion(
-                thurstToWeight,
+                thrustToWeight,
                 vehicleMass,
                 chamberPressure,
                 exitPressure,
@@ -340,7 +340,7 @@ def main():
             chamberLength,
         )
 
-        rocketGUD = vehicle.check_limits(
+        isWithinLimits = vehicle.check_limits(
             maxThrustLim,
             minThrustLim,
             seaLevelThrust,
@@ -351,8 +351,8 @@ def main():
             copvOD,
         )
 
-        if not rocketGUD:
-            continue  # Skip the rest of the loop if the rocket is not GUD
+        if not isWithinLimits:
+            continue  # Skip the rest of the loop if the rocket is not within limits
 
         fluidsystemsDF = fluidsystemsDF._append(
             {
@@ -364,8 +364,8 @@ def main():
                 "Tank O:F Ratio (mass) [-]": tankMixRatio,
                 "Oxidizer Propellant Mass [lbm]": oxPropMass * c.KG2LB,
                 "Fuel Propellant Mass [lbm]": fuelPropMass * c.KG2LB,
-                "Oxidizer Tank Volume [liters]": oxTankVolume * c.M32L,
-                "Fuel Tank Volume [liters]": fuelTankVolume * c.M32L,
+                "Oxidizer Tank Volume [in^3]": oxTankVolume * c.M32IN3,
+                "Fuel Tank Volume [in^3]": fuelTankVolume * c.M32IN3,
             },
             ignore_index=True,
         )
@@ -390,9 +390,9 @@ def main():
                 "C* [m/s]": cstar,
                 "Isp [s]": specificImpulse,
                 "Expansion Ratio [-]": expansionRatio,
-                "Fuel Temp [K]": fuelTemp,
-                "Ox Temp [K]": oxTemp,
-                "Char Length [m]": characteristicLength,
+                "Fuel Temperature [K]": fuelTemp,
+                "Oxidizer Temperature [K]": oxTemp,
+                "Characteristic Length [m]": characteristicLength,
             },
             ignore_index=True,
         )
@@ -447,7 +447,7 @@ def main():
             {
                 "Altitude [ft]": altitude * c.M2FT,
                 "Max Mach [-]": maxMach,
-                "Max Acceleration [ft/s^2]": maxAccel * c.M2FT,
+                "Max Acceleration [g]": maxAccel / c.GRAVITY,
                 "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
             },
             ignore_index=True,
@@ -458,14 +458,14 @@ def main():
 
     results_file.create_results_file(
         folderName,
-        fluidsystemsDF,
-        combustionDF,
-        propulsionDF,
-        structuresDF,
-        vehicleDF,
-        trajectoryDF,
+        fluidsystemsDF.round(c.OUTPUT_PRECISION),
+        combustionDF.round(c.OUTPUT_PRECISION),
+        propulsionDF.round(c.OUTPUT_PRECISION),
+        structuresDF.round(c.OUTPUT_PRECISION),
+        vehicleDF.round(c.OUTPUT_PRECISION),
+        trajectoryDF.round(c.OUTPUT_PRECISION),
         RIDDF,
-    )  # Output the results
+    )  # Output the results rounded appropriately
 
     bar.finish()  # Finish the progress bar
     # Profile the main function
