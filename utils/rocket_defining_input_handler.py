@@ -122,7 +122,7 @@ def read_inputs():
     possibleRocketsDF = pd.DataFrame(
         possibleRockets,
         index=RIDs,
-        columns=["Propellant combination", "O:F (mass)"] + list(nonPropInputs.keys()),
+        columns=["Propellant combination", "Core O:F Ratio (mass)"] + list(nonPropInputs.keys()),
     )  # Dataframe containing all possible rockets. Rows are rockets, columns are inputs
 
     return possibleRocketsDF, propCombos, tankWalls, copvs

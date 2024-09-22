@@ -65,6 +65,7 @@ def main():
             "Upper Plumbing Length [m]",
             "Tank Total Length [m]",
             "Lower Plumbing Length [m]",
+            "Tank O:F Ratio (mass) [-]",
             "Oxidizer Propellant Mass [kg]",
             "Fuel Propellant Mass [kg]",
             "Oxidizer Tank Volume [m^3]",
@@ -174,7 +175,7 @@ def main():
         ]  # Get the propellant combination
         fuel = propellants["Fuel"]  # Get the fuel properties
         oxidizer = propellants["Oxidizer"]
-        mixRatio = rocket["O:F (mass)"]  # Mixture ratio of the propellants
+        mixRatio = rocket["Core O:F Ratio (mass)"]  # Mixture ratio of the propellants
 
         # Tanks
         tank = tankWalls.loc[rocket["Tank wall"]]  # Get the tank properties
@@ -242,7 +243,7 @@ def main():
                 "Upper Plumbing Length [m]": upperPlumbingLength,
                 "Tank Total Length [m]": tankTotalLength,
                 "Lower Plumbing Length [m]": lowerPlumbingLength,
-                "Tank O/F Ratio [-]": tankMixRatio,
+                "Tank O:F Ratio (mass) [-]": tankMixRatio,
                 "Oxidizer Propellant Mass [kg]": oxPropMass,
                 "Fuel Propellant Mass [kg]": fuelPropMass,
                 "Oxidizer Tank Volume [m^3]": oxTankVolume,
