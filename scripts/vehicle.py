@@ -84,3 +84,38 @@ def calculate_length(
     )
 
     return [totalLength]
+
+
+def check_limits(
+    maxThrustLim,
+    minThrustLim,
+    thrust,
+    maxHeightLim,
+    minHeightLim,
+    height,
+):
+    """ """
+
+    # Organize the limits and values into dictionaries
+
+    values = {
+        "thrust": thrust,
+        "height": height,
+        # Add more actual values as needed
+    }
+
+    # Organize the limits into a dictionary of tuples (min, max)
+    limits = {
+        "thrust": (minThrustLim, maxThrustLim),
+        "height": (minHeightLim, maxHeightLim),
+        # Add more limits as needed
+    }
+
+    # Check the limits
+    for parameter, (minLimit, maxLimit) in limits.items():
+        if parameter in values:
+            actualValue = values[parameter]  # Get the actual value of the parameter
+            if actualValue < minLimit or actualValue > maxLimit:
+                return False  # Return False if the actual value is outside the limits
+    return True  # Return True if all actual values are within the limits
+    # Check the limits

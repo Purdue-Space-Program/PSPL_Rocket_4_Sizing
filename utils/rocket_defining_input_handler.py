@@ -40,6 +40,9 @@ def read_inputs():
         copvs = pd.read_excel(
             RDIs, "COPVs", index_col=0
         )  # Dataframe containing COPV options. Rows are different COPVs, columns are COPV parameters
+        limits = pd.read_excel(
+            RDIs, "Limits", index_col=0
+        )  # Dataframe containing limits for each input
 
     # Possible Rockets
     # This section creates a set of possible rockets from the inputs.
@@ -69,8 +72,6 @@ def read_inputs():
     possibleRocketsByProp = (
         {}
     )  # Dict with all possible combinations of rocket-defining inputs for each propellant combination
-
-    marginTime = 0
 
     # Create a set of inputs for each propellant combination
     for propCombo in list(propCombos.index):
@@ -122,7 +123,8 @@ def read_inputs():
     possibleRocketsDF = pd.DataFrame(
         possibleRockets,
         index=RIDs,
-        columns=["Propellant combination", "Core O:F Ratio (mass)"] + list(nonPropInputs.keys()),
+        columns=["Propellant combination", "Core O:F Ratio (mass)"]
+        + list(nonPropInputs.keys()),
     )  # Dataframe containing all possible rockets. Rows are rockets, columns are inputs
 
-    return possibleRocketsDF, propCombos, tankWalls, copvs
+    return possibleRocketsDF, propCombos, tankWalls, copvs, limits

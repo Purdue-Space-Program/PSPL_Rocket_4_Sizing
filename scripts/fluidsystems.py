@@ -125,7 +125,9 @@ def fluids_sizing(
 
     # Propellant properties
 
-    tankMixRatio = mixRatio / (1 + c.FILM_PERCENT / 100) # [1] Mass ratio of oxidizer to fuel in the propellant tanks (accounting for film cooling)
+    tankMixRatio = mixRatio / (
+        1 + c.FILM_PERCENT / 100
+    )  # [1] Mass ratio of oxidizer to fuel in the propellant tanks (accounting for film cooling)
 
     # Oxidizer
     if oxidizer.lower() == "oxygen":

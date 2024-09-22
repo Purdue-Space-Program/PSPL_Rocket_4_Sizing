@@ -27,6 +27,9 @@ KG2LB = 1 / LB2KG  # [lbm/kg] Conversion factor from kg to lbm
 IN2M = 0.0254  # [m/in] Conversion factor from in to m
 M2IN = 1 / IN2M  # [in/m] Conversion factor from m to in
 
+M2FT = 3.28084  # [ft/m] Conversion factor from m to ft
+FT2M = 1 / M2FT  # [m/ft] Conversion factor from ft to m
+
 ## Area
 
 IN22M2 = 0.0064516  # [m^2/in^2] Conversion factor from in^2 to m^2
@@ -39,6 +42,10 @@ M32L = 1 / L2M3  # [1/m^3] Conversion factor from m^3 to L
 
 M32IN3 = 61023.7  # [in^3/m^3] Conversion factor from m^3 to in^3
 IN32M3 = 1 / M32IN3  # [m^3/in^3] Conversion factor from in^3 to m^3
+
+## Force
+N2LBF = 0.224809  # [lbf/N] Conversion factor from N to lbf
+LBF2N = 1 / N2LBF  # [N/lbf] Conversion factor from lbf to N
 
 # Material Properties
 
@@ -59,7 +66,7 @@ DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
 # Fluids Constants
 
-FILM_PERCENT = 10 # [1] Percent of fuel mass flow dedicated to film cooling
+FILM_PERCENT = 10  # [1] Percent of fuel mass flow dedicated to film cooling
 RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
 ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
