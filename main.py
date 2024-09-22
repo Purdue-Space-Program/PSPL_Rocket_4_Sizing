@@ -147,6 +147,8 @@ def main():
         ]
     )
 
+    RIDDF = pd.DataFrame(columns=["RID"])
+
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
     # Owner: Nick Nielsen
@@ -219,6 +221,7 @@ def main():
         copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
         copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
 
+        maxCOPVODlim = copvOD + 2 * c.COPV_OD_MARGIN
         # GET RESULTS
 
         # Avionics
@@ -344,6 +347,8 @@ def main():
             maxHeightLim,
             minHeightLim,
             totalLength,
+            maxCOPVODlim,
+            copvOD,
         )
 
         if not rocketGUD:
@@ -418,6 +423,13 @@ def main():
             ignore_index=True,
         )
 
+        RIDDF = RIDDF._append(
+            {
+                "RID": idx,
+            },
+            ignore_index=True,
+        )
+
         # Trajectory
         [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
             totalWetMass,
@@ -452,6 +464,7 @@ def main():
         structuresDF,
         vehicleDF,
         trajectoryDF,
+        RIDDF,
     )  # Output the results
 
     bar.finish()  # Finish the progress bar

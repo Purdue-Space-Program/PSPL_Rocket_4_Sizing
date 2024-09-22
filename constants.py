@@ -90,6 +90,10 @@ RAIL_HEIGHT = 18.29  # [m] height of the rail
 
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
 R = 8.314  # [J/mol-K] Universal gas constant
+COPV_OD_MARGIN = (
+    0.061 * 1.5
+)  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube [TEMPORARY, NEED TO ADD]
+
 
 # Assumptions
 MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]

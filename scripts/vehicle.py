@@ -93,6 +93,8 @@ def check_limits(
     maxHeightLim,
     minHeightLim,
     height,
+    maxCOPVODLim,
+    copvOD,
 ):
     """ """
 
@@ -101,6 +103,7 @@ def check_limits(
     values = {
         "thrust": thrust,
         "height": height,
+        "copvOD": copvOD,
         # Add more actual values as needed
     }
 
@@ -108,6 +111,7 @@ def check_limits(
     limits = {
         "thrust": (minThrustLim, maxThrustLim),
         "height": (minHeightLim, maxHeightLim),
+        "copvOD": (0, maxCOPVODLim),
         # Add more limits as needed
     }
 
