@@ -195,8 +195,6 @@ def calculate_propulsion(
     EFFICIENCY_FACTOR = 0.9
     CHAMBER_WALL_THICKNESS = 0.01  # [m] chamber wall thickness
 
-    cstar = cstar * EFFICIENCY_FACTOR  # [m/s] effective characteristic velocity
-
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
     )  # Required sea level thrust to meet initial thrust to weight ratio
