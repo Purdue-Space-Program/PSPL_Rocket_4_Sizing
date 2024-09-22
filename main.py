@@ -22,6 +22,9 @@ import sys
 import time
 import pandas as pd
 import warnings
+import cProfile
+import pstats
+import re
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -424,7 +427,23 @@ def main():
     )  # Output the results
 
     bar.finish()  # Finish the progress bar
+    # Profile the main function
+    # Profile the main function and save the results to a file
 
 
 if __name__ == "__main__":
+    profiler = cProfile.Profile()
+    profiler.enable()
+
     main()
+
+    profiler.disable()
+
+    # Save the profiling results to a file
+    profile_output_file = "profile_results.txt"
+    with open(profile_output_file, "w") as f:
+        ps = pstats.Stats(profiler, stream=f)
+        ps.sort_stats("cumtime")  # Sort by cumulative time
+        ps.print_stats()
+
+    print(f"Profiling results saved to {profile_output_file}")

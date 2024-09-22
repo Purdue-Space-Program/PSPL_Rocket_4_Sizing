@@ -60,10 +60,6 @@ def calculate_trajectory(
         Exit velocity of the rocket [m/s].
     """
 
-    # Constants
-    FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
-    RAIL_HEIGHT = 18.29  # [m] height of the rail
-
     # Rocket Properties
 
     referenceArea = np.pi * (tankOD) ** 2 / 4  # [m^2] reference area of the rocket
@@ -72,10 +68,10 @@ def calculate_trajectory(
 
     # Initial Conditions
 
-    altitude = FAR_ALTITUDE  # [m] initial altitude of the rocket
+    altitude = c.FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
-    dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed NICK CHANGED 9/21 TO 0.1
+    dt = 0.025  # [s] time step of the rocket. 0.025 is good for both accuracy and speed
 
     # Array Initialization:
     altitudeArray = []
@@ -120,7 +116,7 @@ def calculate_trajectory(
 
     # Find the closest altitude to the RAIL_HEIGHT
     for i in range(len(altitudeArray)):
-        if altitudeArray[i] >= RAIL_HEIGHT:
+        if altitudeArray[i] >= c.RAIL_HEIGHT:
             exitVelo = velocityArray[i]
             break
 
