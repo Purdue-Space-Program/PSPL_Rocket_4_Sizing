@@ -218,6 +218,7 @@ def main():
             upperPlumbingLength,
             tankTotalLength,
             lowerPlumbingLength,
+            tankMixRatio,
             oxPropMass,
             fuelPropMass,
             oxTankVolume,
@@ -241,6 +242,7 @@ def main():
                 "Upper Plumbing Length [m]": upperPlumbingLength,
                 "Tank Total Length [m]": tankTotalLength,
                 "Lower Plumbing Length [m]": lowerPlumbingLength,
+                "Tank O/F Ratio [-]": tankMixRatio,
                 "Oxidizer Propellant Mass [kg]": oxPropMass,
                 "Fuel Propellant Mass [kg]": fuelPropMass,
                 "Oxidizer Tank Volume [m^3]": oxTankVolume,
@@ -277,7 +279,7 @@ def main():
             ignore_index=True,
         )
 
-        ## Structures
+        # Structures
         [
             lowerAirframeLength,
             lowerAirframeMass,
@@ -410,8 +412,8 @@ def main():
             {
                 "Altitude [m]": altitude,
                 "Max Mach [-]": maxMach,
-                "Max Accel [m/s^2]": maxAccel,
-                "Rail Exit Velo [m/s]": railExitVelo,
+                "Max Acceleration [m/s^2]": maxAccel,
+                "Rail Exit Velocity [m/s]": railExitVelo,
             },
             ignore_index=True,
         )

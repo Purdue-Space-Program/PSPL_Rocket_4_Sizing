@@ -17,7 +17,7 @@ import constants as c
 # Inputs:
 #   oxidizer [string]: The oxidizer to be used
 #   fuel [string]: The fuel to be used
-#   mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel)
+#   mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel) in the chamber core
 #   chamberPressure [Pa]: The nominal engine chamber pressure
 #   copvPressure [Pa]: The maximum pressure the selected COPV can hold
 #   copvVolume [m^3]: The volume of the selected copv
@@ -57,8 +57,8 @@ def fluids_sizing(
             The oxidizer to be used for propulsion.
         fuel : string
             The fuel to be used for propulsion.
-        mixtureRatio : float
-            The Oxidizer to fuel mass ratio [1].
+        mixRatio : float
+            The oxidizer to fuel mass ratio in the chamber core [1].
         chamberPressure : float
             The engine chamber pressure [Pa].
         copvPressure : float
@@ -85,6 +85,8 @@ def fluids_sizing(
             End-to-end length of the propellant tanks [m].
         lowerPlumbingLength : float
             Length of lower plumbing [m].
+        tankMixRatio : float
+            The oxidizer to fuel mass ratio in the tanks [1].
         oxPropMass : float
             Mass of oxidizer to be used [m].
         fuelPropMass : float
@@ -122,6 +124,8 @@ def fluids_sizing(
     PROOF_FACTOR = 1.5  # [1] Ratio of proof pressure to nominal pressure
 
     # Propellant properties
+
+    tankMixRatio = mixRatio / (1 + c.FILM_PERCENT / 100) # [1] Mass ratio of oxidizer to fuel in the propellant tanks (accounting for film cooling)
 
     # Oxidizer
     if oxidizer.lower() == "oxygen":
@@ -184,9 +188,9 @@ def fluids_sizing(
     )  # [m^3] Total propellant tank volume
 
     oxTankVolume = (
-        mixRatio
+        tankMixRatio
         * (tankTotalVolume * fuelDensity)
-        / (oxDensity + mixRatio * fuelDensity)
+        / (oxDensity + tankMixRatio * fuelDensity)
     )  # [m^3] Oxidizer tank volume
     fuelTankVolume = tankTotalVolume - oxTankVolume  # [m^3] Fuel tank volume
 
@@ -285,6 +289,7 @@ def fluids_sizing(
         upperPlumbingLength,
         tankTotalLength,
         lowerPlumbingLength,
+        tankMixRatio,
         oxPropMass,
         fuelPropMass,
         oxTankVolume,

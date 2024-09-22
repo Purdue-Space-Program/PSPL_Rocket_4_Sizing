@@ -59,6 +59,7 @@ DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
 # Fluids Constants
 
+FILM_PERCENT = 10 # [1] Percent of fuel mass flow dedicated to film cooling
 RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
 ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
