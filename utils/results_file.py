@@ -14,13 +14,24 @@ def create_results_file(
     structuresDF,
     vehicleDF,
     trajectoryDF,
+    RIDDF,
 ):
+    for df in [
+        fluidsystemsDF,
+        combustionDF,
+        propulsionDF,
+        structuresDF,
+        vehicleDF,
+        trajectoryDF,
+    ]:
+        df.insert(0, "RID", RIDDF)
 
     os.chdir(os.path.join("data/outputs", folderName))
 
     with pd.ExcelWriter(
         "results.xlsx",
     ) as writer:
+
         fluidsystemsDF.to_excel(writer, sheet_name="Fluid Systems", index=False)
         combustionDF.to_excel(writer, sheet_name="Combustion", index=False)
         propulsionDF.to_excel(writer, sheet_name="Propulsion", index=False)
