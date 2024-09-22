@@ -34,11 +34,6 @@ import constants as c
 from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory
 from utils import output_folder, rocket_defining_input_handler, results_file
 
-vehicleMassEstimate = 164  # [lbs] Estimate of the vehicle mass
-vehicleMassEstimate = (
-    vehicleMassEstimate * c.LB2KG
-)  # [kg] Convert the vehicle mass to kilograms
-
 
 def main():
     folderName = output_folder.create_output_folder()  # Create a new output folder
@@ -141,6 +136,8 @@ def main():
 
     numberPossibleRockets = len(possibleRocketsDF)  # Get the number of possible rockets
 
+    # Mass Estimation
+
     bar = pb.ProgressBar(
         maxval=numberPossibleRockets
     )  # Create a progress bar with the number of possible rockets as the max value
@@ -148,6 +145,13 @@ def main():
     bar.start()  # Start the progress bar
 
     for idx, rocket in possibleRocketsDF.iterrows():
+
+        # Mass Estimation & Initialization
+        vehicleMassEstimate = 160  # [lbs] Estimate of the vehicle mass
+        vehicleMassEstimate = (
+            vehicleMassEstimate * c.LB2KG
+        )  # [kg] Convert the vehicle mass to kilograms
+        vehicleMass = -np.inf
 
         # Continous Inputs
         chamberPressure = rocket[
@@ -271,49 +275,6 @@ def main():
             ignore_index=True,
         )
 
-        # Propulsion
-        [
-            idealThrust,
-            oxMassFlowRate,
-            fuelMassFlowRate,
-            burnTime,
-            chamberLength,
-            chamberMass,
-            injectorMass,
-            totalPropulsionMass,
-            totalMassFlowRate,
-            exitArea,
-        ] = propulsion.calculate_propulsion(
-            thurstToWeight,
-            vehicleMassEstimate,
-            chamberPressure,
-            exitPressure,
-            cstar,
-            specificImpulse,
-            expansionRatio,
-            characteristicLength,
-            mixRatio,
-            oxPropMass,
-            fuelPropMass,
-            tankOD,
-        )
-
-        propulsionDF = propulsionDF._append(
-            {
-                "Ideal Thrust": idealThrust,
-                "Oxidizer Mass Flow Rate": oxMassFlowRate,
-                "Fuel Mass Flow Rate": fuelMassFlowRate,
-                "Burn Time": burnTime,
-                "Chamber Length": chamberLength,
-                "Chamber Mass": chamberMass,
-                "Injector Mass": injectorMass,
-                "Total Propulsion Mass": totalPropulsionMass,
-                "Total Mass Flow Rate": totalMassFlowRate,
-                "Exit Area": exitArea,
-            },
-            ignore_index=True,
-        )
-
         ## Structures
         [
             lowerAirframeLength,
@@ -349,15 +310,65 @@ def main():
             ignore_index=True,
         )
 
-        ## Mass
-        [totalDryMass, totalWetMass] = vehicle.calculate_mass(
-            avionicsMass,
-            fluidsystemsMass,
-            oxPropMass,
-            fuelPropMass,
-            totalPropulsionMass,
-            structuresMass,
+        while abs(vehicleMassEstimate - vehicleMass) > (0.01):
+            vehicleMass = vehicleMassEstimate
+            [
+                idealThrust,
+                oxMassFlowRate,
+                fuelMassFlowRate,
+                burnTime,
+                chamberLength,
+                chamberMass,
+                injectorMass,
+                totalPropulsionMass,
+                totalMassFlowRate,
+                exitArea,
+            ] = propulsion.calculate_propulsion(
+                thurstToWeight,
+                vehicleMass,
+                chamberPressure,
+                exitPressure,
+                cstar,
+                specificImpulse,
+                expansionRatio,
+                characteristicLength,
+                mixRatio,
+                oxPropMass,
+                fuelPropMass,
+                tankOD,
+            )
+
+            [vehicleDryMassEstimate, vehicleMassEstimate] = vehicle.calculate_mass(
+                avionicsMass,
+                fluidsystemsMass,
+                oxPropMass,
+                fuelPropMass,
+                totalPropulsionMass,
+                structuresMass,
+            )
+            print(vehicleMassEstimate)
+            print(idealThrust)
+
+        totalDryMass = vehicleDryMassEstimate
+        totalWetMass = vehicleMassEstimate
+
+        propulsionDF = propulsionDF._append(
+            {
+                "Ideal Thrust": idealThrust,
+                "Oxidizer Mass Flow Rate": oxMassFlowRate,
+                "Fuel Mass Flow Rate": fuelMassFlowRate,
+                "Burn Time": burnTime,
+                "Chamber Length": chamberLength,
+                "Chamber Mass": chamberMass,
+                "Injector Mass": injectorMass,
+                "Total Propulsion Mass": totalPropulsionMass,
+                "Total Mass Flow Rate": totalMassFlowRate,
+                "Exit Area": exitArea,
+            },
+            ignore_index=True,
         )
+
+        ## Mass
 
         ## Length
         [totalLength] = vehicle.calculate_length(

@@ -84,4 +84,4 @@ GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
 R = 8.314  # [J/mol-K] Universal gas constant
 
 # Assumptions
-MASS_GROWTH_FACTOR = 1.15  # [1] iteration growth factor [NEED TO DISCUSS]
+MASS_GROWTH_FACTOR = 1.3  # [1] iteration growth factor [NEED TO DISCUSS]
