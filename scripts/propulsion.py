@@ -169,6 +169,8 @@ def calculate_propulsion(
         Volume of oxidizer tank [m^3].
     fuelMass : float
         Volume of fuel tank [m^3].
+    tankOD: float
+        Outer diameter of tanks [m].
 
     Returns
     -------
@@ -191,13 +193,13 @@ def calculate_propulsion(
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
     EFFICIENCY_FACTOR = 0.9
-    CHAMBER_WALL_THICKNESS = 0.01  # [m] chamber wall thickness
+    CHAMBER_WALL_THICKNESS = 0.5 * c.IN2M  # [m] chamber wall thickness
 
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
     )  # Required sea level thrust to meet initial thrust to weight ratio
 
-    idealThrust = 0
+    jetThrust = 0
     seaLevelThrustToWeight = 0
 
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
@@ -205,50 +207,51 @@ def calculate_propulsion(
         idealExhaustVelocity = (
             specificImpulse * c.GRAVITY
         )  # [m/s] ideal exhaust velocity
-        totalMassFlowRate = idealThrust / (
+        coreMassFlowRate = jetThrust / (
             idealExhaustVelocity * EFFICIENCY_FACTOR
         )  # [kg/s] total mass flow rate
 
-        throatArea = cstar * totalMassFlowRate / chamberPressure  # [m^2] throat area
+        throatArea = EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure  # [m^2] throat area
         throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
         exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
 
-        seaLevelThrust = idealThrust + exitArea * (
+        seaLevelThrust = jetThrust + exitArea * (
             exitPressure - SEA_LEVEL_PRESSURE
         )  # [N] sea
         seaLevelThrustToWeight = seaLevelThrust / (
             vehicleMass * c.GRAVITY
         )  # sea level thrust to weight ratio
-        idealThrust = requiredSeaLevelThrust - exitArea * (
+        jetThrust = requiredSeaLevelThrust - exitArea * (
             exitPressure - SEA_LEVEL_PRESSURE
         )  # [N] ideal thrust
 
-    fuelMassFlowRate = totalMassFlowRate / (
+    fuelMassFlowRate = coreMassFlowRate / (
         1 + mixtureRatio
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
+    totalMassFlowRate = coreMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
+    burnTime = (1 - c.ULLAGE_PERCENT) * (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
-    chamberDiameter = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
-
-    chamberArea = np.pi / 4 * chamberDiameter**2  # [m^2] chamber areas
+    chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
+    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
+    chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
-
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
     )  # [m] nozzle diverging section length
     convergeLength = (
-        0.5 * (chamberDiameter - throatDiameter) / np.tan(np.radians(25))
+        0.5 * (chamberID - throatDiameter) / np.tan(np.radians(35))
     )  # [m] nozzle converging section length
     convergeVolume = (
         (1 / 3)
         * np.pi
         * convergeLength
         * (
-            (chamberDiameter / 2) ** 2
+            (chamberID / 2) ** 2
             + (throatDiameter / 2) ** 2
-            + ((chamberDiameter * throatDiameter) / 2) ** 2
+            + ((chamberID * throatDiameter) / 2) ** 2
         )
     )  # [m^3] nozzle converging section volume
     chamberVolume = (
@@ -261,12 +264,12 @@ def calculate_propulsion(
 
     # Mass estimates
     chamberMaterialDensity = (
-        c.DENSITY_INCO  # [kg/m^3] chamber wall material density (Inconel 718)
+        c.DENSITY_CF  # [kg/m^3] chamber wall material density (Inconel 718)
     )
     chamberMass = (
         chamberMaterialDensity
         * (np.pi / 4)
-        * ((chamberDiameter + CHAMBER_WALL_THICKNESS) ** 2 - chamberDiameter**2)
+        * (chamberOD** 2 - chamberID**2)
         * thrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
@@ -277,19 +280,17 @@ def calculate_propulsion(
         injectorMaterialDensity
         * (np.pi / 4)
         * (
-            2 * c.IN2M * (chamberDiameter**2 - (chamberDiameter - 1 * c.IN2M) ** 2)
-            + 2 * 0.5 * c.IN2M * (chamberDiameter - 1 * c.IN2M) ** 2
+            2 * c.IN2M * (chamberOD**2 - (chamberOD - 1 * c.IN2M) ** 2)
+            + 2 * 0.5 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
         )
-    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.5" thick walls
-
-    burnTime = (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
+    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.y65" thick walls
 
     totalPropulsionMass = (
         chamberMass + injectorMass
     )  # [kg] total propulsion system mass
 
     return [
-        idealThrust,
+        jetThrust,
         seaLevelThrust,
         oxMassFlowRate,
         fuelMassFlowRate,
