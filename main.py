@@ -146,7 +146,7 @@ def main():
         ]
     )
 
-    RIDDF = pd.DataFrame(columns=["RID"])
+    identificationDF = pd.DataFrame(columns=["RID"])
 
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
@@ -422,7 +422,7 @@ def main():
             ignore_index=True,
         )
 
-        RIDDF = RIDDF._append(
+        identificationDF = identificationDF._append(
             {
                 "RID": idx,
             },
@@ -462,7 +462,7 @@ def main():
         structuresDF.round(c.OUTPUT_PRECISION),
         vehicleDF.round(c.OUTPUT_PRECISION),
         trajectoryDF.round(c.OUTPUT_PRECISION),
-        RIDDF,
+        identificationDF,
     )  # Output the results rounded appropriately
 
     bar.finish()  # Finish the progress bar
