@@ -58,4 +58,7 @@ def create_results_file(
                 worksheet.cell(row=1, column=i).column_letter
             ].width = max_length
 
+        # Freeze header row
+        worksheet.freeze_panes = "A2"
+
         writer._save()
