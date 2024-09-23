@@ -161,7 +161,7 @@ def main():
         vehicleMassEstimate = (
             vehicleMassEstimate * c.LB2KG
         )  # [kg] Convert the vehicle mass to kilograms
-        vehicleMass = -np.inf
+        vehicleMass = 0  # [kg] Initialize the vehicle mass
 
         # Continous Inputs
         chamberPressure = rocket[
@@ -279,6 +279,7 @@ def main():
         )
 
         while abs(vehicleMassEstimate - vehicleMass) > c.CONVERGE_TOLERANCE:
+
             vehicleMass = vehicleMassEstimate
             [
                 idealThrust,

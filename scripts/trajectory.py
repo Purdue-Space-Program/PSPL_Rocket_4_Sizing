@@ -12,7 +12,16 @@ atmosphereDF = pd.read_csv("atmosphere.csv")
 
 def get_atmospheric_conditions(df, altitude):
     index = int(altitude // 10)  # Divide altitude by 10 to find index
-    return df.iloc[index, 1], df.iloc[index, 2]  # Access with row and column indices
+
+    if index < 0:
+        return df.iloc[0][1], df.iloc[0][2]  # Return first row if below range
+    elif index >= len(df):
+        return df.iloc[-1][1], df.iloc[-1][2]  # Return last row if above range
+    else:
+        return (
+            df.iloc[index][1],
+            df.iloc[index][2],
+        )  # Return the values at the calculated index
 
 
 def calculate_trajectory(
