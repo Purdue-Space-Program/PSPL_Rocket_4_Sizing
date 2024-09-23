@@ -14,7 +14,7 @@ fuel = "methane"
 ox = "oxygen"
 
 
-ceaDATA = propulsion.run_CEA(Pc, Pe, OF, fuel, ox)
+ceaDATA = propulsion.run_CEA(Pc, Pe, fuel, ox, OF)
 cstar = ceaDATA[0]
 Isp = ceaDATA[1]
 expRatio = ceaDATA[2]
@@ -24,8 +24,9 @@ TWR = 5.18
 vehicleMass = 74.69
 
 
-[
-    idealThrust,
+[   
+    jetThrust,
+    seaLevelThrust,
     oxMassFlow,
     fuelMassFlow,
     burnTime,
@@ -33,11 +34,13 @@ vehicleMass = 74.69
     chamberMass,
     InjectorMass,
     totalPropulsionMass,
+    totalMassFlow,
+    exitArea
 ] = propulsion.calculate_propulsion(
     TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7, 0.108
 )
 
-idealThrust = round(idealThrust, 2)
+idealThrust = round(jetThrust, 2)
 oxMassFlow = round(oxMassFlow, 2)
 fuelMassFlow = round(fuelMassFlow, 2)
 burnTime = round(burnTime, 2)

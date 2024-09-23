@@ -280,8 +280,8 @@ def calculate_propulsion(
         injectorMaterialDensity
         * (np.pi / 4)
         * (
-            2 * c.IN2M * (chamberOD**2 - (chamberOD - 1 * c.IN2M) ** 2)
-            + 2 * 0.5 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
+            2 * c.IN2M * (chamberOD**2 - (chamberOD - 1.5 * c.IN2M) ** 2)
+            + 2 * 0.75 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
         )
     )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.y65" thick walls
 
