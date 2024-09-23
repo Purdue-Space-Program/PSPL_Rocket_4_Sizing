@@ -28,28 +28,13 @@ def binary_search(df, altitude):
         else:
             high = mid - 1
 
-    # If exact altitude is not found, interpolate between the closest values
+    # If exact altitude is not found, return closest values (no interpolation)
     if high < 0:
-        return df.iloc[0][1], df.iloc[0][2]
+        return df.iloc[0][1], df.iloc[0][2]  # Return first row if below range
     elif low >= len(df):
-        return df.iloc[-1][1], df.iloc[-1][2]
+        return df.iloc[-1][1], df.iloc[-1][2]  # Return last row if above range
     else:
-        alt_low = df.iloc[high][0]
-        alt_high = df.iloc[low][0]
-        pressure_low = df.iloc[high][1]
-        pressure_high = df.iloc[low][1]
-        density_low = df.iloc[high][2]
-        density_high = df.iloc[low][2]
-
-        # Linear interpolation
-        pressure = pressure_low + (altitude - alt_low) * (
-            pressure_high - pressure_low
-        ) / (alt_high - alt_low)
-        density = density_low + (altitude - alt_low) * (density_high - density_low) / (
-            alt_high - alt_low
-        )
-
-        return pressure, density
+        return df.iloc[high][1], df.iloc[high][2]  # Return closest match
 
 
 def calculate_trajectory(
