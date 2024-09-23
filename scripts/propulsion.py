@@ -76,18 +76,18 @@ def run_CEA(
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
 
-    if fuel == "methane":
+    if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
         # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
         characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
 
-    elif fuel == "ethanol":
+    elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
 
-    elif fuel == "jet-a":
+    elif fuel.lower() == "jet-a":
         fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
         fuelTemp = c.TAMBIENT
