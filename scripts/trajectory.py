@@ -7,10 +7,49 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-from ambiance import Atmosphere
+import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
+
+atmosphereDF = pd.read_csv("atmosphere.csv")
+
+
+def binary_search(df, altitude):
+    low = 0
+    high = len(df) - 1
+
+    while low <= high:
+        mid = (low + high) // 2
+        if df.iloc[mid][0] == altitude:
+            return df.iloc[mid][1], df.iloc[mid][2]  # Return pressure and density
+        elif df.iloc[mid][0] < altitude:
+            low = mid + 1
+        else:
+            high = mid - 1
+
+    # If exact altitude is not found, interpolate between the closest values
+    if high < 0:
+        return df.iloc[0][1], df.iloc[0][2]
+    elif low >= len(df):
+        return df.iloc[-1][1], df.iloc[-1][2]
+    else:
+        alt_low = df.iloc[high][0]
+        alt_high = df.iloc[low][0]
+        pressure_low = df.iloc[high][1]
+        pressure_high = df.iloc[low][1]
+        density_low = df.iloc[high][2]
+        density_high = df.iloc[low][2]
+
+        # Linear interpolation
+        pressure = pressure_low + (altitude - alt_low) * (
+            pressure_high - pressure_low
+        ) / (alt_high - alt_low)
+        density = density_low + (altitude - alt_low) * (density_high - density_low) / (
+            alt_high - alt_low
+        )
+
+        return pressure, density
 
 
 def calculate_trajectory(
@@ -76,13 +115,12 @@ def calculate_trajectory(
     # Array Initialization:
     altitudeArray = []
     velocityArray = []
-    machArray = []
     accelArray = []
     timeArray = []
 
     while velocity >= 0:
-        atmo = Atmosphere(altitude)
-        pressure = atmo.pressure
+        pressure, rho = binary_search(atmosphereDF, altitude)
+
         if time < burnTime:
             mass = mass - mDotTotal * dt  # [kg] mass of the rocket
             thrust = (
@@ -92,7 +130,6 @@ def calculate_trajectory(
         else:
             thrust = 0  # [N] total thrust of the rocket
 
-        rho = atmo.density
         drag = (
             0.5 * rho * velocity**2 * ascentDragCoeff * referenceArea
         )  # [N] force of drag
@@ -103,9 +140,6 @@ def calculate_trajectory(
 
         velocity = velocity + accel * dt  # velocity integration
         velocityArray.append(velocity)
-
-        mach = velocity / atmo.speed_of_sound
-        machArray.append(mach)
 
         altitude = altitude + velocity * dt  # position integration
 
@@ -129,17 +163,8 @@ def calculate_trajectory(
         plt.grid()
         plt.show()
 
-        plt.figure(2)
-        plt.title("Mach v. Time")
-        plt.plot(timeArray, machArray)
-        plt.ylabel("Mach [-]")
-        plt.xlabel("Time (s)")
-        plt.grid()
-        plt.show()
-
     return [
         float(altitude),
-        float(max(machArray)),
         float(max(accelArray)),
         float(exitVelo),
     ]

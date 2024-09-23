@@ -19,7 +19,7 @@ plots = 0  # [-]
 
 
 # Run Test Case
-[altitude, maxMach, maxAccel, exitVelo] = trajectory.calculate_trajectory(
+[altitude, maxAccel, exitVelo] = trajectory.calculate_trajectory(
     wetMass,
     mDotTotal,
     jetThrust,
@@ -31,6 +31,5 @@ plots = 0  # [-]
     plots,
 )
 print(f"Max Altitude is: ", altitude)
-print(f"Maximum Mach Number is:", maxMach)
 print(f"Maximum Acceleration is", maxAccel)
 print(f"Exit Velocity is", exitVelo)

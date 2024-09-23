@@ -141,7 +141,6 @@ def main():
     trajectoryDF = pd.DataFrame(
         columns=[
             "Altitude [ft]",
-            "Max Mach [-]",
             "Max Acceleration [g]",
             "Rail Exit Velocity [ft/s]",
         ]
@@ -431,7 +430,7 @@ def main():
         )
 
         # Trajectory
-        [altitude, maxMach, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
+        [altitude, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
             totalWetMass,
             totalMassFlowRate,
             idealThrust,
@@ -446,7 +445,6 @@ def main():
         trajectoryDF = trajectoryDF._append(
             {
                 "Altitude [ft]": altitude * c.M2FT,
-                "Max Mach [-]": maxMach,
                 "Max Acceleration [g]": maxAccel / c.GRAVITY,
                 "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
             },
