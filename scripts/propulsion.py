@@ -231,7 +231,7 @@ def calculate_propulsion(
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
     totalMassFlowRate = coreMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
-    burnTime = (1 - c.RESIDUAL_PERCENT) * (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
+    burnTime = (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
 
     chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
     chamberOD = chamberID + CHAMBER_WALL_THICKNESS
