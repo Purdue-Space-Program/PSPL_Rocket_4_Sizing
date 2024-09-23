@@ -1,10 +1,5 @@
-# Owners: Nick Nielsen, Hudson Reynolds
-# 24 July 2024
-
-
 import os
 import sys
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -15,26 +10,9 @@ import constants as c
 atmosphereDF = pd.read_csv("atmosphere.csv")
 
 
-def binary_search(df, altitude):
-    low = 0
-    high = len(df) - 1
-
-    while low <= high:
-        mid = (low + high) // 2
-        if df.iloc[mid][0] == altitude:
-            return df.iloc[mid][1], df.iloc[mid][2]  # Return pressure and density
-        elif df.iloc[mid][0] < altitude:
-            low = mid + 1
-        else:
-            high = mid - 1
-
-    # If exact altitude is not found, return closest values (no interpolation)
-    if high < 0:
-        return df.iloc[0][1], df.iloc[0][2]  # Return first row if below range
-    elif low >= len(df):
-        return df.iloc[-1][1], df.iloc[-1][2]  # Return last row if above range
-    else:
-        return df.iloc[high][1], df.iloc[high][2]  # Return closest match
+def get_atmospheric_conditions(df, altitude):
+    index = int(altitude // 10)  # Divide altitude by 10 to find index
+    return df.iloc[index, 1], df.iloc[index, 2]  # Access with row and column indices
 
 
 def calculate_trajectory(
@@ -85,17 +63,14 @@ def calculate_trajectory(
     """
 
     # Rocket Properties
-
     referenceArea = np.pi * (tankOD) ** 2 / 4  # [m^2] reference area of the rocket
-
     mass = wetMass  # [kg] initial mass of the rocket
 
     # Initial Conditions
-
     altitude = c.FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
-    dt = 0.1  # [s] time step of the rocket. 0.025 is good for both accuracy and speed CHANGED TO 0.1 BY NICK 9/22 FOR TESTING
+    dt = 0.1  # [s] time step of the rocket
 
     # Array Initialization:
     altitudeArray = []
@@ -104,14 +79,13 @@ def calculate_trajectory(
     timeArray = []
 
     while velocity >= 0:
-        pressure, rho = binary_search(atmosphereDF, altitude)
+        pressure, rho = get_atmospheric_conditions(atmosphereDF, altitude)
 
         if time < burnTime:
             mass = mass - mDotTotal * dt  # [kg] mass of the rocket
             thrust = (
                 jetThrust - (exitPressure - pressure) * exitArea
             )  # [N] force of thrust, accounting for pressure thrust
-
         else:
             thrust = 0  # [N] total thrust of the rocket
 
@@ -127,7 +101,6 @@ def calculate_trajectory(
         velocityArray.append(velocity)
 
         altitude = altitude + velocity * dt  # position integration
-
         altitudeArray.append(altitude)
 
         time = time + dt  # time step
