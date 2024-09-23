@@ -19,7 +19,6 @@
 
 import os
 import sys
-import time
 import pandas as pd
 import warnings
 import cProfile
@@ -49,9 +48,6 @@ def main():
         rocket_defining_input_handler.read_inputs()
     )  # Get information on possible rockets
 
-    possibleRocketsDF.to_excel(
-        "possible_rocket_combinations.xlsx"
-    )  # Save the possible rockets to an Excel sheet
     os.chdir("../../../")  # Change directory to the main folder
 
     # Limits
@@ -145,8 +141,6 @@ def main():
             "Rail Exit Velocity [ft/s]",
         ]
     )
-
-    identificationDF = pd.DataFrame(columns=["RID"])
 
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
@@ -351,6 +345,9 @@ def main():
         )
 
         if not isWithinLimits:
+            possibleRocketsDF.drop(
+                idx, inplace=True
+            )  # Drop the rocket if it is not within limits
             continue  # Skip the rest of the loop if the rocket is not within limits
 
         fluidsystemsDF = fluidsystemsDF._append(
@@ -422,13 +419,6 @@ def main():
             ignore_index=True,
         )
 
-        identificationDF = identificationDF._append(
-            {
-                "RID": idx,
-            },
-            ignore_index=True,
-        )
-
         # Trajectory
         [altitude, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
             totalWetMass,
@@ -462,7 +452,7 @@ def main():
         structuresDF.round(c.OUTPUT_PRECISION),
         vehicleDF.round(c.OUTPUT_PRECISION),
         trajectoryDF.round(c.OUTPUT_PRECISION),
-        identificationDF,
+        possibleRocketsDF,
     )  # Output the results rounded appropriately
 
     bar.finish()  # Finish the progress bar
