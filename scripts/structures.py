@@ -64,12 +64,9 @@ def calculate_structures(
 
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
     
-    STRUT_AREA = (1.5 * 0.25 + 1 * 0.25) * tankOD/6.625 * c.IN22M2 # [m^2] area of the struts scaled based on size of tank diameter
 
     ### MASS ESTIMATES
-    COUPLER_MASS_ESTIMATE = (
-        np.pi * (tankOD/2)^2 + np.pi * tankOD * 0.25 * 5
-    )  # [kg] Estimated mass of the aluminum tube couplers
+    
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
     FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
 
@@ -114,13 +111,19 @@ def calculate_structures(
         * c.DENSITY_CF
         * LAYER_THICKNESS
     )  # [kg]
-    heliumBayMass += 2 * COUPLER_MASS_ESTIMATE  # [kg]
+    couplerMass = (
+        np.pi * (tankOD/2)**2 + np.pi * tankOD * 0.25 * 5
+    )  # [kg] Estimated mass of the aluminum tube couplers 
+    heliumBayMass += 2 * couplerMass  # [kg]
 
     ### Upper Airframe Calculations
+    strutArea = (1.5 * 0.25 + 1 * 0.25) * tankOD/6.625 * c.IN22M2 # [m^2] area of the struts scaled based on size of tank diameter
+
+
     upperAirframeLength = upperPlumbingLength  # [m]
     upperAirframeStrutMass = (
         NUMBER_OF_STRUTS
-        * (upperAirframeLength * STRUT_AREA)
+        * (upperAirframeLength * strutArea)
         * c.DENSITY_AL
     )  # [kg]
     upperAirframeMass = (
@@ -139,7 +142,7 @@ def calculate_structures(
     lowerAirframeLength = lowerPlumbingLength  # [m]
     lowerAirframeStrutMass = (
         NUMBER_OF_STRUTS
-        * (lowerAirframeLength * STRUT_AREA)
+        * (lowerAirframeLength * strutArea)
         * c.DENSITY_AL  
     )  # [kg]
     lowerAirframeMass = (
