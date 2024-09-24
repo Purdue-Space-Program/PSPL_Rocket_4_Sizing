@@ -63,12 +63,12 @@ def calculate_structures(
     CD_NOSECODE = 0.5  # [-] Drag coefficient of the nosecone
 
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
-    STRUT_WIDTH = 1 * c.IN2M  # [m] Width of the struts
-    STRUT_HEIGHT = 1.5 * c.IN2M  # [m] Height of the struts
+    
+    STRUT_AREA = (1.5 * 0.25 + 1 * 0.25) * tankOD/6.625 * c.IN22M2 # [m^2] area of the struts scaled based on size of tank diameter
 
     ### MASS ESTIMATES
     COUPLER_MASS_ESTIMATE = (
-        2 * c.LB2KG
+        np.pi * (tankOD/2)^2 + np.pi * tankOD * 0.25 * 5
     )  # [kg] Estimated mass of the aluminum tube couplers
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
     FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
@@ -83,9 +83,9 @@ def calculate_structures(
 
     ### Layer Counts
 
-    HELIUM_TUBE_LAYER_COUNT = 10  # [-] Number of layers in the helium tube
-    LOWER_AIRFRAME_LAYER_COUNT = 5  # [-] Number of layers in the lower airframe
-    UPPER_AIRFRAME_LAYER_COUNT = 5  # [-] Number of layers in the upper airframe
+    HELIUM_TUBE_LAYER_COUNT = 8 * (tankOD/6.625)  # [-] Number of layers in the helium tube
+    LOWER_AIRFRAME_LAYER_COUNT = 4  # [-] Number of layers in the lower airframe
+    UPPER_AIRFRAME_LAYER_COUNT = 4  # [-] Number of layers in the upper airframe
     NOSECONE_LAYER_COUNT = 6  # [-] Number of layers in the nosecone
 
     ### Layup Properties
@@ -120,7 +120,7 @@ def calculate_structures(
     upperAirframeLength = upperPlumbingLength  # [m]
     upperAirframeStrutMass = (
         NUMBER_OF_STRUTS
-        * (upperAirframeLength * STRUT_WIDTH * STRUT_HEIGHT)
+        * (upperAirframeLength * STRUT_AREA)
         * c.DENSITY_AL
     )  # [kg]
     upperAirframeMass = (
@@ -139,8 +139,8 @@ def calculate_structures(
     lowerAirframeLength = lowerPlumbingLength  # [m]
     lowerAirframeStrutMass = (
         NUMBER_OF_STRUTS
-        * (lowerAirframeLength * STRUT_WIDTH * STRUT_HEIGHT)
-        * c.DENSITY_AL  # [assuming 1.5" x 1" struts]
+        * (lowerAirframeLength * STRUT_AREA)
+        * c.DENSITY_AL  
     )  # [kg]
     lowerAirframeMass = (
         np.pi
