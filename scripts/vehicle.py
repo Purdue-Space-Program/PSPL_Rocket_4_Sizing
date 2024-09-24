@@ -1,5 +1,7 @@
 import sys
 import os
+import time
+import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
@@ -93,17 +95,22 @@ def check_limits(
     maxHeightLim,
     minHeightLim,
     height,
-    maxCOPVODLim,
-    copvOD,
+    minTankODLim,
+    tankOD,
 ):
     """ """
+
+    time.sleep(0.1)
+    print("Tank OD: ", tankOD)
+    print("Min Tank OD Limit: ", minTankODLim)
+    
 
     # Organize the limits and values into dictionaries
 
     values = {
         "thrust": thrust,
         "height": height,
-        "copvOD": copvOD,
+        "tank OD": tankOD,
         # Add more actual values as needed
     }
 
@@ -111,7 +118,7 @@ def check_limits(
     limits = {
         "thrust": (minThrustLim, maxThrustLim),
         "height": (minHeightLim, maxHeightLim),
-        "copvOD": (0, maxCOPVODLim),
+        "tank OD": (minTankODLim, np.inf),
         # Add more limits as needed
     }
 

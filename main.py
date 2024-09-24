@@ -64,6 +64,9 @@ def main():
     minHeightLim = limits.loc["Min", "Height (ft)"]
     minHeightLim = minHeightLim * c.FT2M
 
+    COPVODMargin = limits.loc["Max", "COPV OD Margin (in)"]
+    COPVODMargin = COPVODMargin * c.IN2M
+
     # Rocket results
     # This section creates a dataframe to store the results of the rocket analysis
     # Owner: Nick Nielsen
@@ -161,7 +164,7 @@ def main():
         vehicleMassEstimate = (
             vehicleMassEstimate * c.LB2KG
         )  # [kg] Convert the vehicle mass to kilograms
-        vehicleMass = 0  # [kg] Initialize the vehicle mass
+        vehicleMass = -np.inf  # [kg] Initialize the vehicle mass
 
         # Continous Inputs
         chamberPressure = rocket[
@@ -214,7 +217,7 @@ def main():
         copvOD = copv["Outer diameter (in)"]  # [in] Get the outer diameter of the COPV
         copvOD = copvOD * c.IN2M  # [m] Convert the outer diameter to meters
 
-        maxCOPVODlim = copvOD + 2 * c.COPV_OD_MARGIN
+        minTankODLim = copvOD + (2 * COPVODMargin)  # [m] Maximum tank OD limit
         # GET RESULTS
 
         # Avionics
@@ -341,11 +344,12 @@ def main():
             maxHeightLim,
             minHeightLim,
             totalLength,
-            maxCOPVODlim,
-            copvOD,
+            minTankODLim,
+            tankOD,
         )
 
-        if not isWithinLimits:
+        if not isWithinLimits:  
+            print("Removing rocket")
             possibleRocketsDF.drop(
                 idx, inplace=True
             )  # Drop the rocket if it is not within limits
