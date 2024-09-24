@@ -97,13 +97,12 @@ def check_limits(
     height,
     minTankODLim,
     tankOD,
+    maxFuelTankVolumeLim,
+    fuelTankVolume,
+    maxOxidizerTankVolumeLim,
+    oxidizerTankVolume,
 ):
     """ """
-
-    time.sleep(0.1)
-    print("Tank OD: ", tankOD)
-    print("Min Tank OD Limit: ", minTankODLim)
-    
 
     # Organize the limits and values into dictionaries
 
@@ -111,6 +110,8 @@ def check_limits(
         "thrust": thrust,
         "height": height,
         "tank OD": tankOD,
+        "fuel tank volume": fuelTankVolume,
+        "oxidizer tank volume": oxidizerTankVolume,
         # Add more actual values as needed
     }
 
@@ -119,6 +120,8 @@ def check_limits(
         "thrust": (minThrustLim, maxThrustLim),
         "height": (minHeightLim, maxHeightLim),
         "tank OD": (minTankODLim, np.inf),
+        "fuel tank volume": (0, maxFuelTankVolumeLim),
+        "oxidizer tank volume": (0, maxOxidizerTankVolumeLim),
         # Add more limits as needed
     }
 
