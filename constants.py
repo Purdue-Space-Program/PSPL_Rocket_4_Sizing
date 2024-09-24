@@ -1,7 +1,7 @@
 # Main function
 
-CONVERGE_TOLERANCE = 0.01 # [kg] Allowable difference between masses for Structures and Propulsion to converge
-OUTPUT_PRECISION = 3 # [1] Number of digits to round outputs to
+CONVERGE_TOLERANCE = 0.01  # [kg] Allowable difference between masses for Structures and Propulsion to converge
+OUTPUT_PRECISION = 3  # [1] Number of digits to round outputs to
 
 # Conversion Factors
 
@@ -47,6 +47,9 @@ M32L = 1 / L2M3  # [1/m^3] Conversion factor from m^3 to L
 
 M32IN3 = 61023.7  # [in^3/m^3] Conversion factor from m^3 to in^3
 IN32M3 = 1 / M32IN3  # [m^3/in^3] Conversion factor from in^3 to m^3
+
+M32FT3 = 35.3147  # [ft^3/m^3] Conversion factor from m^3 to ft^3
+FT32M3 = 1 / M32FT3  # [m^3/ft^3] Conversion factor from ft^3 to m^3
 
 ## Force
 N2LBF = 0.224809  # [lbf/N] Conversion factor from N to lbf

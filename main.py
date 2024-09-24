@@ -67,6 +67,12 @@ def main():
     COPVODMargin = limits.loc["Max", "COPV OD Margin (in)"]
     COPVODMargin = COPVODMargin * c.IN2M
 
+    maxFuelVolumeLim = limits.loc["Max", "Fuel Volume (in^3)"]
+    maxFuelVolumeLim = maxFuelVolumeLim * c.FT32M3
+
+    maxOxVolumeLim = limits.loc["Max", "Oxidizer Volume (in^3)"]
+    maxOxVolumeLim = maxOxVolumeLim * c.FT32M3
+
     # Rocket results
     # This section creates a dataframe to store the results of the rocket analysis
     # Owner: Nick Nielsen
@@ -346,10 +352,13 @@ def main():
             totalLength,
             minTankODLim,
             tankOD,
+            maxFuelVolumeLim,
+            fuelTankVolume,
+            maxOxVolumeLim,
+            oxTankVolume,
         )
 
-        if not isWithinLimits:  
-            print("Removing rocket")
+        if not isWithinLimits:
             possibleRocketsDF.drop(
                 idx, inplace=True
             )  # Drop the rocket if it is not within limits
