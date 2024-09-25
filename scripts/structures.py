@@ -70,10 +70,7 @@ def calculate_structures(
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
     FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
 
-    RECOVERY_MASS_ESTIMATE = 25  # [lbm] Estimated mass of the recovery bay
-    RECOVERY_MASS_ESTIMATE = (
-        RECOVERY_MASS_ESTIMATE * c.LB2KG
-    )  # [kg] Estimated mass of the recovery bay
+    RECOVERY_MASS_ESTIMATE = 25  * c.LB2KG  # [kg] Estimated mass of the recovery bay
 
     ### Length Estimates
     RECOVERY_BAY_LENGTH = 24 * c.IN2M  # [m] Length of the recovery bay
@@ -99,7 +96,7 @@ def calculate_structures(
 
     noseconeMass = (
         noseconeSA * c.DENSITY_CF * LAYER_THICKNESS * NOSECONE_LAYER_COUNT
-    ) + TIP_MASS_ESTIMATE  # [kg]
+    ) + TIP_MASS_ESTIMATE + COUPLER_MASS_ESTIMATE # [kg]
 
     ### Helium Tube Calculations
     heliumBayLength = COPVLength  # [m] Length of the helium tube
