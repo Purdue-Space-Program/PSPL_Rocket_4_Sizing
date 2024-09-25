@@ -106,9 +106,9 @@ def fluids_sizing(
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
 
     # Plumbing
-    VENTURI_DP_RATIO = 0.8  # [1] venturi outlet pressure / tank pressure, based on past rockets
+    VENTURI_DP_RATIO = 0.775  # [1] venturi outlet pressure / tank pressure, based on past rockets
     REGEN_DP_RATIO = 1 / 1.3 # [1] regen inlet pressure / regen inlet pressure (pressure upstream of regen jacket is 30% higher than downstream)
-    INJECTOR_DP_RATIO = 0.8 # [1] injector outlet pressure / injector inlet pressure, based on past rockets
+    INJECTOR_DP_RATIO = 0.775 # [1] injector outlet pressure / injector inlet pressure, based on past rockets
     CHAMBER_DP_RATIO = VENTURI_DP_RATIO * REGEN_DP_RATIO * INJECTOR_DP_RATIO
 
     COPV_TEMP_1 = T_INF + 15  # [K] Assumed initial COPV temperature
