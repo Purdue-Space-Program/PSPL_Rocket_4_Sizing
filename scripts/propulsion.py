@@ -211,7 +211,9 @@ def calculate_propulsion(
             idealExhaustVelocity * EFFICIENCY_FACTOR
         )  # [kg/s] total mass flow rate
 
-        throatArea = EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure  # [m^2] throat area
+        throatArea = (
+            EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure
+        )  # [m^2] throat area
         throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
         exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
@@ -231,7 +233,9 @@ def calculate_propulsion(
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
     totalMassFlowRate = coreMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
-    burnTime = (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
+    burnTime = (
+        (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate
+    )  # [s] burn time
 
     chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
     chamberOD = chamberID + CHAMBER_WALL_THICKNESS
@@ -269,7 +273,7 @@ def calculate_propulsion(
     chamberMass = (
         chamberMaterialDensity
         * (np.pi / 4)
-        * (chamberOD** 2 - chamberID**2)
+        * (chamberOD**2 - chamberID**2)
         * thrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
@@ -326,29 +330,29 @@ def pumps():
     print(D)
 
 
-def main():
-    Pc = 200 * c.PSI2PA
-    Pe = 11 * c.PSI2PA
-    OF = 2.7
-    fuel = "methane"
-    ox = "oxygen"
-    fuelCEA = "CH4(L)"
-    oxCEA = "O2(L)"
+# def main():
+#     Pc = 200 * c.PSI2PA
+#     Pe = 11 * c.PSI2PA
+#     OF = 2.7
+#     fuel = "methane"
+#     ox = "oxygen"
+#     fuelCEA = "CH4(L)"
+#     oxCEA = "O2(L)"
 
-    ceaDATA = run_CEA(Pc, Pe, OF, fuel, ox, fuelCEA, oxCEA)
-    cstar = ceaDATA[0]
-    Isp = ceaDATA[1]
-    expRatio = ceaDATA[2]
-    Lstar = ceaDATA[-1]
+#     ceaDATA = run_CEA(Pc, Pe, OF, fuel, ox, fuelCEA, oxCEA)
+#     cstar = ceaDATA[0]
+#     Isp = ceaDATA[1]
+#     expRatio = ceaDATA[2]
+#     Lstar = ceaDATA[-1]
 
-    TWR = 5.18
-    vehicleMass = 74.69
+#     TWR = 5.18
+#     vehicleMass = 74.69
 
-    prop = calculate_propulsion(
-        TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7
-    )
-    print(prop)
+#     prop = calculate_propulsion(
+#         TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7
+#     )
+#     print(prop)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

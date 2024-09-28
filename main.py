@@ -443,6 +443,7 @@ def main():
             exitArea,
             exitPressure,
             burnTime,
+            totalLength,
             plots=0,
         )
 
