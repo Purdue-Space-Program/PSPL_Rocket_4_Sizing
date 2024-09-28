@@ -33,6 +33,7 @@ def calculate_trajectory(
     exitArea,
     exitPressure,
     burnTime,
+    totalLength,
     plots,
 ):
     """
@@ -56,6 +57,8 @@ def calculate_trajectory(
         Exit pressure of the nozzle [Pa].
     burnTime : float
         Burn time of the engine [s].
+    totalLength : float
+        Total Length of Rocket [m].
     plots : bool
         Boolean for plotting, 1 = on, 0 = off [-].
 
@@ -74,6 +77,9 @@ def calculate_trajectory(
     # Rocket Properties
     referenceArea = np.pi * (tankOD) ** 2 / 4  # [m^2] reference area of the rocket
     mass = wetMass  # [kg] initial mass of the rocket
+
+    cD = 0.4
+    ascentDragCoeff = cD * (totalLength / 6.35) * (tankOD / 0.203)
 
     # Initial Conditions
     altitude = c.FAR_ALTITUDE  # [m] initial altitude of the rocket
