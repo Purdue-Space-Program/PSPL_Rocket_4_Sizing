@@ -85,7 +85,7 @@ def calculate_trajectory(
     altitude = c.FAR_ALTITUDE  # [m] initial altitude of the rocket
     velocity = 0  # [m/s] initial velocity of the rocket
     time = 0  # [s] initial time of the rocket
-    dt = 0.1  # [s] time step of the rocket
+    dt = 0.05  # [s] time step of the rocket
 
     # Array Initialization:
     altitudeArray = []
@@ -125,6 +125,7 @@ def calculate_trajectory(
     for i in range(len(altitudeArray)):
         if altitudeArray[i] >= c.RAIL_HEIGHT:
             exitVelo = velocityArray[i]
+            exitAccel = accelArray[i]
             break
 
     if plots == 1:
@@ -136,8 +137,4 @@ def calculate_trajectory(
         plt.grid()
         plt.show()
 
-    return [
-        float(altitude),
-        float(max(accelArray)),
-        float(exitVelo),
-    ]
+    return [float(altitude), float(max(accelArray)), float(exitVelo), float(exitAccel)]

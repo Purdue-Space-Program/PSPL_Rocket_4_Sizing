@@ -29,6 +29,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 import numpy as np
 import progressbar as pb
+from progressbar import Timer, ETA
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -72,6 +73,9 @@ def main():
 
     maxOxVolumeLim = limits.loc["Max", "Oxidizer Volume (in^3)"]
     maxOxVolumeLim = maxOxVolumeLim * c.FT32M3
+
+    maxRailAccelLim = limits.loc["Max", "Rail Acceleration (g)"] * c.GRAVITY
+    minRailAccelLim = limits.loc["Min", "Rail Acceleration (g)"] * c.GRAVITY
 
     # Rocket results
     # This section creates a dataframe to store the results of the rocket analysis
@@ -148,6 +152,7 @@ def main():
             "Altitude [ft]",
             "Max Acceleration [g]",
             "Rail Exit Velocity [ft/s]",
+            "Rail Exit Acceleration [g]",
         ]
     )
 
@@ -156,10 +161,20 @@ def main():
     # Owner: Nick Nielsen
 
     numberPossibleRockets = len(possibleRocketsDF)  # Get the number of possible rockets
-
-    bar = pb.ProgressBar(
-        maxval=numberPossibleRockets
-    )  # Create a progress bar with the number of possible rockets as the max value
+    widgets = [
+        " [",
+        Timer(),
+        "] ",
+        pb.Percentage(),
+        " (",
+        pb.SimpleProgress(),
+        ") ",
+        " [",
+        ETA(),
+        "] ",
+    ]
+    bar = pb.ProgressBar(maxval=numberPossibleRockets, widgets=widgets)
+    # Create a progress bar with the number of possible rockets as the max value
 
     bar.start()  # Start the progress bar
 
@@ -364,6 +379,30 @@ def main():
             )  # Drop the rocket if it is not within limits
             continue  # Skip the rest of the loop if the rocket is not within limits
 
+        # Trajectory
+        [altitude, maxAccel, railExitVelo, railExitAccel] = (
+            trajectory.calculate_trajectory(
+                totalWetMass,
+                totalMassFlowRate,
+                idealThrust,
+                tankOD,
+                dragCoeff,
+                exitArea,
+                exitPressure,
+                burnTime,
+                totalLength,
+                plots=0,
+            )
+        )
+
+        isWithinPostLimits = vehicle.check_post_limits(
+            maxRailAccelLim, minRailAccelLim, railExitAccel
+        )
+
+        if not isWithinPostLimits:
+            possibleRocketsDF.drop(idx, inplace=True)
+            continue
+
         fluidsystemsDF = fluidsystemsDF._append(
             {
                 "Fluid Systems Mass [lbm]": fluidsystemsMass * c.KG2LB,
@@ -433,25 +472,12 @@ def main():
             ignore_index=True,
         )
 
-        # Trajectory
-        [altitude, maxAccel, railExitVelo] = trajectory.calculate_trajectory(
-            totalWetMass,
-            totalMassFlowRate,
-            idealThrust,
-            tankOD,
-            dragCoeff,
-            exitArea,
-            exitPressure,
-            burnTime,
-            totalLength,
-            plots=0,
-        )
-
         trajectoryDF = trajectoryDF._append(
             {
                 "Altitude [ft]": altitude * c.M2FT,
                 "Max Acceleration [g]": maxAccel / c.GRAVITY,
                 "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
+                "Rail Exit Acceleration [g]": railExitAccel / c.GRAVITY,
             },
             ignore_index=True,
         )
