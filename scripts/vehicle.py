@@ -133,3 +133,22 @@ def check_limits(
                 return False  # Return False if the actual value is outside the limits
     return True  # Return True if all actual values are within the limits
     # Check the limits
+
+
+def check_post_limits(maxRailExitAccelLim, minRailExitAccelim, railExitAccel):
+    values = {
+        "rail exit acceleration": railExitAccel,
+        # Add more actual values as needed
+    }
+
+    limits = {
+        "rail exit acceleration": (minRailExitAccelim, maxRailExitAccelLim),
+        # Add more limits as needed
+    }
+
+    for parameter, (minLimit, maxLimit) in limits.items():
+        if parameter in values:
+            actualValue = values[parameter]
+            if actualValue < minLimit or actualValue > maxLimit:
+                return False
+    return True
