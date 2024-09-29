@@ -299,7 +299,7 @@ def calculate_propulsion(
         oxMassFlowRate,
         fuelMassFlowRate,
         burnTime,
-        chamberLength,
+        thrustChamberLength,
         chamberMass,
         injectorMass,
         totalPropulsionMass,
