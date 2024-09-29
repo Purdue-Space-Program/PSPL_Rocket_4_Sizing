@@ -211,7 +211,9 @@ def calculate_propulsion(
             idealExhaustVelocity * EFFICIENCY_FACTOR
         )  # [kg/s] total mass flow rate
 
-        throatArea = EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure  # [m^2] throat area
+        throatArea = (
+            EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure
+        )  # [m^2] throat area
         throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
         exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
@@ -231,7 +233,9 @@ def calculate_propulsion(
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
     totalMassFlowRate = coreMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
-    burnTime = (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate  # [s] burn time
+    burnTime = (
+        (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate
+    )  # [s] burn time
 
     chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
     chamberOD = chamberID + CHAMBER_WALL_THICKNESS
@@ -269,7 +273,7 @@ def calculate_propulsion(
     chamberMass = (
         chamberMaterialDensity
         * (np.pi / 4)
-        * (chamberOD** 2 - chamberID**2)
+        * (chamberOD**2 - chamberID**2)
         * thrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
@@ -305,12 +309,16 @@ def calculate_propulsion(
 
 
 def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
-    volumetricFlowrate = massFlowRate / density  # convert from lbm/s to gpm
-    deltaP = inletPressure - exitPressure
-    developedHead = deltaP / density
-    pumpEfficiency = 0.5  # Constant??
+    # Constants
+    PUMP_EFFICIENCY = 0.5  # [-] pump efficiency
+
+    volumetricFlowrate = massFlowRate / density  # [m^3/s] volumetric flow rate
+    deltaP = inletPressure - exitPressure  # [Pa] pressure difference
+    developedHead = (
+        deltaP / density
+    )  # shoulnt this be deltaP / (density * g) to get head in meters?
     # specificSpeed = (rpm * volumetricFlowrate**0.5) / developedHead**0.75
-    power = (massFlowRate * developedHead) / pumpEfficiency
+    power = (massFlowRate * developedHead) / PUMP_EFFICIENCY  # [W] pump power
     torque = power / ((2 * np.pi / 60) * rpm)
 
     return power, torque

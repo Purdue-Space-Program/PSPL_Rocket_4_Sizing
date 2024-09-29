@@ -11,9 +11,23 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
 
 
-def calculate_avionics():
+def pumpfed_avionics_sizing(powerRequired, cellDF):
 
-    mass = 6  # [lb] estimated mass of avionics
-    mass = 6 * c.LB2KG  # [kg] estimated mass of avionics
+    # Constants
+    MOTOR_EFFICIENCY = 0.85  # estimated motor efficiency
+    LIPO_CELL_VOLTAGE = 22.2  # [V] nominal voltage of a LiPo cell
+    LIPO_CELL_DISCHARGE_CURRENT = 80  # [A] maximum discharge current of a LiPo cell
+    LIPO_CELL_MASS = 22.2  # [g] mass of a LiPo cell
 
-    return [mass]
+    LIPO_CELL_MASS = LIPO_CELL_MASS * c.G2KG  # [kg] Convert mass to kg
+
+    power = powerRequired / MOTOR_EFFICIENCY  # [W] power required for avionics
+
+    
+        numberOfTotalCells = numberOfSeriesCells * numberOfParallelCells
+
+    return [
+        totalAviMass,
+        numberOfParallelCells,
+        numberOfSeriesCells,
+    ]
