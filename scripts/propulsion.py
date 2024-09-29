@@ -205,7 +205,7 @@ def calculate_propulsion(
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
         idealExhaustVelocity = (
-            specificImpulse * c.GRAVITY
+            specificImpulse * c.GRAVITY * EFFICIENCY_FACTOR**2
         )  # [m/s] ideal exhaust velocity
         coreMassFlowRate = jetThrust / (
             idealExhaustVelocity * EFFICIENCY_FACTOR
@@ -238,9 +238,13 @@ def calculate_propulsion(
     )  # [s] burn time
 
     chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
-    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
+    if contractionRatio > 6 or contractionRatio < 4: # Reset contraction ratio to a reasonable value
+        contractionRatio = 4.5
+    chamberArea = contractionRatio * throatArea
+    chamberID = 2 * np.sqrt(chamberArea / np.pi)
+    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
@@ -259,7 +263,7 @@ def calculate_propulsion(
         )
     )  # [m^3] nozzle converging section volume
     chamberVolume = (
-        characteristicLength * throatArea - convergeVolume
+        (characteristicLength * throatArea) - convergeVolume
     )  # [m^3] chamber volume
     chamberLength = chamberVolume / chamberArea  # [m] chamber length
     thrustChamberLength = (
@@ -284,10 +288,10 @@ def calculate_propulsion(
         injectorMaterialDensity
         * (np.pi / 4)
         * (
-            2 * c.IN2M * (chamberOD**2 - (chamberOD - 1.5 * c.IN2M) ** 2)
-            + 2 * 0.75 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
+            2 * c.IN2M * (chamberOD**2 - (chamberOD - 0.5 * c.IN2M)**2)
+            + 2 * 0.25 * c.IN2M * (chamberOD - 1 * c.IN2M)**2
         )
-    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.y65" thick walls
+    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.25" thick walls
 
     totalPropulsionMass = (
         chamberMass + injectorMass
@@ -299,7 +303,7 @@ def calculate_propulsion(
         oxMassFlowRate,
         fuelMassFlowRate,
         burnTime,
-        chamberLength,
+        thrustChamberLength,
         chamberMass,
         injectorMass,
         totalPropulsionMass,
