@@ -100,7 +100,6 @@ def fluids_sizing(
     # Constants
 
     # Propellant
-    T_INF = 20 + 273.15  # [K] Assumed ambient temperature
     R_PROP = (
         100 - c.ULLAGE_PERCENT
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
@@ -109,7 +108,7 @@ def fluids_sizing(
     CHAMBER_DP_RATIO = (
         0.6  # [1] Chamber pressure / tank pressure, based on past rockets
     )
-    COPV_TEMP_1 = T_INF + 15  # [K] Assumed initial COPV temperature
+    COPV_TEMP_1 = c.TAMBIENT + 15  # [K] Assumed initial COPV temperature
     BURNOUT_PRESSURE_RATIO = (
         2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
     )
@@ -156,7 +155,7 @@ def fluids_sizing(
     tankID = tankOD - 2 * tankThickness  # [m] Tank wall inner diameter
 
     heliumCv = PropsSI(
-        "CVMASS", "P", 1 * c.ATM2PA, "T", T_INF, "helium"
+        "CVMASS", "P", 1 * c.ATM2PA, "T", c.TAMBIENT, "helium"
     )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     copvPressure1 = copvPressure  # [Pa] COPV initial pressure
@@ -309,24 +308,18 @@ def fluids_sizing(
 #   BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
 
 
-def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
+def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, npshRequired, copvMassOld):
 
-    # Allowable alternate COPVs
-    BZB_COPV_VOLUME = 9 * c.L2M3  # [m^3] Volume of the BZB COPV
-    BZB_COPV_PRESSURE = 4950 * c.PSI2PA  # [Pa] Maximum pressure of the BZB COPV
-    BZ1_COPV_VOLUME = 5 * c.L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
-    BZ1_COPV_PRESSURE = 4500 * c.PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
+    tankTotalVolume = oxTankVolume + fuelTankVolume
 
     # Propellant
-    T_INF = 20 + 273.15  # [K] Assumed ambient temperature
-    ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
     R_PROP = (
-        100 - ULLAGE_PERCENT
+        100 - c.ULLAGE_PERCENT
     ) / 100  # [1] Ratio of total tank volume to total propellant volume
 
     # Plumbing
     PUMP_DP_RATIO = 0.9  # [1] Pump inlet pressure / tank pressure, based on past rockets [TEMPORARY, NEED TO FIND ACTUAL VALUE]
-    COPV_TEMP_1 = T_INF + 15  # [K] Assumed initial COPV temperature
+    COPV_TEMP_1 = c.TAMBIENT + 15  # [K] Assumed initial COPV temperature
     BURNOUT_PRESSURE_RATIO = (
         2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
     )
@@ -337,11 +330,11 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
 
     # Volume checks
     heliumCv = PropsSI(
-        "CVMASS", "P", 1 * c.ATM2PA, "T", T_INF, "helium"
+        "CVMASS", "P", 1 * c.ATM2PA, "T", c.TAMBIENT, "helium"
     )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     # BZ1 COPV volume check
-    copvPressure1 = BZ1_COPV_PRESSURE  # [Pa] COPV initial pressure
+    copvPressure1 = c.BZ1_COPV_PRESSURE  # [Pa] COPV initial pressure
     copvPressure2 = (
         BURNOUT_PRESSURE_RATIO * pumpTankPressure
     )  # [Pa] COPV burnout pressure
@@ -367,8 +360,8 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
 
     tankMaxVolume = K_PRESSURIZATION * (
         (
-            (copvDensity1 * BZ1_COPV_VOLUME * copvEnergy1)
-            - (copvDensity2 * BZ1_COPV_VOLUME * copvEnergy2)
+            (copvDensity1 * c.BZ1_COPV_VOLUME * copvEnergy1)
+            - (copvDensity2 * c.BZ1_COPV_VOLUME * copvEnergy2)
         )
         / (pumpTankPressure * (heliumCv / c.HE_GAS_CONSTANT + R_PROP))
     )  # [m^3] Maximum propellant tank volume with BZ1 COPV
@@ -379,7 +372,7 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
         BZ1copvUsable = False
 
     # BZB COPV volume check
-    copvPressure1 = BZB_COPV_PRESSURE  # [Pa] COPV initial pressure
+    copvPressure1 = c.BZB_COPV_PRESSURE  # [Pa] COPV initial pressure
     copvPressure2 = (
         BURNOUT_PRESSURE_RATIO * pumpTankPressure
     )  # [Pa] COPV burnout pressure
@@ -405,8 +398,8 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
 
     tankMaxVolume = K_PRESSURIZATION * (
         (
-            (copvDensity1 * BZB_COPV_VOLUME * copvEnergy1)
-            - (copvDensity2 * BZB_COPV_VOLUME * copvEnergy2)
+            (copvDensity1 * c.BZB_COPV_VOLUME * copvEnergy1)
+            - (copvDensity2 * c.BZB_COPV_VOLUME * copvEnergy2)
         )
         / (pumpTankPressure * (heliumCv / c.HE_GAS_CONSTANT + R_PROP))
     )  # [m^3] Maximum propellant tank volume with BZB COPV
@@ -416,5 +409,13 @@ def pumpfed_fluids_sizing(tankTotalVolume, npshRequired):
     else:
         BZBcopvUsable = False
 
-    # Return outputs
-    return (BZ1copvUsable, BZBcopvUsable)
+    # Get mass of new COPV
+    if BZ1copvUsable == True:
+        copvMassNew = c.BZ1_COPV_MASS
+    elif BZBcopvUsable == True:
+        copvMassNew = c.BZB_COPV_MASS
+    else:
+        copvMassNew = copvMassOld
+    
+    return copvMassNew
+    
