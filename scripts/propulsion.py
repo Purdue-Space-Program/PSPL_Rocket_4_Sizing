@@ -205,7 +205,7 @@ def calculate_propulsion(
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
         idealExhaustVelocity = (
-            specificImpulse * c.GRAVITY * EFFICIENCY_FACTOR**2
+            specificImpulse * c.GRAVITY
         )  # [m/s] ideal exhaust velocity
         coreMassFlowRate = jetThrust / (
             idealExhaustVelocity * EFFICIENCY_FACTOR
@@ -311,25 +311,37 @@ def calculate_propulsion(
         exitArea,
     ]
 
-
-def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
-    volumetricFlowrate = massFlowRate / density  # convert from lbm/s to gpm
-    deltaP = inletPressure - exitPressure
-    developedHead = deltaP / density
+def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
     pumpEfficiency = 0.5  # Constant??
-    # specificSpeed = (rpm * volumetricFlowrate**0.5) / developedHead**0.75
-    power = (massFlowRate * developedHead) / pumpEfficiency
-    torque = power / ((2 * np.pi / 60) * rpm)
 
-    return power, torque
+    oxInletPressure = 60 * c.PSI2PA
+    fuelInletPressure = 60 * c.PSI2PA
+
+    oxExitPressure = 1.2 * newChamberPressure
+    fuelExitPressure = 1.2 * 1.4 * newChamberPressure
+
+    if fuel.lower() == "methane":
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
+
+    elif fuel.lower() == "ethanol":
+        fuelTemp = c.TAMBIENT
+
+    elif fuel.lower() == "jet-a":
+        fluid = "dodecane"
+        fuelTemp = c.TAMBIENT
+
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+
+    oxDensity = PropsSI("D", "P", oxInletPressure, "T", oxTemp, oxidizer)  # Density [kg/m3]
+    fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", oxTemp, fuel)  # Density [kg/m3]
+    
+    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (oxDensity * c.GRAVITY)
+    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency
+    oxTorque = oxPower / ((2 * np.pi / 60) * rpm)
+
+    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (fuelDensity * c.GRAVITY)
+    fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
+    fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)
 
 
-def pumps():
-    # Known fluid properties
-    fluid = "oxygen"  # fluid name
-    P = 101325  # Pressure [Pa]
-    T = 400  # Temperature [Kelvin]
-    # Use CoolProp to find density
-    D = PropsSI("D", "P", P, "T", T, fluid)  # Density [kg/m3]
-    print(D)
 
