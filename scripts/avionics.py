@@ -11,18 +11,17 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
 
 
-def avionics_sizng():
+def avionics_sizing():
     mass = 6  # [lbm] mass of avionics
-    mass = mass * c.LBM2KG  # [kg] Convert mass to kg
+    mass = mass * c.LB2KG  # [kg] Convert mass to kg
 
     return mass
 
 
-def pumpfed_avionics_sizing(powerRequired, motorDF, cellDF):
-
+def pumpfed_avionics_sizing(powerRequired, motorDF):
     # Constants
     BASE_AVI_MASS = 6  # [lbm] base mass of avionics
-    BASE_AVI_MASS = BASE_AVI_MASS * c.LBM2KG  # [kg] Convert mass to kg
+    BASE_AVI_MASS = BASE_AVI_MASS * c.LB2KG  # [kg] Convert mass to kg
 
     MOTOR_EFFICIENCY = 0.85  # estimated motor efficiency
 
@@ -34,45 +33,60 @@ def pumpfed_avionics_sizing(powerRequired, motorDF, cellDF):
 
     # Power required (adjusted for motor efficiency)
     totalPowerRequired = powerRequired / MOTOR_EFFICIENCY  # [W]
-
-    optimal_solution = None
-    min_total_mass = float("inf")
+    print("Total Power Required:", totalPowerRequired)
 
     for index, motor in motorDF.iterrows():
-        motor_voltage = motor["Max Volts"]
-        motor_current = totalPowerRequired / motor_voltage
+        motorVoltage = motor["Max Volts [V]"]  # [V]
+        motorCurrent = totalPowerRequired / motorVoltage  # [A]
 
         # Check if motor can handle the current
-        if motor_current > motor["Max Amps"]:
+        if motorCurrent > motor["Max Amps [A]"]:
+            print(f"Motor {motor['Motor']} cannot handle the current!")
+            print(f"Motor Current: {motorCurrent} A")
+            print(f"Max Amps: {motor['Max Amps [A]']} A")
             continue
 
         # Number of series cells to meet the voltage requirement
-        numSeriesCells = motor_voltage / LIPO_CELL_VOLTAGE
-        numSeriesCells = np.ceil(numSeriesCells)  # Round up
+        numSeriesCells = motorVoltage / LIPO_CELL_VOLTAGE  # [-]
+        numSeriesCells = np.ceil(numSeriesCells)  # [-] Round up
 
         # Number of parallel cells to meet the current requirement
-        numParallelCells = motor_current / LIPO_CELL_DISCHARGE_CURRENT
-        numParallelCells = np.ceil(numParallelCells)  # Round up
+        numParallelCells = motorCurrent / LIPO_CELL_DISCHARGE_CURRENT  # [-]
+        numParallelCells = np.ceil(numParallelCells)  # [-]
 
         # Total number of cells and mass of the battery pack
-        totalCells = numSeriesCells * numParallelCells
-        totalBatteryMass = totalCells * LIPO_CELL_MASS
+        totalCells = numSeriesCells * numParallelCells  # [-]
+        totalBatteryMass = totalCells * LIPO_CELL_MASS  # [Kg]
+        print("Total Battery Mass:", totalBatteryMass)
+
+        motorMass = (0.243) * (powerRequired / 1000) ** (
+            0.94
+        )  # [Kg] Andrews weird ass empirical coorelation
+
+        print("Motor Mass:", motorMass)
 
         # Total mass (motor + battery)
-        total_mass = totalBatteryMass + motor["Motor Mass [kg]"]
+        totalMass = totalBatteryMass + motorMass + BASE_AVI_MASS  # [Kg]
 
         # Track the optimal solution (minimize total mass)
-        if total_mass < min_total_mass:
-            min_total_mass = total_mass
-            optimal_solution = [
-                total_mass,
-                numSeriesCells,
-                numParallelCells,
-                totalCells,
-                totalBatteryMass,
-                motor["Motor Mass [kg]"],
-                motor["Max Amps"],
-                motor["Max Volts"],
-            ]
+        if totalMass < minTotalMass:
+            minTotalMass = totalMass
+            optimalMass = totalMass
+            optimalNumSeriesCells = numSeriesCells
+            optimalNumParallelCells = numParallelCells
+            optimalTotalCells = totalCells
+            optimalBatteryMass = totalBatteryMass
+            optimalMotorMass = motorMass
 
-    return optimal_solution
+    # Ensure there's a valid solution
+    if optimalMass is None:
+        raise ValueError("No valid motor configuration found!")
+
+    return [
+        optimalMass,
+        optimalNumSeriesCells,
+        optimalNumParallelCells,
+        optimalTotalCells,
+        optimalBatteryMass,
+        optimalMotorMass,
+    ]
