@@ -73,6 +73,10 @@ DENSITY_INCO = 8190  # [kg/m^3] Density
 
 DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
+## 316 Stainless Steel
+
+DENSITY_SS316 = 7980 # [kg/m^3] Density
+
 # Fluids Constants
 
 FILM_PERCENT = 10  # [1] Percent of fuel mass flow dedicated to film cooling

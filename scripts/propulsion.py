@@ -272,7 +272,7 @@ def calculate_propulsion(
 
     # Mass estimates
     chamberMaterialDensity = (
-        c.DENSITY_CF  # [kg/m^3] chamber wall material density (Inconel 718)
+        c.DENSITY_INCO  # [kg/m^3] chamber wall material density (Inconel 718)
     )
     chamberMass = (
         chamberMaterialDensity
@@ -313,6 +313,8 @@ def calculate_propulsion(
 
 def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
     pumpEfficiency = 0.5  # Constant??
+    dynaHeadLoss = .2 # Dynamic Head Loss Factor (Assumed Constant)
+    exitFlowCoef = .8 # Exit Flow Coeffiecnt (Assumed Constant)
 
     oxInletPressure = 60 * c.PSI2PA
     fuelInletPressure = 60 * c.PSI2PA
@@ -343,5 +345,39 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
     fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)
 
+    # Mass Correlations
+
+    # Shafts
+    shaftMaterialDensity = (
+        c.DENSITY_SS316
+    ) # [kg/m^3] Stainless Steel 316 material density
+    shaftLength = 3.5 * c.IN2M
+    shaftDiameter = .5 * c.IN2M
+    shaftMass = (
+        2 * (shaftLength * (shaftDiameter / 2)**2 * np.pi * shaftMaterialDensity)
+    ) # [kg] Mass of shaft, bearings, and seals for both pumps (condidering constant, equal diameter shafts for both pumps)
+   
+    # Impellers
+    oxImpellerDia = (
+        np.sqrt((8 * c.GRAVITY * oxDevelopedHead) 
+                 / (((rpm * 2 * np.pi / 60)**2)
+                 * (1 + dynaHeadLoss * exitFlowCoef**2)))
+    ) # Ox Impeller Diameter [m] 
+    fuelImpellerDia = (
+        np.sqrt((8 * c.GRAVITY * fuelDevelopedHead) 
+                 / (((rpm * 2 * np.pi / 60)**2)
+                 * (1 + dynaHeadLoss * exitFlowCoef**2)))
+    ) # Fuel Impeller Diameter [m]
+    impellerThickness = .375 * c.IN2M
+    
+    impellerMass = (
+        (oxImpellerDia / 2)**2 * np.pi * impellerThickness 
+        + (fuelImpellerDia / 2)**2 * np.pi * impellerThickness
+    )
+
+    #voluteMass = 
+
+    #pumpsMass = shaftMass + impellerMass + voluteMass
+   
 
 
