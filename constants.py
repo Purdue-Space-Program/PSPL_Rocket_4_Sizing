@@ -100,6 +100,11 @@ MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
 RAIL_HEIGHT = 18.29  # [m] height of the rail
 
+# Components
+
+BZ1_COPV_MASS = 3 # [kg] [GUESS, NEED TO UPDATE] Mass of BZ1 COPV
+BZB_COPV_MASS = 5.7 # [kg] Mass of BZB COPV (Luxfer T90A)
+
 # Other Constants
 
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
