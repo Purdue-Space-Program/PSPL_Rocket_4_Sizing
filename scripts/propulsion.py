@@ -238,9 +238,15 @@ def calculate_propulsion(
     )  # [s] burn time
 
     chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
-    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
+    if (
+        contractionRatio > 6 or contractionRatio < 4
+    ):  # Reset contraction ratio to a reasonable value
+        contractionRatio = 4.5
+    chamberArea = contractionRatio * throatArea
+    chamberID = 2 * np.sqrt(chamberArea / np.pi)
+    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
@@ -259,8 +265,8 @@ def calculate_propulsion(
         )
     )  # [m^3] nozzle converging section volume
     chamberVolume = (
-        characteristicLength * throatArea - convergeVolume
-    )  # [m^3] chamber volume
+        characteristicLength * throatArea
+    ) - convergeVolume  # [m^3] chamber volume
     chamberLength = chamberVolume / chamberArea  # [m] chamber length
     thrustChamberLength = (
         chamberLength + convergeLength + divergeLength
@@ -284,10 +290,10 @@ def calculate_propulsion(
         injectorMaterialDensity
         * (np.pi / 4)
         * (
-            2 * c.IN2M * (chamberOD**2 - (chamberOD - 1.5 * c.IN2M) ** 2)
-            + 2 * 0.75 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
+            2 * c.IN2M * (chamberOD**2 - (chamberOD - 0.5 * c.IN2M) ** 2)
+            + 2 * 0.25 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
         )
-    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.y65" thick walls
+    )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.25" thick walls
 
     totalPropulsionMass = (
         chamberMass + injectorMass
@@ -308,55 +314,40 @@ def calculate_propulsion(
     ]
 
 
-def calcPowerTorque(density, massFlowRate, inletPressure, exitPressure, rpm):
-    # Constants
-    PUMP_EFFICIENCY = 0.5  # [-] pump efficiency
+def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
+    pumpEfficiency = 0.5  # Constant??
 
-    volumetricFlowrate = massFlowRate / density  # [m^3/s] volumetric flow rate
-    deltaP = inletPressure - exitPressure  # [Pa] pressure difference
-    developedHead = (
-        deltaP / density
-    )  # shoulnt this be deltaP / (density * g) to get head in meters?
-    # specificSpeed = (rpm * volumetricFlowrate**0.5) / developedHead**0.75
-    power = (massFlowRate * developedHead) / PUMP_EFFICIENCY  # [W] pump power
-    torque = power / ((2 * np.pi / 60) * rpm)
+    oxInletPressure = 60 * c.PSI2PA
+    fuelInletPressure = 60 * c.PSI2PA
 
-    return power, torque
+    oxExitPressure = 1.2 * newChamberPressure
+    fuelExitPressure = 1.2 * 1.4 * newChamberPressure
 
+    if fuel.lower() == "methane":
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
 
-def pumps():
-    # Known fluid properties
-    fluid = "oxygen"  # fluid name
-    P = 101325  # Pressure [Pa]
-    T = 400  # Temperature [Kelvin]
-    # Use CoolProp to find density
-    D = PropsSI("D", "P", P, "T", T, fluid)  # Density [kg/m3]
-    print(D)
+    elif fuel.lower() == "ethanol":
+        fuelTemp = c.TAMBIENT
 
+    elif fuel.lower() == "jet-a":
+        fluid = "dodecane"
+        fuelTemp = c.TAMBIENT
 
-# def main():
-#     Pc = 200 * c.PSI2PA
-#     Pe = 11 * c.PSI2PA
-#     OF = 2.7
-#     fuel = "methane"
-#     ox = "oxygen"
-#     fuelCEA = "CH4(L)"
-#     oxCEA = "O2(L)"
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
 
-#     ceaDATA = run_CEA(Pc, Pe, OF, fuel, ox, fuelCEA, oxCEA)
-#     cstar = ceaDATA[0]
-#     Isp = ceaDATA[1]
-#     expRatio = ceaDATA[2]
-#     Lstar = ceaDATA[-1]
+    oxDensity = PropsSI(
+        "D", "P", oxInletPressure, "T", oxTemp, oxidizer
+    )  # Density [kg/m3]
+    fuelDensity = PropsSI(
+        "D", "P", fuelInletPressure, "T", oxTemp, fuel
+    )  # Density [kg/m3]
 
-#     TWR = 5.18
-#     vehicleMass = 74.69
+    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (oxDensity * c.GRAVITY)
+    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency
+    oxTorque = oxPower / ((2 * np.pi / 60) * rpm)
 
-#     prop = calculate_propulsion(
-#         TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7
-#     )
-#     print(prop)
-
-
-# if __name__ == "__main__":
-#     main()
+    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (
+        fuelDensity * c.GRAVITY
+    )
+    fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
+    fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)

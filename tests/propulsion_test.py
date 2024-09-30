@@ -7,10 +7,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from scripts import propulsion
 import constants as c
 
-Pc = 200 * c.PSI2PA
+Pc = 150 * c.PSI2PA
 Pe = 11 * c.PSI2PA
-OF = 2.7
-fuel = "methane"
+OF = 2.3
+fuel = "jet-a"
 ox = "oxygen"
 
 
@@ -20,8 +20,11 @@ Isp = ceaDATA[1]
 expRatio = ceaDATA[2]
 Lstar = ceaDATA[-1]
 
-TWR = 5.18
-vehicleMass = 74.69
+TWR = 2.3
+vehicleMass = 180
+oxMass = 146.926 * c.LB2KG
+fuMass = 70.269 * c.LB2KG
+tankOD = 8.625 * c.IN2M
 
 
 [   
@@ -37,7 +40,7 @@ vehicleMass = 74.69
     totalMassFlow,
     exitArea
 ] = propulsion.calculate_propulsion(
-    TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, 17.2, 7, 0.108
+    TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, oxMass, fuMass, tankOD
 )
 
 idealThrust = round(jetThrust, 2)
@@ -49,11 +52,11 @@ chamberMass = round(chamberMass, 2)
 InjectorMass = round(InjectorMass, 2)
 totalPropulsionMass = round(totalPropulsionMass, 2)
 
-print(f"idealThrust: {idealThrust} # [N] Ideal thrust")
-print(f"oxMassFlow: {oxMassFlow} # [kg/s] Oxidizer mass flow rate")
-print(f"fuelMassFlow: {fuelMassFlow} # [kg/s] Fuel mass flow rate")
-print(f"burnTime: {burnTime} # [s] Burn time")
-print(f"chamberLength: {chamberLength} # [m] Chamber length")
-print(f"chamberMass: {chamberMass} # [kg] Chamber mass")
-print(f"InjectorMass: {InjectorMass} # [kg] Injector mass")
-print(f"totalPropulsionMass: {totalPropulsionMass} # [kg] Total propulsion mass")
+print(f"idealThrust: {idealThrust*c.N2LBF:.2f} # [lbf] Ideal thrust")
+print(f"oxMassFlow: {oxMassFlow*c.KG2LB:.3f} # [lbm/s] Oxidizer mass flow rate")
+print(f"fuelMassFlow: {fuelMassFlow*c.KG2LB:.3f} # [lbm/s] Fuel mass flow rate")
+print(f"burnTime: {burnTime:.3f} # [s] Burn time")
+print(f"chamberLength: {chamberLength*c.M2IN:.3f} # [in] Chamber length")
+print(f"chamberMass: {chamberMass*c.KG2LB:.2f} # [lbm] Chamber mass")
+print(f"InjectorMass: {InjectorMass*c.KG2LB:.2f} # [lbm] Injector mass")
+print(f"totalPropulsionMass: {totalPropulsionMass*c.KG2LB:.2f} # [lbm] Total propulsion mass")
