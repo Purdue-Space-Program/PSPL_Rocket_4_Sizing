@@ -208,7 +208,7 @@ def calculate_propulsion(
             specificImpulse * c.GRAVITY
         )  # [m/s] ideal exhaust velocity
         coreMassFlowRate = jetThrust / (
-            idealExhaustVelocity * EFFICIENCY_FACTOR
+            idealExhaustVelocity * EFFICIENCY_FACTOR**2
         )  # [kg/s] total mass flow rate
 
         throatArea = (
@@ -274,7 +274,7 @@ def calculate_propulsion(
 
     # Mass estimates
     chamberMaterialDensity = (
-        c.DENSITY_INCO  # [kg/m^3] chamber wall material density (Inconel 718)
+        c.DENSITY_CF  # [kg/m^3] chamber wall material density (Inconel 718)
     )
     chamberMass = (
         chamberMaterialDensity
@@ -315,15 +315,20 @@ def calculate_propulsion(
 
 
 def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
+    INJECTOR_DP_RATIO = 1 / 1.2  # [1] Assumed pressure drop ratio over injector
+    REGEN_DP_RATIO = (
+        1 / 1.4
+    )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
+
     pumpEfficiency = 0.5  # Constant??
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = 60 * c.PSI2PA
-    fuelInletPressure = 60 * c.PSI2PA
+    oxInletPressure = c.REQUIRED_NPSH
+    fuelInletPressure = c.REQUIRED_NPSH
 
-    oxExitPressure = 1.2 * newChamberPressure
-    fuelExitPressure = 1.2 * 1.4 * newChamberPressure
+    oxExitPressure = newChamberPressure / INJECTOR_DP_RATIO
+    fuelExitPressure = newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
 
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion

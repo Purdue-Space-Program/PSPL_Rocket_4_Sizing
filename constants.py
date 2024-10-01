@@ -98,10 +98,24 @@ MOLAR_MASS_ETHANOL = 0.04607  # [kg/mol] Ethanol molar mass
 MOLAR_MASS_JET_A = 0.170  # [kg/mol] Jet-A molar mass
 MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 
-# FAR Properties
+# Pump Constant
+
+REQUIRED_NPSH = 60 * PSI2PA # [Pa] [GUESS, NEEDS TO BE DECIDED] Required net positive suction head for pumps (assumed constant)
+
+# FAR Constants
 
 FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
 RAIL_HEIGHT = 18.29  # [m] height of the rail
+
+# Components
+
+BZB_COPV_VOLUME = 9 * L2M3  # [m^3] Volume of the BZB COPV
+BZB_COPV_PRESSURE = 4950 * PSI2PA  # [Pa] Maximum pressure of the BZB COPV
+BZB_COPV_MASS = 5.7 # [kg] Mass of BZB COPV (Luxfer T90A)
+
+BZ1_COPV_VOLUME = 5 * L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
+BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
+BZ1_COPV_MASS = 3 # [kg] [GUESS, NEED TO UPDATE] Mass of BZ1 COPV
 
 # Other Constants
 
