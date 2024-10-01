@@ -409,13 +409,16 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, npshRequired, copvMassOl
     else:
         BZBcopvUsable = False
 
-    # Get mass of new COPV
+    # Get new COPV info
     if BZ1copvUsable == True:
         copvMassNew = c.BZ1_COPV_MASS
+        copvNew = 'BZ1 COPV'
     elif BZBcopvUsable == True:
         copvMassNew = c.BZB_COPV_MASS
+        copvNew = 'BZB COPV'
     else:
         copvMassNew = copvMassOld
+        copvNew = 'Same as pressure-fed'
     
-    return copvMassNew
+    return (copvMassNew, copvNew)
     
