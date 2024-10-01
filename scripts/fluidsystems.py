@@ -308,7 +308,7 @@ def fluids_sizing(
 #   BZBcopvUsable [bool]: Whether the BZB COPV can pressurize the pump-fed configuration
 
 
-def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, npshRequired, copvMassOld):
+def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
 
     tankTotalVolume = oxTankVolume + fuelTankVolume
 
@@ -326,7 +326,7 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, npshRequired, copvMassOl
     K_PRESSURIZATION = 0.65  # [1] Ratio of ideal tank volume to actual tank volume [TEMPORARY, NEED TO FIND ACTUAL VALUE]
 
     # Tank pressure using pumps
-    pumpTankPressure = npshRequired / PUMP_DP_RATIO  # [Pa] Tank pressure
+    pumpTankPressure = c.REQUIRED_NPSH / PUMP_DP_RATIO  # [Pa] Tank pressure
 
     # Volume checks
     heliumCv = PropsSI(

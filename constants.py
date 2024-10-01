@@ -95,7 +95,11 @@ MOLAR_MASS_ETHANOL = 0.04607  # [kg/mol] Ethanol molar mass
 MOLAR_MASS_JET_A = 0.170  # [kg/mol] Jet-A molar mass
 MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 
-# FAR Properties
+# Pump Constant
+
+REQUIRED_NPSH = 60 * PSI2PA # [Pa] [GUESS, NEEDS TO BE DECIDED] Required net positive suction head for pumps (assumed constant)
+
+# FAR Constants
 
 FAR_ALTITUDE = 615.09  # [m] altitude of FAR launch site
 RAIL_HEIGHT = 18.29  # [m] height of the rail
