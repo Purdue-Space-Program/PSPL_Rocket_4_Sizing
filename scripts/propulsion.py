@@ -312,16 +312,16 @@ def calculate_propulsion(
     ]
 
 def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
-    injectorDP = 1 / 1.2 # [1] Assumed pressure drop ratio over injector
-    regenDP = 1 / 1.4 # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
+    INJECTOR_DP_RATIO = 1 / 1.2 # [1] Assumed pressure drop ratio over injector
+    REGEN_DP_RATIO = 1 / 1.4 # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
     
     pumpEfficiency = 0.5  # Constant??
 
     oxInletPressure = c.REQUIRED_NPSH
     fuelInletPressure = c.REQUIRED_NPSH
 
-    oxExitPressure = newChamberPressure / injectorDP
-    fuelExitPressure = newChamberPressure / injectorDP / regenDP
+    oxExitPressure = newChamberPressure / INJECTOR_DP_RATIO
+    fuelExitPressure = newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
 
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion

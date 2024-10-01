@@ -420,5 +420,5 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
         copvMassNew = copvMassOld
         copvNew = 'Same as pressure-fed'
     
-    return (copvMassNew, copvNew)
+    return (pumpTankPressure, copvMassNew, copvNew)
     
