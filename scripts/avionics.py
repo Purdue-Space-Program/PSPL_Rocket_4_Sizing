@@ -18,7 +18,7 @@ def avionics_sizing():
     return mass
 
 
-def pumpfed_avionics_sizing(powerRequired, motorDF):
+def pumpfed_avionics_sizing(powerRequired):
     # Constants
     BASE_AVI_MASS = 6  # [lbm] base mass of avionics
     BASE_AVI_MASS = BASE_AVI_MASS * c.LB2KG  # [kg] Convert mass to kg
@@ -31,62 +31,31 @@ def pumpfed_avionics_sizing(powerRequired, motorDF):
     LIPO_CELL_MASS = 22.2  # [g] mass of a LiPo cell
     LIPO_CELL_MASS = LIPO_CELL_MASS * c.G2KG  # [kg] Convert mass to kg
 
+    MOTOR_MASS = 2.9  # [kg] mass of the 3030 motor
+    MAX_CONTINOUS_WATTS = 3000  # [W] max amount of continous watts of the 3030 motor
+
     # Power required (adjusted for motor efficiency)
-    totalPowerRequired = powerRequired / MOTOR_EFFICIENCY  # [W]
-    print("Total Power Required:", totalPowerRequired)
 
-    for index, motor in motorDF.iterrows():
-        motorVoltage = motor["Max Volts [V]"]  # [V]
-        motorCurrent = totalPowerRequired / motorVoltage  # [A]
+    totalCurrentRequired = totalPowerRequired / motorVoltageRequired  # [A]
 
-        # Check if motor can handle the current
-        if motorCurrent > motor["Max Amps [A]"]:
-            print(f"Motor {motor['Motor']} cannot handle the current!")
-            print(f"Motor Current: {motorCurrent} A")
-            print(f"Max Amps: {motor['Max Amps [A]']} A")
-            continue
+    numSeriesCells = motorVoltageRequired / LIPO_CELL_VOLTAGE
+    numSeriesCells = np.ceil(numSeriesCells)  # [-] Round up
 
-        # Number of series cells to meet the voltage requirement
-        numSeriesCells = motorVoltage / LIPO_CELL_VOLTAGE  # [-]
-        numSeriesCells = np.ceil(numSeriesCells)  # [-] Round up
+    numParallelCells = totalCurrentRequired / LIPO_CELL_DISCHARGE_CURRENT
+    numParallelCells = np.ceil(numParallelCells)  # [-]
 
-        # Number of parallel cells to meet the current requirement
-        numParallelCells = motorCurrent / LIPO_CELL_DISCHARGE_CURRENT  # [-]
-        numParallelCells = np.ceil(numParallelCells)  # [-]
+    # Total number of cells and mass of the battery pack
+    totalCells = numSeriesCells * numParallelCells  # [-]
+    totalBatteryMass = totalCells * LIPO_CELL_MASS  # [Kg]
 
-        # Total number of cells and mass of the battery pack
-        totalCells = numSeriesCells * numParallelCells  # [-]
-        totalBatteryMass = totalCells * LIPO_CELL_MASS  # [Kg]
-        print("Total Battery Mass:", totalBatteryMass)
-
-        motorMass = (0.243) * (powerRequired / 1000) ** (
-            0.94
-        )  # [Kg] Andrews weird ass empirical coorelation
-
-        print("Motor Mass:", motorMass)
-
-        # Total mass (motor + battery)
-        totalMass = totalBatteryMass + motorMass + BASE_AVI_MASS  # [Kg]
-
-        # Track the optimal solution (minimize total mass)
-        if totalMass < minTotalMass:
-            minTotalMass = totalMass
-            optimalMass = totalMass
-            optimalNumSeriesCells = numSeriesCells
-            optimalNumParallelCells = numParallelCells
-            optimalTotalCells = totalCells
-            optimalBatteryMass = totalBatteryMass
-            optimalMotorMass = motorMass
-
-    # Ensure there's a valid solution
-    if optimalMass is None:
-        raise ValueError("No valid motor configuration found!")
+    # Total mass (motor + battery)
+    totalMass = totalBatteryMass + MOTOR_MASS + BASE_AVI_MASS  # [Kg]
+    # Track the optimal solution (minimize total mass)
 
     return [
-        optimalMass,
-        optimalNumSeriesCells,
-        optimalNumParallelCells,
-        optimalTotalCells,
-        optimalBatteryMass,
-        optimalMotorMass,
+        totalMass,
+        numSeriesCells,
+        numParallelCells,
+        totalCells,
+        totalBatteryMass,
     ]
