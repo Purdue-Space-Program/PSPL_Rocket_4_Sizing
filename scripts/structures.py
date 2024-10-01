@@ -191,8 +191,6 @@ def calculate_pumpfed_structures(
 ):
     ### Constants and Inputs
 
-    CD_NOSECODE = 0.5  # [-] Drag coefficient of the nosecone
-
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
 
     ### MASS ESTIMATES
@@ -203,7 +201,6 @@ def calculate_pumpfed_structures(
     RECOVERY_MASS_ESTIMATE = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
 
     ### Length Estimates
-    RECOVERY_BAY_LENGTH = 24 * c.IN2M  # [m] Length of the recovery bay
 
     ### Layer Counts
 

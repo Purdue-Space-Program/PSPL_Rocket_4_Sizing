@@ -76,6 +76,7 @@ def run_CEA(
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
 
+    # remove methane
     if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
         # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
@@ -122,6 +123,103 @@ def run_CEA(
         expansionRatio,
         fuelTemp,
         oxTemp,
+        characteristicLength,
+    ]
+
+
+def run_pumpfed_CEA(
+    chamberPressure,
+    exitPressure,
+    fuel,
+    oxidizer,
+    mixRatio,
+):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    chamberPressure : float
+        Pressure within the engine combustion chamber [Pa].
+    exitPressure : float
+        Pressure at nozzle exit [Pa].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+    fuelName : str
+        Name of fuel under CEA conventions [N/A].
+    oxName : str
+        Name of oxidizer under CEA conventions [N/A].
+    fuelTemp : float
+        Temperature of fuel upon injection into combustion [K].
+    oxTemp : float
+        Temperature of oxidizer upon injection into combustion [K].
+
+    Returns
+    -------
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    productMolecularWeight : float
+        Molecular weight of products at exit [kg/kmol].
+    specificGasConstant : float
+        Gas constant of products at exit [J/kg-K].
+
+    """
+    # Get the fuel and oxidizer temperatures using CoolProp
+
+    # Unit conversions
+    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    exitPressure = exitPressure * c.PA2BAR
+    pressureRatio = chamberPressure / exitPressure
+
+    # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
+
+    # remove methane
+    if fuel.lower() == "methane":
+        fuelCEA = "CH4(L)"
+        # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
+        characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+
+    elif fuel.lower() == "ethanol":
+        fuelCEA = "C2H5OH(L)"
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
+
+    elif fuel.lower() == "jet-a":
+        fuelCEA = "Jet-A(L)"
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
+
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+    oxidizerCEA = "O2(L)"
+
+    # CEA Propellant Object Setup
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+
+    # Run CEA with optimal mixture ratio
+    rocket = CEA.RocketProblem(
+        pressure=chamberPressure,
+        pip=pressureRatio,
+        materials=[fuel, oxidizer],
+        o_f=mixRatio,
+        filename="engineCEAoutput",
+        pressure_units="bar",
+    )
+
+    data = rocket.run()
+
+    # Extract CEA outputs
+    cstar = data.cstar
+    specificImpulse = data.isp
+    expansionRatio = data.ae
+
+    return [
+        cstar,
+        specificImpulse,
+        expansionRatio,
         characteristicLength,
     ]
 

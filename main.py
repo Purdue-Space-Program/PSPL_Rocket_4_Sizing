@@ -489,12 +489,45 @@ def main():
             ignore_index=True,
         )
 
+        # Pumps
+
+        [
+            pumpfedCstar,
+            pumpfedSpecificImpulse,
+            pumpfedExpansionRatio,
+            pumpfedCharacteristicLength,
+        ] = 
+
+        # Fluids
+        [] = fluidsystems.calculate_pumpfed_fluid_systems(
+            oxTankVolume, fuelTankVolume, npshRequired, copvMass
+        )
+
+        # Structures
         [
             pumpfedLowerAirframeLength,
             pumpfedLowerAirframeMass,
             pumpfedTotalStructuresMass,
         ] = structures.calculate_pumpfed_structures(
             additionalPumpLength, lowerPlumbingLength, copvLength, tankOD
+        )
+
+        [pumpfedTotalLength] = vehicle.calculate_length(
+            noseconeLength,
+            copvLength,
+            heliumBayLength,
+            recoveryBayLength,
+            pumpfedLowerAirframeLength,
+            chamberLength,
+        )
+
+        [pumpfedTotalDryMass, pumpfedTotalWetMass] = vehicle.calculate_mass(
+            pumpfedTotalAvionicsMass,
+            fluidsystemsMass - copvMass + pumpfedcopvMass,
+            oxPropMass,
+            fuelPropMass,
+            pumpfedtotalPropMass,
+            pumpfedTotalStructuresMass,
         )
 
         pumpfedDF = pumpfedDF._append(
