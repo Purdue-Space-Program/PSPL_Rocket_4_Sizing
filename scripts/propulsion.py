@@ -316,6 +316,8 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     REGEN_DP_RATIO = 1 / 1.4 # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
     
     pumpEfficiency = 0.5  # Constant??
+    dynaHeadLoss = .2 # Dynamic Head Loss Factor (Assumed Constant)
+    exitFlowCoef = .8 # Exit Flow Coeffiecnt (Assumed Constant)
 
     oxInletPressure = c.REQUIRED_NPSH
     fuelInletPressure = c.REQUIRED_NPSH
@@ -345,6 +347,66 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (fuelDensity * c.GRAVITY)
     fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
     fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)
+
+    # Mass Correlations
+
+    # Shafts
+    shaftMaterialDensity = (
+        c.DENSITY_SS316
+    ) # [kg/m^3] Stainless Steel 316 material density
+    shaftLength = 3.5 * c.IN2M
+    shaftDiameter = .5 * c.IN2M
+    shaftMass = (
+        2 * (shaftLength * (shaftDiameter / 2)**2 * np.pi * shaftMaterialDensity)
+    ) # [kg] Mass of shaft, bearings, and seals for both pumps (condidering constant, equal diameter shafts for both pumps)
+   
+    # Impellers
+    oxImpellerDia = (
+        np.sqrt((8 * c.GRAVITY * oxDevelopedHead) 
+                 / (((rpm * 2 * np.pi / 60)**2)
+                 * (1 + dynaHeadLoss * exitFlowCoef**2)))
+    ) # Ox Impeller Diameter [m] 
+    fuelImpellerDia = (
+        np.sqrt((8 * c.GRAVITY * fuelDevelopedHead) 
+                 / (((rpm * 2 * np.pi / 60)**2)
+                 * (1 + dynaHeadLoss * exitFlowCoef**2)))
+    ) # Fuel Impeller Diameter [m]
+    impellerThickness = .375 * c.IN2M
+    
+    impellerMass = (
+        (oxImpellerDia / 2)**2 * np.pi * impellerThickness 
+        + (fuelImpellerDia / 2)**2 * np.pi * impellerThickness
+    )
+
+    # Housings
+    voluteMaterialDensity = (
+        c.DENSITY_SS316
+    ) # may want to change to aluminum alloy if possible
+    
+    voluteWallThickness = 0.25 * c.IN2M
+    oxVoluteOuterVol = (
+        (np.pi * (oxImpellerDia + voluteWallThickness) ** 2 / 4) 
+    * (2 * voluteWallThickness + impellerThickness)
+    )
+
+    oxVoluteInnerVol = (np.pi * oxImpellerDia ** 2 / 4) * impellerThickness
+
+    oxVoluteMass = voluteMaterialDensity * (oxVoluteOuterVol - oxVoluteInnerVol)
+    
+    fuVoluteOuterVol = (
+        (np.pi * (fuelImpellerDia + voluteWallThickness) ** 2 / 4) 
+    * (2 * voluteWallThickness + impellerThickness)
+    )
+
+    fuVoluteInnerVol = (np.pi * fuelImpellerDia ** 2 / 4) * impellerThickness
+
+    fuVoluteMass = voluteMaterialDensity * (fuVoluteOuterVol - fuVoluteInnerVol)
+    
+    voluteMass = fuVoluteMass * 1.05 + oxVoluteMass * 1.1 
+    # total pump mass with rough additional mass percent depending on pump complexity
+    
+    pumpsMass = shaftMass + impellerMass + voluteMass
+
 
 
 
