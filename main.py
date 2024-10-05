@@ -156,6 +156,13 @@ def main():
         ]
     )
 
+    pumpfedDF = pd.DataFrame(
+        columns=[
+            "Pumpfed Lower Airframe Length [ft]",
+            "Pumpfed Lower Airframe Mass [lbm]",
+            "Pumpfed Total Structures Mass [lbm]",
+        ]
+    )
     # Progress Bar
     # This section creates a progress bar to track script progress [TEST FOR NOW]
     # Owner: Nick Nielsen
@@ -478,6 +485,58 @@ def main():
                 "Max Acceleration [g]": maxAccel / c.GRAVITY,
                 "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
                 "Rail Exit Acceleration [g]": railExitAccel / c.GRAVITY,
+            },
+            ignore_index=True,
+        )
+
+        # Pumps
+
+        [
+            pumpfedCstar,
+            pumpfedSpecificImpulse,
+            pumpfedExpansionRatio,
+            pumpfedCharacteristicLength,
+        ] = 
+
+        # Fluids
+        [] = fluidsystems.calculate_pumpfed_fluid_systems(
+            oxTankVolume, fuelTankVolume, npshRequired, copvMass
+        )
+
+        # Structures
+        [
+            pumpfedLowerAirframeLength,
+            pumpfedLowerAirframeMass,
+            pumpfedTotalStructuresMass,
+        ] = structures.calculate_pumpfed_structures(
+            additionalPumpLength, lowerPlumbingLength, copvLength, tankOD
+        )
+
+        [pumpfedTotalLength] = vehicle.calculate_length(
+            noseconeLength,
+            copvLength,
+            heliumBayLength,
+            recoveryBayLength,
+            pumpfedLowerAirframeLength,
+            chamberLength,
+        )
+
+        [pumpfedTotalDryMass, pumpfedTotalWetMass] = vehicle.calculate_mass(
+            pumpfedTotalAvionicsMass,
+            fluidsystemsMass - copvMass + pumpfedcopvMass,
+            oxPropMass,
+            fuelPropMass,
+            pumpfedtotalPropMass,
+            pumpfedTotalStructuresMass,
+        )
+
+        pumpfedDF = pumpfedDF._append(
+            {
+                "Pumpfed Lower Airframe Length [ft]": pumpfedLowerAirframeLength
+                * c.M2FT,
+                "Pumpfed Lower Airframe Mass [lbm]": pumpfedLowerAirframeMass * c.KG2LB,
+                "Pumpfed Total Structures Mass [lbm]": pumpfedTotalStructuresMass
+                * c.KG2LB,
             },
             ignore_index=True,
         )

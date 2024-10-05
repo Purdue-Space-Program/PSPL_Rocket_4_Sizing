@@ -27,6 +27,9 @@ TAMBIENT = 290  # [K] Ambient temperature (62 F)
 LB2KG = 0.453592  # [kg/lbm] Conversion factor from lbm to kg
 KG2LB = 1 / LB2KG  # [lbm/kg] Conversion factor from kg to lbm
 
+G2KG = 0.001  # [kg/g] Conversion factor from g to kg
+KG2G = 1 / G2KG  # [g/kg] Conversion factor from kg to g
+
 ## Length
 
 IN2M = 0.0254  # [m/in] Conversion factor from in to m
@@ -75,7 +78,7 @@ DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
 ## 316 Stainless Steel
 
-DENSITY_SS316 = 7980 # [kg/m^3] Density
+DENSITY_SS316 = 7980  # [kg/m^3] Density
 
 # Fluids Constants
 
@@ -94,13 +97,15 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Propellant Properties
 
-DENSITY_ETHANOL = 789  # [kg/m^3] Ethanol density at STP
-DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP
-DENSITY_IPA = 786  # [kg/m^3] Isopropyl alcohol density at STP
+DENSITY_ETHANOL = 785  # [kg/m^3] Ethanol density at STP (https://www.engineeringtoolbox.com/ethanol-ethyl-alcohol-properties-C2H6O-d_2027.html)
+DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP (https://www.code7700.com/pdfs/bd700_fuel_density.pdf)
+DENSITY_IPA = 785  # [kg/m^3] Isopropyl alcohol density at STP (https://macro.lsu.edu/HowTo/solvents/IPA.htm)
 
 # Pump Constant
 
-REQUIRED_NPSH = 85 * PSI2PA # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
+REQUIRED_NPSH = (
+    85 * PSI2PA
+)  # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
 
 # FAR Constants
 
@@ -111,16 +116,18 @@ RAIL_HEIGHT = 18.29  # [m] height of the rail
 
 BZB_COPV_VOLUME = 9 * L2M3  # [m^3] Volume of the BZB COPV
 BZB_COPV_PRESSURE = 4950 * PSI2PA  # [Pa] Maximum pressure of the BZB COPV
-BZB_COPV_MASS = 5.7 # [kg] Mass of BZB COPV (Luxfer T90A)
+BZB_COPV_MASS = 5.7  # [kg] Mass of BZB COPV (Luxfer T90A)
 
 BZ1_COPV_VOLUME = 5 * L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
 BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
-BZ1_COPV_MASS = 3 # [kg] [GUESS, NEED TO UPDATE, NICK IS CHECKING TONIGHT] Mass of BZ1 COPV
+BZ1_COPV_MASS = 3  # [kg] [GUESS, NEED TO UPDATE] Mass of BZ1 COPV
 
 # Other Constants
 
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
-COPV_OD_MARGIN = 0.061 * 1.5  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube thickness with a 1.5 safety factor
+COPV_OD_MARGIN = (
+    0.061 * 1.5
+)  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube thickness with a 1.5 safety factor
 
 # Assumptions
 MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]

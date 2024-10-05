@@ -76,6 +76,7 @@ def run_CEA(
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
 
+    # remove methane
     if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
         # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
@@ -122,6 +123,103 @@ def run_CEA(
         expansionRatio,
         fuelTemp,
         oxTemp,
+        characteristicLength,
+    ]
+
+
+def run_pumpfed_CEA(
+    chamberPressure,
+    exitPressure,
+    fuel,
+    oxidizer,
+    mixRatio,
+):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    chamberPressure : float
+        Pressure within the engine combustion chamber [Pa].
+    exitPressure : float
+        Pressure at nozzle exit [Pa].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+    fuelName : str
+        Name of fuel under CEA conventions [N/A].
+    oxName : str
+        Name of oxidizer under CEA conventions [N/A].
+    fuelTemp : float
+        Temperature of fuel upon injection into combustion [K].
+    oxTemp : float
+        Temperature of oxidizer upon injection into combustion [K].
+
+    Returns
+    -------
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    productMolecularWeight : float
+        Molecular weight of products at exit [kg/kmol].
+    specificGasConstant : float
+        Gas constant of products at exit [J/kg-K].
+
+    """
+    # Get the fuel and oxidizer temperatures using CoolProp
+
+    # Unit conversions
+    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    exitPressure = exitPressure * c.PA2BAR
+    pressureRatio = chamberPressure / exitPressure
+
+    # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
+
+    # remove methane
+    if fuel.lower() == "methane":
+        fuelCEA = "CH4(L)"
+        # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
+        characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+
+    elif fuel.lower() == "ethanol":
+        fuelCEA = "C2H5OH(L)"
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
+
+    elif fuel.lower() == "jet-a":
+        fuelCEA = "Jet-A(L)"
+        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = c.TAMBIENT
+
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+    oxidizerCEA = "O2(L)"
+
+    # CEA Propellant Object Setup
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+
+    # Run CEA with optimal mixture ratio
+    rocket = CEA.RocketProblem(
+        pressure=chamberPressure,
+        pip=pressureRatio,
+        materials=[fuel, oxidizer],
+        o_f=mixRatio,
+        filename="engineCEAoutput",
+        pressure_units="bar",
+    )
+
+    data = rocket.run()
+
+    # Extract CEA outputs
+    cstar = data.cstar
+    specificImpulse = data.isp
+    expansionRatio = data.ae
+
+    return [
+        cstar,
+        specificImpulse,
+        expansionRatio,
         characteristicLength,
     ]
 
@@ -240,7 +338,9 @@ def calculate_propulsion(
     chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
     chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
-    if contractionRatio > 6 or contractionRatio < 4: # Reset contraction ratio to a reasonable value
+    if (
+        contractionRatio > 6 or contractionRatio < 4
+    ):  # Reset contraction ratio to a reasonable value
         contractionRatio = 4.5
     chamberArea = contractionRatio * throatArea
     chamberID = 2 * np.sqrt(chamberArea / np.pi)
@@ -263,8 +363,8 @@ def calculate_propulsion(
         )
     )  # [m^3] nozzle converging section volume
     chamberVolume = (
-        (characteristicLength * throatArea) - convergeVolume
-    )  # [m^3] chamber volume
+        characteristicLength * throatArea
+    ) - convergeVolume  # [m^3] chamber volume
     chamberLength = chamberVolume / chamberArea  # [m] chamber length
     thrustChamberLength = (
         chamberLength + convergeLength + divergeLength
@@ -288,8 +388,8 @@ def calculate_propulsion(
         injectorMaterialDensity
         * (np.pi / 4)
         * (
-            2 * c.IN2M * (chamberOD**2 - (chamberOD - 0.5 * c.IN2M)**2)
-            + 2 * 0.25 * c.IN2M * (chamberOD - 1 * c.IN2M)**2
+            2 * c.IN2M * (chamberOD**2 - (chamberOD - 0.5 * c.IN2M) ** 2)
+            + 2 * 0.25 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
         )
     )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.25" thick walls
 
@@ -311,102 +411,114 @@ def calculate_propulsion(
         exitArea,
     ]
 
+
 def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
-    INJECTOR_DP_RATIO = 1 / 1.2 # [1] Assumed pressure drop ratio over injector
-    REGEN_DP_RATIO = 1 / 1.4 # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
-    
+    INJECTOR_DP_RATIO = 1 / 1.2  # [1] Assumed pressure drop ratio over injector
+    REGEN_DP_RATIO = (
+        1 / 1.4
+    )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
+
     pumpEfficiency = 0.5  # Constant??
-    dynaHeadLoss = .2 # Dynamic Head Loss Factor (Assumed Constant)
-    exitFlowCoef = .8 # Exit Flow Coeffiecnt (Assumed Constant)
+    dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
+    exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = c.REQUIRED_NPSH
-    fuelInletPressure = c.REQUIRED_NPSH
+    oxInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
+    fuelInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
 
-    oxExitPressure = newChamberPressure / INJECTOR_DP_RATIO
-    fuelExitPressure = newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
+    oxExitPressure = (
+        newChamberPressure / INJECTOR_DP_RATIO
+    )  # [Pa] pressure at pump exit
+    fuelExitPressure = (
+        newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
+    )  # [Pa] pressure at pump exit
 
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
 
     elif fuel.lower() == "ethanol":
-        fuelTemp = c.TAMBIENT
-
-    elif fuel.lower() == "jet-a":
-        fluid = "dodecane"
-        fuelTemp = c.TAMBIENT
+        fuelTemp = c.TAMBIENT  # [K] temperature of fuel upon injection into combustion
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
 
-    oxDensity = PropsSI("D", "P", oxInletPressure, "T", oxTemp, oxidizer)  # Density [kg/m3]
-    fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", oxTemp, fuel)  # Density [kg/m3]
-    
-    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (oxDensity * c.GRAVITY)
-    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency
-    oxTorque = oxPower / ((2 * np.pi / 60) * rpm)
+    oxDensity = PropsSI(
+        "D", "P", oxInletPressure, "T", oxTemp, oxidizer
+    )  # Density [kg/m3]
+    fuelDensity = PropsSI(
+        "D", "P", fuelInletPressure, "T", oxTemp, fuel
+    )  # Density [kg/m3]
 
-    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (fuelDensity * c.GRAVITY)
+    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (
+        oxDensity * c.GRAVITY
+    )  # [m] Developed Head
+    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency  # [W] Power
+    oxTorque = oxPower / ((2 * np.pi / 60) * rpm)  # [N-m] Torque
+
+    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (
+        fuelDensity * c.GRAVITY
+    )  # [m] Developed Head
     fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
-    fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)
+    fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)  # [N-m] Torque
 
     # Mass Correlations
 
     # Shafts
     shaftMaterialDensity = (
         c.DENSITY_SS316
-    ) # [kg/m^3] Stainless Steel 316 material density
+    )  # [kg/m^3] Stainless Steel 316 material density
     shaftLength = 3.5 * c.IN2M
-    shaftDiameter = .5 * c.IN2M
-    shaftMass = (
-        2 * (shaftLength * (shaftDiameter / 2)**2 * np.pi * shaftMaterialDensity)
-    ) # [kg] Mass of shaft, bearings, and seals for both pumps (condidering constant, equal diameter shafts for both pumps)
-   
+    shaftDiameter = 0.5 * c.IN2M
+    shaftMass = 2 * (
+        shaftLength * (shaftDiameter / 2) ** 2 * np.pi * shaftMaterialDensity
+    )  # [kg] Mass of shaft, bearings, and seals for both pumps (condidering constant, equal diameter shafts for both pumps)
+
     # Impellers
-    oxImpellerDia = (
-        np.sqrt((8 * c.GRAVITY * oxDevelopedHead) 
-                 / (((rpm * 2 * np.pi / 60)**2)
-                 * (1 + dynaHeadLoss * exitFlowCoef**2)))
-    ) # Ox Impeller Diameter [m] 
-    fuelImpellerDia = (
-        np.sqrt((8 * c.GRAVITY * fuelDevelopedHead) 
-                 / (((rpm * 2 * np.pi / 60)**2)
-                 * (1 + dynaHeadLoss * exitFlowCoef**2)))
-    ) # Fuel Impeller Diameter [m]
-    impellerThickness = .375 * c.IN2M
-    
-    impellerMass = (
-        (oxImpellerDia / 2)**2 * np.pi * impellerThickness 
-        + (fuelImpellerDia / 2)**2 * np.pi * impellerThickness
-    )
+    oxImpellerDia = np.sqrt(
+        (8 * c.GRAVITY * oxDevelopedHead)
+        / (((rpm * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
+    )  # Ox Impeller Diameter [m]
+    fuelImpellerDia = np.sqrt(
+        (8 * c.GRAVITY * fuelDevelopedHead)
+        / (((rpm * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
+    )  # Fuel Impeller Diameter [m]
+    impellerThickness = 0.375 * c.IN2M  # Impeller Thickness [m]
+
+    impellerMass = (oxImpellerDia / 2) ** 2 * np.pi * impellerThickness + (
+        fuelImpellerDia / 2
+    ) ** 2 * np.pi * impellerThickness  # [kg] Mass of impellers for both pumps
 
     # Housings
     voluteMaterialDensity = (
         c.DENSITY_SS316
-    ) # may want to change to aluminum alloy if possible
-    
+    )  # may want to change to aluminum alloy if possible [kg/m^3]
+
     voluteWallThickness = 0.25 * c.IN2M
-    oxVoluteOuterVol = (
-        (np.pi * (oxImpellerDia + voluteWallThickness) ** 2 / 4) 
-    * (2 * voluteWallThickness + impellerThickness)
-    )
+    oxVoluteOuterVol = (np.pi * (oxImpellerDia + voluteWallThickness) ** 2 / 4) * (
+        2 * voluteWallThickness + impellerThickness
+    )  # [m^3] Ox Volute Outer Volume
 
-    oxVoluteInnerVol = (np.pi * oxImpellerDia ** 2 / 4) * impellerThickness
+    oxVoluteInnerVol = (
+        np.pi * oxImpellerDia**2 / 4
+    ) * impellerThickness  # [m^3] Ox Volute Inner Volumes
 
-    oxVoluteMass = voluteMaterialDensity * (oxVoluteOuterVol - oxVoluteInnerVol)
-    
-    fuVoluteOuterVol = (
-        (np.pi * (fuelImpellerDia + voluteWallThickness) ** 2 / 4) 
-    * (2 * voluteWallThickness + impellerThickness)
-    )
+    oxVoluteMass = voluteMaterialDensity * (
+        oxVoluteOuterVol - oxVoluteInnerVol
+    )  # [kg] Ox Volute Mass
 
-    fuVoluteInnerVol = (np.pi * fuelImpellerDia ** 2 / 4) * impellerThickness
+    fuVoluteOuterVol = (np.pi * (fuelImpellerDia + voluteWallThickness) ** 2 / 4) * (
+        2 * voluteWallThickness + impellerThickness
+    )  # [m^3] Fuel Volute Outer Volume
 
-    fuVoluteMass = voluteMaterialDensity * (fuVoluteOuterVol - fuVoluteInnerVol)
-    
-    voluteMass = fuVoluteMass * 1.05 + oxVoluteMass * 1.1 
+    fuVoluteInnerVol = (
+        np.pi * fuelImpellerDia**2 / 4
+    ) * impellerThickness  # [m^3] Fuel Volute Inner Volumes
+
+    fuVoluteMass = voluteMaterialDensity * (
+        fuVoluteOuterVol - fuVoluteInnerVol
+    )  # [kg] Fuel Volute Mass
+
+    voluteMass = fuVoluteMass * 1.05 + oxVoluteMass * 1.1  # [kg] Total Volute Mass
     # total pump mass with rough additional mass percent depending on pump complexity
-    
-    pumpsMass = shaftMass + impellerMass + voluteMass
 
+    pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
 
-
-
+    return [oxPower, fuelPower, pumpsMass]

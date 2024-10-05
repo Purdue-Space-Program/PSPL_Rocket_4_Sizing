@@ -180,3 +180,122 @@ def calculate_structures(
         totalStructuresMass,
         CD_NOSECODE,
     ]
+
+
+def calculate_pumpfed_structures(
+    additionalPumpLength,
+    lowerPlumbingLength,
+    upperPlumbingLength,
+    COPVLength,
+    tankOD,
+):
+    ### Constants and Inputs
+
+    NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
+
+    ### MASS ESTIMATES
+
+    TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
+    FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
+
+    RECOVERY_MASS_ESTIMATE = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
+
+    ### Length Estimates
+
+    ### Layer Counts
+
+    HELIUM_TUBE_LAYER_COUNT = 8 * (
+        tankOD / 6.625
+    )  # [-] Number of layers in the helium tube
+    LOWER_AIRFRAME_LAYER_COUNT = 4  # [-] Number of layers in the lower airframe
+    UPPER_AIRFRAME_LAYER_COUNT = 4  # [-] Number of layers in the upper airframe
+    NOSECONE_LAYER_COUNT = 6  # [-] Number of layers in the nosecone
+
+    ### Layup Properties
+
+    LAYER_THICKNESS = 0.00025  # [m] Thickness of each layer
+
+    ### Coupler Properties
+    couplerMass = (
+        np.pi * (tankOD / 2) ** 2 + np.pi * tankOD * 0.25 * 5
+    )  # [kg] Estimated mass of the aluminum tube couplers
+
+    ### Nosecone Properties
+    noseconeLength = (
+        tankOD * 5
+    )  # [m] Length of the nosecone based on a 5:1 fineness ratio
+    noseconeSA = (
+        np.pi * (tankOD / 2) * np.sqrt((tankOD / 2) ** 2 + noseconeLength**2)
+    )  # [m^2] Surface area of the nosecone based on a cone
+
+    noseconeMass = (
+        (noseconeSA * c.DENSITY_CF * LAYER_THICKNESS * NOSECONE_LAYER_COUNT)
+        + TIP_MASS_ESTIMATE
+        + couplerMass
+    )  # [kg]
+
+    ### Helium Tube Calculations
+    heliumBayLength = COPVLength  # [m] Length of the helium tube
+    heliumBayMass = (
+        np.pi
+        * heliumBayLength
+        * tankOD
+        * HELIUM_TUBE_LAYER_COUNT
+        * c.DENSITY_CF
+        * LAYER_THICKNESS
+    )  # [kg]
+
+    heliumBayMass += 2 * couplerMass  # [kg]
+
+    ### Upper Airframe Calculations
+    strutArea = (
+        (1.5 * 0.25 + 1 * 0.25) * tankOD / 6.625 * c.IN22M2
+    )  # [m^2] area of the struts scaled based on size of tank diameter
+
+    upperAirframeLength = upperPlumbingLength  # [m]
+    upperAirframeStrutMass = (
+        NUMBER_OF_STRUTS * (upperAirframeLength * strutArea) * c.DENSITY_AL
+    )  # [kg]
+    upperAirframeMass = (
+        np.pi
+        * tankOD
+        * upperPlumbingLength
+        * UPPER_AIRFRAME_LAYER_COUNT
+        * c.DENSITY_CF
+        * LAYER_THICKNESS
+    )  # [kg]
+
+    upperAirframeMass += upperAirframeStrutMass  # [kg]
+
+    ### Lower Airframe Calculations
+
+    lowerAirframeLength = lowerPlumbingLength + additionalPumpLength  # [m]
+    lowerAirframeStrutMass = (
+        NUMBER_OF_STRUTS * (lowerAirframeLength * strutArea) * c.DENSITY_AL
+    )  # [kg]
+    lowerAirframeMass = (
+        np.pi
+        * tankOD
+        * lowerAirframeLength
+        * LOWER_AIRFRAME_LAYER_COUNT
+        * LAYER_THICKNESS
+        * c.DENSITY_CF
+    )  # [kg]
+
+    lowerAirframeMass = (
+        lowerAirframeMass + lowerAirframeStrutMass + FIN_MASS_ESTIMATE
+    )  # [kg]
+
+    totalStructuresMass = (
+        heliumBayMass
+        + upperAirframeMass
+        + lowerAirframeMass
+        + noseconeMass
+        + RECOVERY_MASS_ESTIMATE
+    )  # [kg]
+
+    return [
+        lowerAirframeLength,
+        lowerAirframeMass,
+        totalStructuresMass,
+    ]
