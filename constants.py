@@ -91,10 +91,6 @@ DENSITY_ETHANOL = 789  # [kg/m^3] Ethanol density at STP
 DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP
 DENSITY_IPA = 786  # [kg/m^3] Isopropyl alcohol density at STP
 
-MOLAR_MASS_ETHANOL = 0.04607  # [kg/mol] Ethanol molar mass
-MOLAR_MASS_JET_A = 0.170  # [kg/mol] Jet-A molar mass
-MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
-
 # Pump Constant
 
 REQUIRED_NPSH = 85 * PSI2PA # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
