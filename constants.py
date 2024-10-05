@@ -57,7 +57,7 @@ LBF2N = 1 / N2LBF  # [N/lbf] Conversion factor from lbf to N
 
 # Material Properties
 
-## 6000-Series Aluminum
+## 6000-Series Aluminum (https://asm.matweb.com/search/specificmaterial.asp?bassnum=ma6061t6)
 
 DENSITY_AL = 2700  # [kg/m^3] Density
 YIELD_STRENGTH_AL = 276 * 10**6  # [Pa] Yield strength
@@ -65,7 +65,7 @@ ULTIMATE_STRENGTH_AL = 310 * 10**6  # [Pa] Ultimate tensile strength
 YOUNGS_MODULUS = 68.9 * 10**9  # [Pa] Modulus of elasticity
 POISSON_RATIO_AL = 0.33  # [1] Poisson's ratio
 
-## Inconel 718
+## Inconel 718 (https://asm.matweb.com/search/specificmaterial.asp?bassnum=ninc34)
 
 DENSITY_INCO = 8190  # [kg/m^3] Density
 
@@ -79,9 +79,9 @@ DENSITY_SS316 = 7980 # [kg/m^3] Density
 
 # Fluids Constants
 
-FILM_PERCENT = 10  # [1] Percent of fuel mass flow dedicated to film cooling
-RESIDUAL_PERCENT = 7  # [1] Percent of propellant mass dedicated to residuals
-ULLAGE_PERCENT = 10  # [1] Percent of tank volume dedicated to ullage
+FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling
+RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals
+ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 FILL_PRESSURE = 60  # psi
 
