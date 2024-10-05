@@ -31,31 +31,15 @@ def pumpfed_avionics_sizing(powerRequired):
     LIPO_CELL_MASS = 22.2  # [g] mass of a LiPo cell
     LIPO_CELL_MASS = LIPO_CELL_MASS * c.G2KG  # [kg] Convert mass to kg
 
-    MOTOR_MASS = 2.9  # [kg] mass of the 3030 motor
-    MAX_CONTINOUS_WATTS = 3000  # [W] max amount of continous watts of the 3030 motor
+    MAX_PEAK_WATTS = 7000  # [W] maximum continuous power of the motor
+    MOTOR_WEIGHT = 0.660  # [Kg] weight of the motor
 
     # Power required (adjusted for motor efficiency)
 
-    totalCurrentRequired = totalPowerRequired / motorVoltageRequired  # [A]
-
-    numSeriesCells = motorVoltageRequired / LIPO_CELL_VOLTAGE
-    numSeriesCells = np.ceil(numSeriesCells)  # [-] Round up
-
-    numParallelCells = totalCurrentRequired / LIPO_CELL_DISCHARGE_CURRENT
-    numParallelCells = np.ceil(numParallelCells)  # [-]
-
-    # Total number of cells and mass of the battery pack
-    totalCells = numSeriesCells * numParallelCells  # [-]
-    totalBatteryMass = totalCells * LIPO_CELL_MASS  # [Kg]
-
-    # Total mass (motor + battery)
-    totalMass = totalBatteryMass + MOTOR_MASS + BASE_AVI_MASS  # [Kg]
-    # Track the optimal solution (minimize total mass)
-
     return [
         totalMass,
-        numSeriesCells,
-        numParallelCells,
+        parallel,
+        series,
         totalCells,
         totalBatteryMass,
     ]
