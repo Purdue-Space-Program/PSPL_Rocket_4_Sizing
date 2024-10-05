@@ -79,11 +79,18 @@ DENSITY_SS316 = 7980 # [kg/m^3] Density
 
 # Fluids Constants
 
-FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling
-RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals
-ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage
+FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
+RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
+ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
+
+R_PROP = 1 - ULLAGE_PERCENT / 100  # [1] Ratio of total tank volume to total propellant volume
+
+BURNOUT_PRESSURE_RATIO = 2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
+
+K_PRESSURIZATION = 0.64 # [1] Ratio of ideal tank volume to actual tank volume, calculated based on average from past rocket designs
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
-FILL_PRESSURE = 60  # psi
+
+FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Propellant Properties
 
