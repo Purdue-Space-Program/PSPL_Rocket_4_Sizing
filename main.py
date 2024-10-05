@@ -496,11 +496,31 @@ def main():
             pumpfedSpecificImpulse,
             pumpfedExpansionRatio,
             pumpfedCharacteristicLength,
-        ] = 
+        ] = propulsion.run_pumpfed_CEA(
+            chamberPressure,
+            exitPressure,
+            fuel,
+            oxidizer,
+            mixRatio,
+        )
 
         # Fluids
-        [] = fluidsystems.calculate_pumpfed_fluid_systems(
-            oxTankVolume, fuelTankVolume, npshRequired, copvMass
+        [
+            pumpfedTankPressure,
+            copvNewNew,
+            copvNew,
+        ] = fluidsystems.calculate_pumpfed_fluid_systems(
+            oxTankVolume, fuelTankVolume, c.REQUIRED_NPSH, copvMass
+        )
+        [
+            oxPower,
+            fuelPower,
+            pumpsMass,
+        ] = propulsion.calculate_pumpfed_propulsion(
+            pumpfedChamberPressure,
+            oxidizer,
+            fuel,
+            oxMassFlowRate,
         )
 
         # Structures
