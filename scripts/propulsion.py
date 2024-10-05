@@ -336,10 +336,6 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     elif fuel.lower() == "ethanol":
         fuelTemp = c.TAMBIENT
 
-    elif fuel.lower() == "jet-a":
-        fluid = "dodecane"
-        fuelTemp = c.TAMBIENT
-
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
 
     oxDensity = PropsSI(
