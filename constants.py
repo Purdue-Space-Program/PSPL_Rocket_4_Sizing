@@ -90,9 +90,9 @@ FILL_PRESSURE = 60  # psi
 
 # Propellant Properties
 
-DENSITY_ETHANOL = 789  # [kg/m^3] Ethanol density at STP
-DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP
-DENSITY_IPA = 786  # [kg/m^3] Isopropyl alcohol density at STP
+DENSITY_ETHANOL = 785  # [kg/m^3] Ethanol density at STP (https://www.engineeringtoolbox.com/ethanol-ethyl-alcohol-properties-C2H6O-d_2027.html)
+DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP (https://www.code7700.com/pdfs/bd700_fuel_density.pdf)
+DENSITY_IPA = 785  # [kg/m^3] Isopropyl alcohol density at STP (https://macro.lsu.edu/HowTo/solvents/IPA.htm)
 
 # Pump Constant
 
