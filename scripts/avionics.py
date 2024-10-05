@@ -18,7 +18,7 @@ def avionics_sizing():
     return mass
 
 
-def pumpfed_avionics_sizing(powerRequired):
+def pumpfed_avionics_sizing(oxPower, fuelPower):
     # Constants
     BASE_AVI_MASS = 6  # [lbm] base mass of avionics
     BASE_AVI_MASS = BASE_AVI_MASS * c.LB2KG  # [kg] Convert mass to kg
@@ -31,23 +31,32 @@ def pumpfed_avionics_sizing(powerRequired):
     LIPO_CELL_MASS = 22.2  # [g] mass of a LiPo cell
     LIPO_CELL_MASS = LIPO_CELL_MASS * c.G2KG  # [kg] Convert mass to kg
 
-    powerRequired = powerRequired / MOTOR_EFFICIENCY  # [W] power required by the motor
-
     MAX_VOLTS = 103  # [V] maximum voltage of the motor
-    MOTOR_WEIGHT = 0.660  # [Kg] weight of the motor
+    MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 
+    # Adjust power required for oxidizer and fuel pumps separately
+    oxPowerRequired = oxPower / MOTOR_EFFICIENCY  # [W] Adjust oxidizer power
+    fuelPowerRequired = fuelPower / MOTOR_EFFICIENCY  # [W] Adjust fuel power
+
+    # Total power required
+    totalPowerRequired = oxPowerRequired + fuelPowerRequired  # [W]
+
+    # Calculate the number of battery cells required
     series = np.ceil(MAX_VOLTS / LIPO_CELL_VOLTAGE)  # number of cells in series
     paralell = np.ceil(
-        powerRequired / (LIPO_CELL_DISCHARGE_CURRENT * LIPO_CELL_VOLTAGE)
+        totalPowerRequired / (LIPO_CELL_DISCHARGE_CURRENT * LIPO_CELL_VOLTAGE)
     )  # number of cells in parallel
 
     numCells = series * paralell  # total number of cells
 
-    pumpAviMass = (
-        numCells * LIPO_CELL_MASS + MOTOR_WEIGHT
-    )  # total weight of the battery
+    # Total motor weight (2 motors: one for oxidizer, one for fuel)
+    totalMotorWeight = MOTOR_WEIGHT * 2  # [kg]
 
-    totalMass = BASE_AVI_MASS + pumpAviMass  # total mass of avionics
+    # Total weight of the battery and motors
+    pumpAviMass = numCells * LIPO_CELL_MASS + totalMotorWeight
+
+    # Total mass of the avionics system
+    totalMass = BASE_AVI_MASS + pumpAviMass
 
     return [
         totalMass,

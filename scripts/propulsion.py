@@ -324,17 +324,21 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = c.REQUIRED_NPSH
-    fuelInletPressure = c.REQUIRED_NPSH
+    oxInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
+    fuelInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
 
-    oxExitPressure = newChamberPressure / INJECTOR_DP_RATIO
-    fuelExitPressure = newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
+    oxExitPressure = (
+        newChamberPressure / INJECTOR_DP_RATIO
+    )  # [Pa] pressure at pump exit
+    fuelExitPressure = (
+        newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
+    )  # [Pa] pressure at pump exit
 
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
 
     elif fuel.lower() == "ethanol":
-        fuelTemp = c.TAMBIENT
+        fuelTemp = c.TAMBIENT  # [K] temperature of fuel upon injection into combustion
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
 
@@ -345,15 +349,17 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
         "D", "P", fuelInletPressure, "T", oxTemp, fuel
     )  # Density [kg/m3]
 
-    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (oxDensity * c.GRAVITY)
-    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency
-    oxTorque = oxPower / ((2 * np.pi / 60) * rpm)
+    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (
+        oxDensity * c.GRAVITY
+    )  # [m] Developed Head
+    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency  # [W] Power
+    oxTorque = oxPower / ((2 * np.pi / 60) * rpm)  # [N-m] Torque
 
     fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (
         fuelDensity * c.GRAVITY
-    )
+    )  # [m] Developed Head
     fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
-    fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)
+    fuelTorque = fuelPower / ((2 * np.pi / 60) * rpm)  # [N-m] Torque
 
     # Mass Correlations
 
@@ -376,35 +382,43 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
         (8 * c.GRAVITY * fuelDevelopedHead)
         / (((rpm * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
     )  # Fuel Impeller Diameter [m]
-    impellerThickness = 0.375 * c.IN2M
+    impellerThickness = 0.375 * c.IN2M  # Impeller Thickness [m]
 
     impellerMass = (oxImpellerDia / 2) ** 2 * np.pi * impellerThickness + (
         fuelImpellerDia / 2
-    ) ** 2 * np.pi * impellerThickness
+    ) ** 2 * np.pi * impellerThickness  # [kg] Mass of impellers for both pumps
 
     # Housings
     voluteMaterialDensity = (
         c.DENSITY_SS316
-    )  # may want to change to aluminum alloy if possible
+    )  # may want to change to aluminum alloy if possible [kg/m^3]
 
     voluteWallThickness = 0.25 * c.IN2M
     oxVoluteOuterVol = (np.pi * (oxImpellerDia + volumeWallThickness) ** 2 / 4) * (
         2 * voluteWallThickness + impellerThickness
-    )
+    )  # [m^3] Ox Volute Outer Volume
 
-    oxVoluteInnerVol = (np.pi * oxImpellerDia**2 / 4) * impellerThickness
+    oxVoluteInnerVol = (
+        np.pi * oxImpellerDia**2 / 4
+    ) * impellerThickness  # [m^3] Ox Volute Inner Volumes
 
-    oxVoluteMass = voluteMaterialDensity * (oxVoluteOuterVol - oxVoluteInnerVol)
+    oxVoluteMass = voluteMaterialDensity * (
+        oxVoluteOuterVol - oxVoluteInnerVol
+    )  # [kg] Ox Volute Mass
 
     fuVoluteOuterVol = (np.pi * (fuImpellerDia + volumeWallThickness) ** 2 / 4) * (
         2 * voluteWallThickness + impellerThickness
-    )
+    )  # [m^3] Fuel Volute Outer Volume
 
-    fuVoluteInnerVol = (np.pi * fuImpellerDia**2 / 4) * impellerThickness
+    fuVoluteInnerVol = (
+        np.pi * fuImpellerDia**2 / 4
+    ) * impellerThickness  # [m^3] Fuel Volute Inner Volumes
 
-    fuVoluteMass = voluteMaterialDensity * (fuVoluteOuterVol - fuVoluteInnerVol)
+    fuVoluteMass = voluteMaterialDensity * (
+        fuVoluteOuterVol - fuVoluteInnerVol
+    )  # [kg] Fuel Volute Mass
 
-    voluteMass = fuVoluteMass * 1.05 + oxVoluteMass * 1.1
+    voluteMass = fuVoluteMass * 1.05 + oxVoluteMass * 1.1  # [kg] Total Volute Mass
     # total pump mass with rough additional mass percent depending on pump complexity
 
-    pumpsMass = shaftMass + impellerMass + voluteMass
+    pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass

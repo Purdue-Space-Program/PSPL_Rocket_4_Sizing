@@ -78,7 +78,7 @@ DENSITY_CF = 1790  # [kg/m^3] HexTow AS4 Carbon Fiber Density
 
 ## 316 Stainless Steel
 
-DENSITY_SS316 = 7980 # [kg/m^3] Density
+DENSITY_SS316 = 7980  # [kg/m^3] Density
 
 # Fluids Constants
 
@@ -100,7 +100,9 @@ MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 
 # Pump Constant
 
-REQUIRED_NPSH = 60 * PSI2PA # [Pa] [GUESS, NEEDS TO BE DECIDED] Required net positive suction head for pumps (assumed constant)
+REQUIRED_NPSH = (
+    60 * PSI2PA
+)  # [Pa] [GUESS, NEEDS TO BE DECIDED] Required net positive suction head for pumps (assumed constant)
 
 # FAR Constants
 
@@ -111,11 +113,11 @@ RAIL_HEIGHT = 18.29  # [m] height of the rail
 
 BZB_COPV_VOLUME = 9 * L2M3  # [m^3] Volume of the BZB COPV
 BZB_COPV_PRESSURE = 4950 * PSI2PA  # [Pa] Maximum pressure of the BZB COPV
-BZB_COPV_MASS = 5.7 # [kg] Mass of BZB COPV (Luxfer T90A)
+BZB_COPV_MASS = 5.7  # [kg] Mass of BZB COPV (Luxfer T90A)
 
 BZ1_COPV_VOLUME = 5 * L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
 BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
-BZ1_COPV_MASS = 3 # [kg] [GUESS, NEED TO UPDATE] Mass of BZ1 COPV
+BZ1_COPV_MASS = 3  # [kg] [GUESS, NEED TO UPDATE] Mass of BZ1 COPV
 
 # Other Constants
 
