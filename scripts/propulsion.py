@@ -394,7 +394,7 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     )  # may want to change to aluminum alloy if possible [kg/m^3]
 
     voluteWallThickness = 0.25 * c.IN2M
-    oxVoluteOuterVol = (np.pi * (oxImpellerDia + volumeWallThickness) ** 2 / 4) * (
+    oxVoluteOuterVol = (np.pi * (oxImpellerDia + voluteWallThickness) ** 2 / 4) * (
         2 * voluteWallThickness + impellerThickness
     )  # [m^3] Ox Volute Outer Volume
 
@@ -406,12 +406,12 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
         oxVoluteOuterVol - oxVoluteInnerVol
     )  # [kg] Ox Volute Mass
 
-    fuVoluteOuterVol = (np.pi * (fuImpellerDia + volumeWallThickness) ** 2 / 4) * (
+    fuVoluteOuterVol = (np.pi * (fuelImpellerDia + voluteWallThickness) ** 2 / 4) * (
         2 * voluteWallThickness + impellerThickness
     )  # [m^3] Fuel Volute Outer Volume
 
     fuVoluteInnerVol = (
-        np.pi * fuImpellerDia**2 / 4
+        np.pi * fuelImpellerDia**2 / 4
     ) * impellerThickness  # [m^3] Fuel Volute Inner Volumes
 
     fuVoluteMass = voluteMaterialDensity * (
@@ -422,3 +422,5 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
+
+    return [oxPower, fuelPower, pumpsMass]
