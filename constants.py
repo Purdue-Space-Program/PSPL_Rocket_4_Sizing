@@ -20,7 +20,7 @@ BAR2PA = 1 / PA2BAR  # [Pa/bar] Conversion factor from bar to Pa
 
 RANK2KELVIN = 5 / 9  # [K/R] Conversion factor from R to K
 KELVIN2RANK = 1 / RANK2KELVIN  # [R/K] Conversion factor from K to R
-TAMBIENT = 297.15  # [K] Ambient temperature
+TAMBIENT = 290  # [K] Ambient temperature (62 F)
 
 ## Mass
 
@@ -38,7 +38,7 @@ FT2M = 1 / M2FT  # [m/ft] Conversion factor from ft to m
 ## Area
 
 IN22M2 = 0.0064516  # [m^2/in^2] Conversion factor from in^2 to m^2
-M22IN2 = 1550.0031  # [in^2/m^2] Conversion factor from m^2 to in^2
+M22IN2 = 1 / IN22M2  # [in^2/m^2] Conversion factor from m^2 to in^2
 
 ## Volume
 
@@ -97,7 +97,7 @@ MOLAR_MASS_IPA = 0.0601  # [kg/mol] Isopropyl alcohol molar mass
 
 # Pump Constant
 
-REQUIRED_NPSH = 60 * PSI2PA # [Pa] [GUESS, NEEDS TO BE DECIDED] Required net positive suction head for pumps (assumed constant)
+REQUIRED_NPSH = 85 * PSI2PA # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
 
 # FAR Constants
 
@@ -112,15 +112,12 @@ BZB_COPV_MASS = 5.7 # [kg] Mass of BZB COPV (Luxfer T90A)
 
 BZ1_COPV_VOLUME = 5 * L2M3  # [m^3] Volume of the BZ1 COPV [TEMPORARY NEED TO ADD]
 BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
-BZ1_COPV_MASS = 3 # [kg] [GUESS, NEED TO UPDATE] Mass of BZ1 COPV
+BZ1_COPV_MASS = 3 # [kg] [GUESS, NEED TO UPDATE, NICK IS CHECKING TONIGHT] Mass of BZ1 COPV
 
 # Other Constants
 
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
-R = 8.314  # [J/mol-K] Universal gas constant
-COPV_OD_MARGIN = (
-    0.061 * 1.5
-)  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube [TEMPORARY, NEED TO ADD]
+COPV_OD_MARGIN = 0.061 * 1.5  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube thickness with a 1.5 safety factor
 
 # Assumptions
 MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]
