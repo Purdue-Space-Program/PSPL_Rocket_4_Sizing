@@ -70,8 +70,8 @@ def run_CEA(
     # Get the fuel and oxidizer temperatures using CoolProp
 
     # Unit conversions
-    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
-    exitPressure = exitPressure * c.PA2BAR
+    chamberPressure = chamberPressure * c.PA2BAR
+    exitPressure = exitPressure * c.PA2BAR # shouldn't this be a constant?
     pressureRatio = chamberPressure / exitPressure
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
@@ -79,21 +79,20 @@ def run_CEA(
     # remove methane
     if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
-        # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
-        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
-        characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion [CHANGE TO MAX ALLOWABLE]
+        characteristicLength = 35 * c.IN2M  # [ADD SOURCE]
 
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
-        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.TAMBIENT
 
     elif fuel.lower() == "jet-a":
         fuelCEA = "Jet-A(L)"
-        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.TAMBIENT
 
-    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
@@ -128,7 +127,6 @@ def run_CEA(
 
 
 def run_pumpfed_CEA(
-    chamberPressure,
     exitPressure,
     fuel,
     oxidizer,
@@ -169,8 +167,8 @@ def run_pumpfed_CEA(
     # Get the fuel and oxidizer temperatures using CoolProp
 
     # Unit conversions
-    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
-    exitPressure = exitPressure * c.PA2BAR
+    chamberPressure = c.PUMP_CHAMBER_PRESSURE * c.PA2BAR
+    exitPressure = exitPressure * c.PA2BAR # shouldn't this be a constant?
     pressureRatio = chamberPressure / exitPressure
 
     # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
@@ -178,21 +176,20 @@ def run_pumpfed_CEA(
     # remove methane
     if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
-        # fuelTemp = PropsSI("T", "P", fillPressure, "Q", 0, fuel) # throws error
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
-        characteristicLength = 35 * c.IN2M  # where are we sourcing these values?
+        characteristicLength = 35 * c.IN2M  # [ADD SOURCE] also if we're going to have these values in more than one place can they be in constants?
 
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
-        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.TAMBIENT
 
     elif fuel.lower() == "jet-a":
         fuelCEA = "Jet-A(L)"
-        characteristicLength = 45 * c.IN2M  # where are we sourcing these values?
+        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.TAMBIENT
 
-    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
@@ -412,11 +409,9 @@ def calculate_propulsion(
     ]
 
 
-def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
-    INJECTOR_DP_RATIO = 1 / 1.2  # [1] Assumed pressure drop ratio over injector
-    REGEN_DP_RATIO = (
-        1 / 1.4
-    )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
+def pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
+    INJECTOR_DP_RATIO = 1 / 1.2  # [1] Assumed pressure drop ratio over injector, from RPE
+    REGEN_DP_RATIO = 1 / 1.4  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
 
     pumpEfficiency = 0.5  # Constant??
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
@@ -426,10 +421,10 @@ def pumps(newChamberPressure, oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, 
     fuelInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
 
     oxExitPressure = (
-        newChamberPressure / INJECTOR_DP_RATIO
+        c.PUMP_CHAMBER_PRESSURE / INJECTOR_DP_RATIO
     )  # [Pa] pressure at pump exit
     fuelExitPressure = (
-        newChamberPressure / INJECTOR_DP_RATIO / REGEN_DP_RATIO
+        c.PUMP_CHAMBER_PRESSURE / INJECTOR_DP_RATIO / REGEN_DP_RATIO
     )  # [Pa] pressure at pump exit
 
     if fuel.lower() == "methane":
