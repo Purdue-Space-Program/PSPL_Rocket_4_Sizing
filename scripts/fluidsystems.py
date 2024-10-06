@@ -20,7 +20,8 @@ import constants as c
 #   mixRatio [1]: The mass ratio of oxidizer to fuel (kg ox/kg fuel) in the chamber core
 #   chamberPressure [Pa]: The nominal engine chamber pressure
 #   copvPressure [Pa]: The maximum pressure the selected COPV can hold
-#   copvVolume [m^3]: The volume of the selected copv
+#   copvVolume [m^3]: The volume of the selected COPV
+#   copvMass [kg]: The mass of the selected COPV
 #   tankOD [m]: The tank wall outer diameter
 #   tankWallThick [m]: the tank wall thickness
 # Outputs:
@@ -29,6 +30,7 @@ import constants as c
 #   upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
 #   tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
 #   lowerPlumbingLength [m]: The length of lower plumbing
+#   tankMixRatio [1]: The ratio of oxidizer to fuel by mass in the tanks, accounting for film cooling.
 #   oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
 #   fuelPropMass [kg]: The nominal mass of fuel the vehicle will carry
 #   oxTankVolume [m^3]: The total volume of the oxidizer tank
@@ -97,13 +99,9 @@ def fluids_sizing(
             Volume of the fuel tank [m^3].
     """
 
-    # Constants
-
-    # Propellant
-
     # Plumbing
     CHAMBER_DP_RATIO = 0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
-    COPV_TEMP_1 = c.TAMBIENT + 15  # [K] Assumed initial COPV temperature
+    COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank structure
     NUM_BULKHEADS = 4  # [1] Number of bulkheads the tanks use, assuming separate tanks for conservatism
@@ -145,7 +143,7 @@ def fluids_sizing(
     tankID = tankOD - 2 * tankThickness  # [m] Tank wall inner diameter
 
     heliumCv = PropsSI(
-        "CVMASS", "P", 1 * c.ATM2PA, "T", c.TAMBIENT, "helium"
+        "CVMASS", "P", 1 * c.ATM2PA, "T", c.T_AMBIENT, "helium"
     )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     copvPressure1 = copvPressure  # [Pa] COPV initial pressure
@@ -189,12 +187,6 @@ def fluids_sizing(
         m.sqrt(2) * tankID**3
     ) / 12  # [m^3] Total internal bulkhead volume for one tank
 
-    oxWallLength = (oxTankVolume - bulkheadVolume) / (
-        (m.pi * tankID**2) / 4
-    )  # [m] Oxidizer tank wall length
-    fuWallLength = (fuelTankVolume - bulkheadVolume) / (
-        (m.pi * tankID**2) / 4
-    )  # [m] Fuel tank wall length
     oxWallLength = (oxTankVolume - bulkheadVolume) / (
         (m.pi * tankID**2) / 4
     )  # [m] Oxidizer tank wall length
@@ -299,14 +291,14 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
 
     # Plumbing
     PUMP_DP_RATIO = 0.9  # [1] Pump inlet pressure / tank pressure, calculated based on average from CMS run lines
-    COPV_TEMP_1 = c.TAMBIENT + 15  # [K] Assumed initial COPV temperature
+    COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank pressure using pumps
     pumpTankPressure = c.REQUIRED_NPSH / PUMP_DP_RATIO  # [Pa] Tank pressure
 
     # Volume checks
     heliumCv = PropsSI(
-        "CVMASS", "P", 1 * c.ATM2PA, "T", c.TAMBIENT, "helium"
+        "CVMASS", "P", 1 * c.ATM2PA, "T", c.T_AMBIENT, "helium"
     )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     # BZ1 COPV volume check
@@ -393,4 +385,3 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
         copvNew = 'Same as pressure-fed'
     
     return (pumpTankPressure, copvMassNew, copvNew)
-    

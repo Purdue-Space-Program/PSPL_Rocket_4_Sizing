@@ -20,7 +20,7 @@ BAR2PA = 1 / PA2BAR  # [Pa/bar] Conversion factor from bar to Pa
 
 RANK2KELVIN = 5 / 9  # [K/R] Conversion factor from R to K
 KELVIN2RANK = 1 / RANK2KELVIN  # [R/K] Conversion factor from K to R
-TAMBIENT = 290  # [K] Ambient temperature (62 F)
+T_AMBIENT = 290  # [K] Ambient temperature (62 F)
 
 ## Mass
 
