@@ -60,8 +60,5 @@ def pumpfed_avionics_sizing(oxPower, fuelPower):
 
     return [
         totalMass,
-        paralell,
-        series,
-        numCells,
         numCells,
     ]

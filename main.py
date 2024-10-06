@@ -489,7 +489,7 @@ def main():
             ignore_index=True,
         )
 
-        # Pumps
+        # CEA
 
         [
             pumpfedCstar,
@@ -497,7 +497,6 @@ def main():
             pumpfedExpansionRatio,
             pumpfedCharacteristicLength,
         ] = propulsion.run_pumpfed_CEA(
-            chamberPressure,
             exitPressure,
             fuel,
             oxidizer,
@@ -507,20 +506,48 @@ def main():
         # Fluids
         [
             pumpfedTankPressure,
-            copvNewNew,
+            copvMassNew,
             copvNew,
         ] = fluidsystems.calculate_pumpfed_fluid_systems(
-            oxTankVolume, fuelTankVolume, c.REQUIRED_NPSH, copvMass
+            oxTankVolume, fuelTankVolume, copvMass
         )
+
+        # Propulsion
+        [
+            pumpfedJetThrust,
+            pumpfedSeaLevelThrust,
+            pumpfedOxMassFlowRate,
+            pumpfedFuelMassFlowRate,
+            pumpfedBurnTime,
+            pumpfedChamberLength,
+            pumpfedChamberMass,
+            pumpfedInjectorMass,
+            pumpfedTotalPropulsionMass,
+            pumpfedTotalMassFlowRate,
+            pumpfedExitArea,
+        ] = propulsion.calculate_pumpfed_propulsion(
+            thrustToWeight,
+            totalWetMass,
+            exitPressure,
+            pumpfedCstar,
+            pumpfedSpecificImpulse,
+            pumpfedExpansionRatio,
+            pumpfedCharacteristicLength,
+            mixRatio,
+            oxPropMass,
+            fuelPropMass,
+            tankOD,
+        )
+
         [
             oxPower,
             fuelPower,
             pumpsMass,
-        ] = propulsion.calculate_pumpfed_propulsion(
-            pumpfedChamberPressure,
+        ] = propulsion.calculate_pumps(
             oxidizer,
             fuel,
             oxMassFlowRate,
+            fuelMassFlowRate,
         )
 
         # Structures
@@ -541,12 +568,18 @@ def main():
             chamberLength,
         )
 
+        [
+            pumpfedTotalAvionicsMass,
+            cellsInParallel,
+            numberCells,
+        ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
+
         [pumpfedTotalDryMass, pumpfedTotalWetMass] = vehicle.calculate_mass(
             pumpfedTotalAvionicsMass,
-            fluidsystemsMass - copvMass + pumpfedcopvMass,
+            fluidsystemsMass - copvMass + copvMassNew,
             oxPropMass,
             fuelPropMass,
-            pumpfedtotalPropMass,
+            totalPropulsionMass + pumpsMass,
             pumpfedTotalStructuresMass,
         )
 
