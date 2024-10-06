@@ -53,12 +53,13 @@ def pumpfed_avionics_sizing(oxPower, fuelPower):
     totalMotorWeight = MOTOR_WEIGHT * 2  # [kg]
 
     # Total weight of the battery and motors
-    pumpAviMass = numCells * LIPO_CELL_MASS + totalMotorWeight
+    batteryMass = numCells * LIPO_CELL_MASS  # [kg]
+    pumpAviMass = batteryMass + totalMotorWeight + BASE_AVI_MASS  # [kg]
 
     # Total mass of the avionics system
-    totalMass = BASE_AVI_MASS + pumpAviMass
 
     return [
-        totalMass,
+        batteryMass,
+        pumpAviMass,
         numCells,
     ]

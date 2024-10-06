@@ -158,9 +158,40 @@ def main():
 
     pumpfedDF = pd.DataFrame(
         columns=[
-            "Pumpfed Lower Airframe Length [ft]",
+            "Pumpfed Cstar [m/s]",
+            "Pumpfed Isp [s]",
+            "Pumpfed Expansion Ratio [-]",
+            "Pumpfed Characteristic Length [m]",
+            "Pumpfed Tank Pressure [psi]",
+            "Pumpfed COPV Mass [lbm]",
+            "Pumpfed COPV [-]",
+            "Pumpfed Jet Thrust [lbf]",
+            "Pumpfed Sea Level Thrust [lbf]",
+            "Pumpfed Oxidizer Mass Flow Rate [lbm/s]",
+            "Pumpfed Fuel Mass Flow Rate [lbm/s]",
+            "Pumpfed Burn Time [s]",
+            "Pumpfed Chamber Length [in]",
+            "Pumpfed Chamber Mass [lbm]",
+            "Pumpfed Injector Mass [lbm]",
+            "Pumpfed Total Propulsion Mass [lbm]",
+            "Pumpfed Total Mass Flow Rate [lbm/s]",
+            "Pumpfed Exit Area [in^2]",
+            "Pumpfed Oxidizer Power [W]",
+            "Pumpfed Fuel Power [W]",
+            "Pumpfed Pumps Mass [lbm]",
+            "Pumpfed Battery Mass [lbm]",
+            "Pumpfed Total Avionics Mass [lbm]",
+            "Pumpfed Number of Cells [-]",
+            "pumpfed Lower Airframe Length [ft]",
             "Pumpfed Lower Airframe Mass [lbm]",
             "Pumpfed Total Structures Mass [lbm]",
+            "Pumpfed Total Dry Mass [lbm]",
+            "Pumpfed Total Wet Mass [lbm]",
+            "Pumpfed Total Length [ft]",
+            "Pumpfed Altitude [ft]",
+            "Pumpfed Max Acceleration [g]",
+            "Pumpfed Rail Exit Velocity [ft/s]",
+            "Pumpfed Rail Exit Acceleration [g]",
         ]
     )
     # Progress Bar
@@ -402,14 +433,6 @@ def main():
             )
         )
 
-        isWithinPostLimits = vehicle.check_post_limits(
-            maxRailAccelLim, minRailAccelLim, railExitAccel
-        )
-
-        if not isWithinPostLimits:
-            possibleRocketsDF.drop(idx, inplace=True)
-            continue
-
         fluidsystemsDF = fluidsystemsDF._append(
             {
                 "Fluid Systems Mass [lbm]": fluidsystemsMass * c.KG2LB,
@@ -488,6 +511,12 @@ def main():
             },
             ignore_index=True,
         )
+
+        # ██████  ██    ██ ███    ███ ██████      ██ ████████     ██    ██ ██████
+        # ██   ██ ██    ██ ████  ████ ██   ██     ██    ██        ██    ██ ██   ██
+        # ██████  ██    ██ ██ ████ ██ ██████      ██    ██        ██    ██ ██████
+        # ██      ██    ██ ██  ██  ██ ██          ██    ██        ██    ██ ██
+        # ██       ██████  ██      ██ ██          ██    ██         ██████  ██
 
         # CEA
 
@@ -569,8 +598,8 @@ def main():
         )
 
         [
+            batteryMass,
             pumpfedTotalAvionicsMass,
-            cellsInParallel,
             numberCells,
         ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
@@ -583,13 +612,66 @@ def main():
             pumpfedTotalStructuresMass,
         )
 
+        [
+            pumpfedAltitude,
+            pumpfedMaxAccel,
+            pumpfedRailExitVelo,
+            pumpfedRailExitAccel,
+        ] = trajectory.calculate_trajectory(
+            pumpfedTotalWetMass,
+            pumpfedTotalMassFlowRate,
+            pumpfedJetThrust,
+            tankOD,
+            dragCoeff,
+            pumpfedExitArea,
+            exitPressure,
+            pumpfedBurnTime,
+            pumpfedTotalLength,
+            plots=0,
+        )
+
         pumpfedDF = pumpfedDF._append(
             {
-                "Pumpfed Lower Airframe Length [ft]": pumpfedLowerAirframeLength
+                "Pumpfed Cstar [m/s]": pumpfedCstar,
+                "Pumpfed Isp [s]": pumpfedSpecificImpulse,
+                "Pumpfed Expansion Ratio [-]": pumpfedExpansionRatio,
+                "Pumpfed Characteristic Length [m]": pumpfedCharacteristicLength,
+                "Pumpfed Tank Pressure [psi]": pumpfedTankPressure * c.PA2PSI,
+                "Pumpfed COPV Mass [lbm]": copvMassNew * c.KG2LB,
+                "Pumpfed COPV [-]": copvNew,
+                "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
+                "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
+                "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate
+                * c.KG2LB,
+                "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate
+                * c.KG2LB,
+                "Pumpfed Burn Time [s]": pumpfedBurnTime,
+                "Pumpfed Chamber Length [in]": pumpfedChamberLength * c.M2IN,
+                "Pumpfed Chamber Mass [lbm]": pumpfedChamberMass * c.KG2LB,
+                "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
+                "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
+                * c.KG2LB,
+                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate
+                * c.KG2LB,
+                "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
+                "Pumpfed Oxidizer Power [W]": oxPower,
+                "Pumpfed Fuel Power [W]": fuelPower,
+                "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,
+                "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
+                "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,
+                "Pumpfed Number of Cells [-]": numberCells,
+                "pumpfed Lower Airframe Length [ft]": pumpfedLowerAirframeLength
                 * c.M2FT,
                 "Pumpfed Lower Airframe Mass [lbm]": pumpfedLowerAirframeMass * c.KG2LB,
                 "Pumpfed Total Structures Mass [lbm]": pumpfedTotalStructuresMass
                 * c.KG2LB,
+                "Pumpfed Total Dry Mass [lbm]": pumpfedTotalDryMass * c.KG2LB,
+                "Pumpfed Total Wet Mass [lbm]": pumpfedTotalWetMass * c.KG2LB,
+                "Pumpfed Total Length [ft]": pumpfedTotalLength * c.M2FT,
+                "Pumpfed Altitude [ft]": pumpfedAltitude * c.M2FT,
+                "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
+                "Pumpfed Rail Exit Velocity [ft/s]": pumpfedRailExitVelo * c.M2FT,
+                "Pumpfed Rail Exit Acceleration [g]": pumpfedRailExitAccel / c.GRAVITY,
             },
             ignore_index=True,
         )
