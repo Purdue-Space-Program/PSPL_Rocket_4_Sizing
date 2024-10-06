@@ -68,10 +68,10 @@ def main():
     COPVODMargin = limits.loc["Max", "COPV OD Margin (in)"]
     COPVODMargin = COPVODMargin * c.IN2M
 
-    maxFuelVolumeLim = limits.loc["Max", "Fuel Volume (in^3)"]
+    maxFuelVolumeLim = limits.loc["Max", "Fuel Volume (ft^3)"]
     maxFuelVolumeLim = maxFuelVolumeLim * c.FT32M3
 
-    maxOxVolumeLim = limits.loc["Max", "Oxidizer Volume (in^3)"]
+    maxOxVolumeLim = limits.loc["Max", "Oxidizer Volume (ft^3)"]
     maxOxVolumeLim = maxOxVolumeLim * c.FT32M3
 
     maxRailAccelLim = limits.loc["Max", "Rail Acceleration (g)"] * c.GRAVITY
@@ -280,7 +280,7 @@ def main():
         # GET RESULTS
 
         # Avionics
-        [avionicsMass] = avionics.calculate_avionics()
+        avionicsMass = avionics.calculate_avionics()
 
         # Fluid Systems
         [
@@ -537,9 +537,7 @@ def main():
             pumpfedTankPressure,
             copvMassNew,
             copvNew,
-        ] = fluidsystems.calculate_pumpfed_fluid_systems(
-            oxTankVolume, fuelTankVolume, copvMass
-        )
+        ] = fluidsystems.pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMass)
 
         # Propulsion
         [

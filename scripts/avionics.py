@@ -11,14 +11,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import constants as c
 
 
-def avionics_sizing():
+def calculate_avionics():
     mass = 6  # [lbm] mass of avionics
     mass = mass * c.LB2KG  # [kg] Convert mass to kg
 
     return mass
 
 
-def pumpfed_avionics_sizing(oxPower, fuelPower):
+def calculate_pumpfed_avionics(oxPower, fuelPower):
     # Constants
     BASE_AVI_MASS = 6  # [lbm] base mass of avionics
     BASE_AVI_MASS = BASE_AVI_MASS * c.LB2KG  # [kg] Convert mass to kg

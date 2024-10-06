@@ -85,12 +85,12 @@ def run_CEA(
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
-        fuelTemp = c.TAMBIENT
+        fuelTemp = c.T_AMBIENT
 
     elif fuel.lower() == "jet-a":
         fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
-        fuelTemp = c.TAMBIENT
+        fuelTemp = c.T_AMBIENT
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
     oxidizerCEA = "O2(L)"
@@ -184,12 +184,12 @@ def run_pumpfed_CEA(
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
-        fuelTemp = c.TAMBIENT
+        fuelTemp = c.T_AMBIENT
 
     elif fuel.lower() == "jet-a":
         fuelCEA = "Jet-A(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
-        fuelTemp = c.TAMBIENT
+        fuelTemp = c.T_AMBIENT
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
     oxidizerCEA = "O2(L)"
@@ -598,7 +598,7 @@ def calculate_pumpfed_propulsion(
     ]
 
 
-def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
+def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
 
     INJECTOR_DP_RATIO = (
         1 / 1.2
@@ -625,7 +625,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, rpm):
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
 
     elif fuel.lower() == "ethanol":
-        fuelTemp = c.TAMBIENT  # [K] temperature of fuel upon injection into combustion
+        fuelTemp = c.T_AMBIENT  # [K] temperature of fuel upon injection into combustion
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
 

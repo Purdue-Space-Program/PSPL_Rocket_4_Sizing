@@ -100,15 +100,23 @@ def fluids_sizing(
     """
 
     # Plumbing
-    CHAMBER_DP_RATIO = 0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
+    CHAMBER_DP_RATIO = (
+        0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
+    )
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank structure
     NUM_BULKHEADS = 4  # [1] Number of bulkheads the tanks use, assuming separate tanks for conservatism
     K_BULKHEAD = 4.0  # [1] Ratio of total bulkhead mass to shell mass, calculated from CMS bulkhead masses
-    SAFETY_FACTOR_Y = 1.25  # [1] Safety factor to tank structure yield, based on H&H chapter 8
-    SAFETY_FACTOR_U = 1.5  # [1] Safety factor to tank structure ultimate, based on H&H chapter 8
-    PROOF_FACTOR = 1.5  # [1] Ratio of proof pressure to nominal pressure, from FAR requirements
+    SAFETY_FACTOR_Y = (
+        1.25  # [1] Safety factor to tank structure yield, based on H&H chapter 8
+    )
+    SAFETY_FACTOR_U = (
+        1.5  # [1] Safety factor to tank structure ultimate, based on H&H chapter 8
+    )
+    PROOF_FACTOR = (
+        1.5  # [1] Ratio of proof pressure to nominal pressure, from FAR requirements
+    )
 
     # Propellant properties
 
@@ -147,7 +155,9 @@ def fluids_sizing(
     )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     copvPressure1 = copvPressure  # [Pa] COPV initial pressure
-    copvPressure2 = c.BURNOUT_PRESSURE_RATIO * tankPressure  # [Pa] COPV burnout pressure
+    copvPressure2 = (
+        c.BURNOUT_PRESSURE_RATIO * tankPressure
+    )  # [Pa] COPV burnout pressure
 
     copvEntropy1 = PropsSI(
         "S", "P", copvPressure1, "T", COPV_TEMP_1, "helium"
@@ -216,7 +226,9 @@ def fluids_sizing(
 
     tankMass = tankWallMass + tankBulkheadmass  # [kg] Total tank mass
     upperPlumbingMass = 7.25  # [kg] Mass of upper plumbing system (see corellations from sizing writeup page)
-    lowerPlumbingMass = 13.115 * tankOD ** (0.469)  # [kg] Mass of lower plumbing system (see corellations from sizing writeup page)
+    lowerPlumbingMass = 13.115 * tankOD ** (
+        0.469
+    )  # [kg] Mass of lower plumbing system (see corellations from sizing writeup page)
 
     fluidSystemsMass = (
         tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass
@@ -303,7 +315,9 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
 
     # BZ1 COPV volume check
     copvPressure1 = c.BZ1_COPV_PRESSURE  # [Pa] COPV initial pressure
-    copvPressure2 = c.BURNOUT_PRESSURE_RATIO * pumpTankPressure # [Pa] COPV burnout pressure
+    copvPressure2 = (
+        c.BURNOUT_PRESSURE_RATIO * pumpTankPressure
+    )  # [Pa] COPV burnout pressure
 
     copvEntropy1 = PropsSI(
         "S", "P", copvPressure1, "T", COPV_TEMP_1, "helium"
@@ -339,7 +353,9 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
 
     # BZB COPV volume check
     copvPressure1 = c.BZB_COPV_PRESSURE  # [Pa] COPV initial pressure
-    copvPressure2 = c.BURNOUT_PRESSURE_RATIO * pumpTankPressure  # [Pa] COPV burnout pressure
+    copvPressure2 = (
+        c.BURNOUT_PRESSURE_RATIO * pumpTankPressure
+    )  # [Pa] COPV burnout pressure
 
     copvEntropy1 = PropsSI(
         "S", "P", copvPressure1, "T", COPV_TEMP_1, "helium"
@@ -376,12 +392,12 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
     # Get new COPV info
     if BZ1copvUsable == True:
         copvMassNew = c.BZ1_COPV_MASS
-        copvNew = 'BZ1 COPV'
+        copvNew = "BZ1 COPV"
     elif BZBcopvUsable == True:
         copvMassNew = c.BZB_COPV_MASS
-        copvNew = 'BZB COPV'
+        copvNew = "BZB COPV"
     else:
         copvMassNew = copvMassOld
-        copvNew = 'Same as pressure-fed'
-    
-    return (pumpTankPressure, copvMassNew, copvNew)
+        copvNew = "Same as pressure-fed"
+
+    return [pumpTankPressure, copvMassNew, copvNew]
