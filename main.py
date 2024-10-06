@@ -585,7 +585,7 @@ def main():
             pumpfedLowerAirframeMass,
             pumpfedTotalStructuresMass,
         ] = structures.calculate_pumpfed_structures(
-            additionalPumpLength, lowerPlumbingLength, copvLength, tankOD
+            18 * c.IN2M, lowerPlumbingLength, copvLength, tankOD
         )
 
         [pumpfedTotalLength] = vehicle.calculate_length(
