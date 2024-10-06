@@ -177,18 +177,9 @@ def run_pumpfed_CEA(
     if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
-        characteristicLength = (
-            35 * c.IN2M
-        )  # [ADD SOURCE] also if we're going to have these values in more than one place can they be in constants?
 
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
-        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
-        fuelTemp = c.T_AMBIENT
-
-    elif fuel.lower() == "jet-a":
-        fuelCEA = "Jet-A(L)"
-        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
@@ -219,7 +210,6 @@ def run_pumpfed_CEA(
         cstar,
         specificImpulse,
         expansionRatio,
-        characteristicLength,
     ]
 
 

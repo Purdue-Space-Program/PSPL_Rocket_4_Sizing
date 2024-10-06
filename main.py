@@ -521,7 +521,6 @@ def main():
             pumpfedCstar,
             pumpfedSpecificImpulse,
             pumpfedExpansionRatio,
-            pumpfedCharacteristicLength,
         ] = propulsion.run_pumpfed_CEA(
             exitPressure,
             fuel,
@@ -556,7 +555,6 @@ def main():
             pumpfedCstar,
             pumpfedSpecificImpulse,
             pumpfedExpansionRatio,
-            pumpfedCharacteristicLength,
             mixRatio,
             oxPropMass,
             fuelPropMass,
@@ -632,7 +630,6 @@ def main():
                 "Pumpfed Cstar [m/s]": pumpfedCstar,
                 "Pumpfed Isp [s]": pumpfedSpecificImpulse,
                 "Pumpfed Expansion Ratio [-]": pumpfedExpansionRatio,
-                "Pumpfed Characteristic Length [m]": pumpfedCharacteristicLength,
                 "Pumpfed Tank Pressure [psi]": pumpfedTankPressure * c.PA2PSI,
                 "Pumpfed COPV Mass [lbm]": copvMassNew * c.KG2LB,
                 "Pumpfed COPV [-]": copvNew,
