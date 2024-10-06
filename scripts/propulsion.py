@@ -607,6 +607,8 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         1 / 1.4
     )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
 
+    rpm = 40000  # [1/min] # max RPM of pump based on neumotors 2020
+
     pumpEfficiency = 0.5  # Constant??
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
@@ -633,7 +635,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         "D", "P", oxInletPressure, "T", oxTemp, oxidizer
     )  # Density [kg/m3]
     fuelDensity = PropsSI(
-        "D", "P", fuelInletPressure, "T", oxTemp, fuel
+        "D", "P", fuelInletPressure, "T", fuelTemp, fuel
     )  # Density [kg/m3]
 
     oxDevelopedHead = (oxExitPressure - oxInletPressure) / (

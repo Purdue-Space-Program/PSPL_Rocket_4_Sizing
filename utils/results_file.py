@@ -12,6 +12,7 @@ def create_results_file(
     vehicleDF,
     trajectoryDF,
     possibleRocketsDF,
+    pumpfedDF,
 ):
     # Reset index for all DataFrames to ensure they start at row 0
     fluidsystemsDF.reset_index(drop=True, inplace=True)
@@ -21,6 +22,7 @@ def create_results_file(
     vehicleDF.reset_index(drop=True, inplace=True)
     trajectoryDF.reset_index(drop=True, inplace=True)
     possibleRocketsDF.reset_index(drop=True, inplace=True)
+    pumpfedDF.reset_index(drop=True, inplace=True)
 
     # Combine DataFrames horizontally
     combinedDF = pd.concat(
@@ -32,6 +34,7 @@ def create_results_file(
             structuresDF,
             vehicleDF,
             trajectoryDF,
+            pumpfedDF,
         ],
         axis=1,
         ignore_index=False,  # Set to False to keep original column names

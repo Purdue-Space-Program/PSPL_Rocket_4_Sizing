@@ -74,9 +74,6 @@ def main():
     maxOxVolumeLim = limits.loc["Max", "Oxidizer Volume (ft^3)"]
     maxOxVolumeLim = maxOxVolumeLim * c.FT32M3
 
-    maxRailAccelLim = limits.loc["Max", "Rail Acceleration (g)"] * c.GRAVITY
-    minRailAccelLim = limits.loc["Min", "Rail Acceleration (g)"] * c.GRAVITY
-
     # Rocket results
     # This section creates a dataframe to store the results of the rocket analysis
     # Owner: Nick Nielsen
@@ -182,7 +179,7 @@ def main():
             "Pumpfed Battery Mass [lbm]",
             "Pumpfed Total Avionics Mass [lbm]",
             "Pumpfed Number of Cells [-]",
-            "pumpfed Lower Airframe Length [ft]",
+            "Pumpfed Lower Airframe Length [ft]",
             "Pumpfed Lower Airframe Mass [lbm]",
             "Pumpfed Total Structures Mass [lbm]",
             "Pumpfed Total Dry Mass [lbm]",
@@ -583,13 +580,15 @@ def main():
             pumpfedLowerAirframeMass,
             pumpfedTotalStructuresMass,
         ] = structures.calculate_pumpfed_structures(
-            18 * c.IN2M, lowerPlumbingLength, copvLength, tankOD
+            18 * c.IN2M, lowerPlumbingLength, upperPlumbingLength, copvLength, tankOD
         )
 
         [pumpfedTotalLength] = vehicle.calculate_length(
             noseconeLength,
             copvLength,
             heliumBayLength,
+            upperAirframeLength,
+            tankTotalLength,
             recoveryBayLength,
             pumpfedLowerAirframeLength,
             chamberLength,
@@ -658,7 +657,7 @@ def main():
                 "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
                 "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,
                 "Pumpfed Number of Cells [-]": numberCells,
-                "pumpfed Lower Airframe Length [ft]": pumpfedLowerAirframeLength
+                "Pumpfed Lower Airframe Length [ft]": pumpfedLowerAirframeLength
                 * c.M2FT,
                 "Pumpfed Lower Airframe Mass [lbm]": pumpfedLowerAirframeMass * c.KG2LB,
                 "Pumpfed Total Structures Mass [lbm]": pumpfedTotalStructuresMass
@@ -686,6 +685,7 @@ def main():
         vehicleDF.round(c.OUTPUT_PRECISION),
         trajectoryDF.round(c.OUTPUT_PRECISION),
         possibleRocketsDF,
+        pumpfedDF.round(c.OUTPUT_PRECISION),
     )  # Output the results rounded appropriately
 
     bar.finish()  # Finish the progress bar
