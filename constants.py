@@ -83,14 +83,22 @@ DENSITY_SS316 = 7980  # [kg/m^3] Density
 # Fluids Constants
 
 FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
-RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
-ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
+RESIDUAL_PERCENT = (
+    7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
+)
+ULLAGE_PERCENT = (
+    10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
+)
 
-R_PROP = 1 - ULLAGE_PERCENT / 100  # [1] Ratio of total tank volume to total propellant volume
+R_PROP = (
+    1 - ULLAGE_PERCENT / 100
+)  # [1] Ratio of total tank volume to total propellant volume
 
-BURNOUT_PRESSURE_RATIO = 2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
+BURNOUT_PRESSURE_RATIO = (
+    2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
+)
 
-K_PRESSURIZATION = 0.64 # [1] Ratio of ideal tank volume to actual tank volume, calculated based on average from past rocket designs
+K_PRESSURIZATION = 0.64  # [1] Ratio of ideal tank volume to actual tank volume, calculated based on average from past rocket designs
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 
 FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
@@ -103,8 +111,12 @@ DENSITY_IPA = 785  # [kg/m^3] Isopropyl alcohol density at STP (https://macro.ls
 
 # Pump Constants
 
-REQUIRED_NPSH = 85 * PSI2PA # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
-PUMP_CHAMBER_PRESSURE = 700 * PSI2PA # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
+REQUIRED_NPSH = (
+    85 * PSI2PA
+)  # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
+PUMP_CHAMBER_PRESSURE = (
+    700 * PSI2PA
+)  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
 
 # FAR Constants
 
@@ -121,7 +133,15 @@ BZ1_COPV_VOLUME = 4.7 * L2M3  # [m^3] Volume of the BZ1 COPV (Luxfer L45M)
 BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
 BZ1_COPV_MASS = 3  # [kg] Mass of BZ1 COPV
 
-# Other Constants
+# Motor Constants
+## All motor constans are based on the Neumotors 2020 Series motor
+MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
+MOTOR_LENGTH = 0.093  # [m] length of a single motor
+
+# LIPO Battery Constants
+LIPO_CELL_MASS = 0.0222  # [kg] mass of a LiPo cell
+LIPO_CELL_VOLTAGE = 22.2  # [V] nominal voltage of a LiPo cell
+LIPO_CELL_DISCHARGE_CURRENT = 80  # [A] maximum discharge current of a LiPo cell
 
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
 COPV_OD_MARGIN = (

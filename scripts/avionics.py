@@ -25,12 +25,6 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
 
     MOTOR_EFFICIENCY = 0.85  # estimated motor efficiency
 
-    LIPO_CELL_VOLTAGE = 22.2  # [V] nominal voltage of a LiPo cell
-    LIPO_CELL_DISCHARGE_CURRENT = 80  # [A] maximum discharge current of a LiPo cell
-
-    LIPO_CELL_MASS = 22.2  # [g] mass of a LiPo cell
-    LIPO_CELL_MASS = LIPO_CELL_MASS * c.G2KG  # [kg] Convert mass to kg
-
     MAX_VOLTS = 103  # [V] maximum voltage of the motor
     MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 
@@ -42,9 +36,9 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     totalPowerRequired = oxPowerRequired + fuelPowerRequired  # [W]
 
     # Calculate the number of battery cells required
-    series = np.ceil(MAX_VOLTS / LIPO_CELL_VOLTAGE)  # number of cells in series
+    series = np.ceil(MAX_VOLTS / c.LIPO_CELL_VOLTAGE)  # number of cells in series
     paralell = np.ceil(
-        totalPowerRequired / (LIPO_CELL_DISCHARGE_CURRENT * LIPO_CELL_VOLTAGE)
+        totalPowerRequired / (c.LIPO_CELL_DISCHARGE_CURRENT * c.LIPO_CELL_VOLTAGE)
     )  # number of cells in parallel
 
     numCells = series * paralell  # total number of cells
@@ -53,7 +47,7 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     totalMotorWeight = MOTOR_WEIGHT * 2  # [kg]
 
     # Total weight of the battery and motors
-    batteryMass = numCells * LIPO_CELL_MASS  # [kg]
+    batteryMass = numCells * c.LIPO_CELL_MASS  # [kg]
     pumpAviMass = batteryMass + totalMotorWeight + BASE_AVI_MASS  # [kg]
 
     # Total mass of the avionics system
