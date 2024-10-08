@@ -283,7 +283,7 @@ def calculate_propulsion(
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
     injectorOD = (
-        tankOD - 2 * 0.5 * c.IN2M
+        chamberOD + 2 * c.IN2M
     )  # [m] Injector OD, an inch smaller than tank OD
     injectorWallThickness = 0.25 * c.IN2M
     injectorLength = 2 * c.IN2M
