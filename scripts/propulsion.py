@@ -427,6 +427,8 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     oxPumpLength = oxVoluteLength + shaftLength  # [m] Length of oxidizer pump
     fuelPumpLength = fuelVoluteLength + shaftLength  # [m] Length of fuel pump
 
-    totalPumpLength = oxPumpLength + fuelPumpLength  # [m] Total Pump Length
+    totalPumpLength = (
+        oxPumpLength + fuelPumpLength + 2 * c.MOTOR_LENGTH
+    )  # [m] Total Pump Length
 
     return [oxPower, fuelPower, pumpsMass, totalPumpLength]
