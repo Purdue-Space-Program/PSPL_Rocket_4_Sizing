@@ -87,11 +87,6 @@ def run_CEA(
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
-    elif fuel.lower() == "jet-a":
-        fuelCEA = "Jet-A(L)"
-        characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
-        fuelTemp = c.T_AMBIENT
-
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
     oxidizerCEA = "O2(L)"
 
