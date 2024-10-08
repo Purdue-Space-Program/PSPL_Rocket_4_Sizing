@@ -164,7 +164,7 @@ def run_pumpfed_CEA(
         Gas constant of products at exit [J/kg-K].
 
     """
-    # Get the fuel and oxidizer temperatures using CoolProp
+    EFFICIENCY_FACTOR = 0.9 # Assumed C* and CF efficiency factor of 90%, results in Isp efficiency of 81% 
 
     # Unit conversions
     chamberPressure = c.PUMP_CHAMBER_PRESSURE * c.PA2BAR  # [Bar] chamber pressure
@@ -202,8 +202,8 @@ def run_pumpfed_CEA(
     data = rocket.run()
 
     # Extract CEA outputs
-    cstar = data.cstar
-    specificImpulse = data.isp
+    cstar = data.cstar * EFFICIENCY_FACTOR
+    specificImpulse = data.isp * EFFICIENCY_FACTOR**2
     expansionRatio = data.ae
 
     return [
@@ -271,6 +271,8 @@ def calculate_propulsion(
         Duration of engine burn [s].
     chamberLength : float
         Total length of chamber [m].
+    chamberOD : float
+        Outer diameter of chamber [m].    
     chamberMass : float
         Combustion chamber and nozzle mass [kg].
     injectorMass : float
@@ -279,7 +281,6 @@ def calculate_propulsion(
 
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
-    EFFICIENCY_FACTOR = 0.9
     CHAMBER_WALL_THICKNESS = 0.5 * c.IN2M  # [m] chamber wall thickness
 
     # Thrust calculations
@@ -292,15 +293,15 @@ def calculate_propulsion(
 
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
-        idealExhaustVelocity = (
+        jetExhaustVelocity = (
             specificImpulse * c.GRAVITY
         )  # [m/s] ideal exhaust velocity
-        coreMassFlowRate = jetThrust / (
-            idealExhaustVelocity * EFFICIENCY_FACTOR**2
+        coreMassFlowRate = (
+            jetThrust / jetExhaustVelocity
         )  # [kg/s] total mass flow rate
 
         throatArea = (
-            EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure
+            cstar * coreMassFlowRate / chamberPressure
         )  # [m^2] throat area
         throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
@@ -377,7 +378,7 @@ def calculate_propulsion(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = tankOD - 2 * 0.5 - c.IN2M # [m] Injector OD, an inch smaller than tank OD
+    injectorOD = tankOD - 2 * 0.5 * c.IN2M # [m] Injector OD, an inch smaller than tank OD
     injectorWallThickness = 0.25 * c.IN2M
     injectorLength = 2 * c.IN2M
     injectorMass = (
@@ -400,6 +401,7 @@ def calculate_propulsion(
         fuelMassFlowRate,
         burnTime,
         thrustChamberLength,
+        chamberOD,
         chamberMass,
         injectorMass,
         totalPropulsionMass,
