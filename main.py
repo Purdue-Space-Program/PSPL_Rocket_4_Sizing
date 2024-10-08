@@ -521,7 +521,11 @@ def main():
             pumpfedCstar,
             pumpfedSpecificImpulse,
             pumpfedExpansionRatio,
-        ] = propulsion.run_pumpfed_CEA(
+            fuelTemp,
+            oxTemp,
+            pumpfedCharacteristicLength,
+        ] = propulsion.run_CEA(
+            c.PUMP_CHAMBER_PRESSURE,
             exitPressure,
             fuel,
             oxidizer,
@@ -548,12 +552,14 @@ def main():
             pumpfedTotalPropulsionMass,
             pumpfedTotalMassFlowRate,
             pumpfedExitArea,
-        ] = propulsion.calculate_pumpfed_propulsion(
+        ] = propulsion.calculate_propulsion(
             thrustToWeight,
             totalWetMass,
+            c.PUMP_CHAMBER_PRESSURE,
             exitPressure,
             pumpfedCstar,
             pumpfedSpecificImpulse,
+            pumpfedExpansionRatio,
             pumpfedExpansionRatio,
             mixRatio,
             oxPropMass,
@@ -565,11 +571,12 @@ def main():
             oxPower,
             fuelPower,
             pumpsMass,
+            totalPumpLength,
         ] = propulsion.calculate_pumps(
             oxidizer,
             fuel,
-            oxMassFlowRate,
-            fuelMassFlowRate,
+            pumpfedOxMassFlowRate,
+            pumpfedFuelMassFlowRate,
         )
 
         # Structures
@@ -578,7 +585,11 @@ def main():
             pumpfedLowerAirframeMass,
             pumpfedTotalStructuresMass,
         ] = structures.calculate_pumpfed_structures(
-            18 * c.IN2M, lowerPlumbingLength, upperPlumbingLength, copvLength, tankOD
+            totalPumpLength,
+            lowerPlumbingLength,
+            upperPlumbingLength,
+            copvLength,
+            tankOD,
         )
 
         [pumpfedTotalLength] = vehicle.calculate_length(
