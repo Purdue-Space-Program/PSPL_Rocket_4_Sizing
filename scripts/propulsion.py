@@ -67,7 +67,7 @@ def run_CEA(
         Gas constant of products at exit [J/kg-K].
 
     """
-    # Get the fuel and oxidizer temperatures using CoolProp
+    EFFICIENCY_FACTOR = 0.9
 
     # Unit conversions
     chamberPressure = chamberPressure * c.PA2BAR
@@ -107,8 +107,8 @@ def run_CEA(
     data = rocket.run()
 
     # Extract CEA outputs
-    cstar = data.cstar
-    specificImpulse = data.isp
+    cstar = data.cstar * EFFICIENCY_FACTOR
+    specificImpulse = data.isp * EFFICIENCY_FACTOR**2
     expansionRatio = data.ae
 
     return [
