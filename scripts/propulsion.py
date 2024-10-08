@@ -189,7 +189,7 @@ def calculate_propulsion(
 
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
-    CHAMBER_WALL_THICKNESS = 0.5 * c.IN2M  # [m] chamber wall thickness
+    CHAMBER_WALL_THICKNESS = 0.25 * c.IN2M  # [m] chamber wall thickness
 
     # Thrust calculations
     requiredSeaLevelThrust = (
@@ -424,8 +424,9 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
 
-    oxPumpLength = oxVoluteLength + shaftLength  # [m] Length of oxidizer pump
-    fuelPumpLength = fuelVoluteLength + shaftLength  # [m] Length of fuel pump
+    motorLength = 3.5 * c.IN2M
+    oxPumpLength = oxVoluteLength + shaftLength + motorLength  # [m] Length of oxidizer pump
+    fuelPumpLength = fuelVoluteLength + shaftLength + motorLength  # [m] Length of fuel pump
 
     totalPumpLength = (
         oxPumpLength + fuelPumpLength + 2 * c.MOTOR_LENGTH
