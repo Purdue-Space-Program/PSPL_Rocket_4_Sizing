@@ -1,5 +1,5 @@
 # Rocket 4 Propulsion Script
-# Daniel DeConti
+# Owner: Andrew Nery, Daniel DeConti, Ian Falk, Eli Solofra
 # 27 May 2024
 
 import os
@@ -282,6 +282,7 @@ def calculate_propulsion(
     EFFICIENCY_FACTOR = 0.9
     CHAMBER_WALL_THICKNESS = 0.5 * c.IN2M  # [m] chamber wall thickness
 
+    # Thrust calculations
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
     )  # Required sea level thrust to meet initial thrust to weight ratio
@@ -324,23 +325,26 @@ def calculate_propulsion(
         (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate
     )  # [s] burn time
 
-    chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] chamber diameter
+    # Thrust chamber dimensions and mass
+    chamberID = tankOD - 2 * (1 * c.IN2M)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
     chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
+    
     if (
         contractionRatio > 6 or contractionRatio < 4
     ):  # Reset contraction ratio to a reasonable value
         contractionRatio = 4.5
+    
     chamberArea = contractionRatio * throatArea
     chamberID = 2 * np.sqrt(chamberArea / np.pi)
     chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
-    )  # [m] nozzle diverging section length
+    )  # [m] nozzle diverging section length, 15 degree half angle
     convergeLength = (
         0.5 * (chamberID - throatDiameter) / np.tan(np.radians(35))
-    )  # [m] nozzle converging section length
+    )  # [m] nozzle converging section length, 35 degree half angle
     convergeVolume = (
         (1 / 3)
         * np.pi
@@ -359,9 +363,8 @@ def calculate_propulsion(
         chamberLength + convergeLength + divergeLength
     )  # [m] overall thrust chamber length
 
-    # Mass estimates
     chamberMaterialDensity = (
-        c.DENSITY_CF  # [kg/m^3] chamber wall material density (Inconel 718)
+        c.DENSITY_INCO  # [kg/m^3] chamber wall material density (Inconel 718)
     )
     chamberMass = (
         chamberMaterialDensity
@@ -370,15 +373,19 @@ def calculate_propulsion(
         * thrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
+    # Injector dimensions and mass
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
+    injectorOD = tankOD - 2 * 0.5 - c.IN2M # [m] Injector OD, an inch smaller than tank OD
+    injectorWallThickness = 0.25 * c.IN2M
+    injectorLength = 2 * c.IN2M
     injectorMass = (
         injectorMaterialDensity
         * (np.pi / 4)
         * (
-            2 * c.IN2M * (chamberOD**2 - (chamberOD - 0.5 * c.IN2M) ** 2)
-            + 2 * 0.25 * c.IN2M * (chamberOD - 1 * c.IN2M) ** 2
+            injectorLength * (injectorOD**2 - (injectorOD - 2*injectorWallThickness)**2)
+            + 2 * injectorWallThickness * injectorOD**2
         )
     )  # [kg] injector mass, modeled as hollow cylinder with  w/ 2" height and 0.25" thick walls
 
@@ -597,7 +604,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         1 / 1.4
     )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
 
-    rpm = 40000  # [1/min] # max RPM of pump based on neumotors 2020
+    rpm = 45000  # [1/min] # max RPM of pump based on neumotors 2020
 
     pumpEfficiency = 0.5  # Constant??
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
@@ -631,20 +638,19 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     oxDevelopedHead = (oxExitPressure - oxInletPressure) / (
         oxDensity * c.GRAVITY
     )  # [m] Developed Head
-    oxPower = (oxMassFlowRate * oxDevelopedHead) / pumpEfficiency  # [W] Power
+    oxPower = (oxMassFlowRate * c.GRAVITY * oxDevelopedHead) / pumpEfficiency  # [W] Power
 
     fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (
         fuelDensity * c.GRAVITY
     )  # [m] Developed Head
-    fuelPower = (fuelMassFlowRate * fuelDevelopedHead) / pumpEfficiency
+    fuelPower = (fuelMassFlowRate * c.GRAVITY * fuelDevelopedHead) / pumpEfficiency
 
     # Mass Correlations
-
     # Shafts
     shaftMaterialDensity = (
         c.DENSITY_SS316
     )  # [kg/m^3] Stainless Steel 316 material density
-    shaftLength = 3.5 * c.IN2M
+    shaftLength = 2 * c.IN2M
     shaftDiameter = 0.5 * c.IN2M
     shaftMass = 2 * (
         shaftLength * (shaftDiameter / 2) ** 2 * np.pi * shaftMaterialDensity
@@ -671,33 +677,24 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     )  # may want to change to aluminum alloy if possible [kg/m^3]
 
     voluteWallThickness = 0.25 * c.IN2M
-    oxVoluteOuterVol = (np.pi * (oxImpellerDia + voluteWallThickness) ** 2 / 4) * (
-        2 * voluteWallThickness + impellerThickness
-    )  # [m^3] Ox Volute Outer Volume
 
-    oxVoluteInnerVol = (
-        np.pi * oxImpellerDia**2 / 4
-    ) * impellerThickness  # [m^3] Ox Volute Inner Volumes
+    oxVoluteID = 1.5 * oxImpellerDia # Pump Handbook, pg. 2.29
+    oxVoluteOD = oxVoluteID + 2 * voluteWallThickness
+    oxVoluteLength = 1 * oxImpellerDia # Pump Handbook, pg. 2.29
 
-    oxVoluteMass = voluteMaterialDensity * (
-        oxVoluteOuterVol - oxVoluteInnerVol
-    )  # [kg] Ox Volute Mass
+    fuelVoluteID = 1.5 * fuelImpellerDia # Pump Handbook, pg. 2.29
+    fuelVoluteOD = fuelVoluteID + 2 * voluteWallThickness
+    fuelVoluteLength = 1 * fuelImpellerDia # Pump Handbook, pg. 2.29
 
-    fuVoluteOuterVol = (np.pi * (fuelImpellerDia + voluteWallThickness) ** 2 / 4) * (
-        2 * voluteWallThickness + impellerThickness
-    )  # [m^3] Fuel Volute Outer Volume
-
-    fuVoluteInnerVol = (
-        np.pi * fuelImpellerDia**2 / 4
-    ) * impellerThickness  # [m^3] Fuel Volute Inner Volumes
-
-    fuVoluteMass = voluteMaterialDensity * (
-        fuVoluteOuterVol - fuVoluteInnerVol
-    )  # [kg] Fuel Volute Mass
-
-    voluteMass = fuVoluteMass * 1.05 + oxVoluteMass * 1.1  # [kg] Total Volute Mass
+    oxVoluteMass = voluteMaterialDensity * (2 * voluteWallThickness * ((np.pi/4) * oxVoluteOD**2) + oxVoluteLength * ((np.pi/4) * (oxVoluteOD**2 - oxVoluteID**2))) # [kg] Oxidizer volute mass, approximated as hollow cylinder
+    fuelVoluteMass = voluteMaterialDensity * (2 * voluteWallThickness * ((np.pi/4) * fuelVoluteOD**2) + fuelVoluteLength * ((np.pi/4) * (fuelVoluteOD**2 - fuelVoluteID**2))) # [kg] Fuel volute mass, approximated as hollow cylinder
+    
+    voluteMass = fuelVoluteMass * 1.05 + oxVoluteMass * 1.1  # [kg] Total Volute Mass
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
 
-    return [oxPower, fuelPower, pumpsMass]
+    oxPumpLength = oxVoluteLength + shaftLength # [m] Length of oxidizer pump
+    fuelPumpLength = fuelVoluteLength + shaftLength # [m] Length of fuel pump
+
+    return [oxPower, fuelPower, pumpsMass, oxPumpLength, fuelPumpLength]
