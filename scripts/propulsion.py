@@ -126,6 +126,93 @@ def run_CEA(
     ]
 
 
+def run_pumpfed_CEA(
+    exitPressure,
+    fuel,
+    oxidizer,
+    mixRatio,
+):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    chamberPressure : float
+        Pressure within the engine combustion chamber [Pa].
+    exitPressure : float
+        Pressure at nozzle exit [Pa].
+    mixtureRatio : float
+        Ratio of oxidizer to fuel by mass [-].
+    fuelName : str
+        Name of fuel under CEA conventions [N/A].
+    oxName : str
+        Name of oxidizer under CEA conventions [N/A].
+    fuelTemp : float
+        Temperature of fuel upon injection into combustion [K].
+    oxTemp : float
+        Temperature of oxidizer upon injection into combustion [K].
+
+    Returns
+    -------
+    chamberTemperature : float
+        Temperature of products in combustion chamber [K].
+    specificHeatRatio : float
+        Ratio of specific heats for products at exit [-].
+    productMolecularWeight : float
+        Molecular weight of products at exit [kg/kmol].
+    specificGasConstant : float
+        Gas constant of products at exit [J/kg-K].
+
+    """
+    # Get the fuel and oxidizer temperatures using CoolProp
+
+    # Unit conversions
+    chamberPressure = c.PUMP_CHAMBER_PRESSURE * c.PA2BAR  # [Bar] chamber pressure
+    exitPressure = exitPressure * c.PA2BAR  # [Bar] exit pressure
+    pressureRatio = chamberPressure / exitPressure  # [1] pressure ratio
+
+    # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
+
+    # remove methane
+    if fuel.lower() == "methane":
+        fuelCEA = "CH4(L)"
+        fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
+
+    elif fuel.lower() == "ethanol":
+        fuelCEA = "C2H5OH(L)"
+        fuelTemp = c.T_AMBIENT
+
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
+    oxidizerCEA = "O2(L)"
+
+    # CEA Propellant Object Setup
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+
+    # Run CEA with optimal mixture ratio
+    rocket = CEA.RocketProblem(
+        pressure=chamberPressure,
+        pip=pressureRatio,
+        materials=[fuel, oxidizer],
+        o_f=mixRatio,
+        filename="engineCEAoutput",
+        pressure_units="bar",
+    )
+
+    data = rocket.run()
+
+    # Extract CEA outputs
+    cstar = data.cstar
+    specificImpulse = data.isp
+    expansionRatio = data.ae
+
+    return [
+        cstar,
+        specificImpulse,
+        expansionRatio,
+    ]
+
+
 def calculate_propulsion(
     thrustToWeight,
     vehicleMass,
@@ -184,6 +271,8 @@ def calculate_propulsion(
         Duration of engine burn [s].
     chamberLength : float
         Total length of chamber [m].
+    chamberOD : float
+        Outer diameter of chamber [m].
     chamberMass : float
         Combustion chamber and nozzle mass [kg].
     injectorMass : float
@@ -192,7 +281,6 @@ def calculate_propulsion(
 
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
-    EFFICIENCY_FACTOR = 0.9
     CHAMBER_WALL_THICKNESS = 0.5 * c.IN2M  # [m] chamber wall thickness
 
     # Thrust calculations
@@ -205,16 +293,10 @@ def calculate_propulsion(
 
     # Iteratively solves for necessary ideal thrust to achieve required launch thrust to weight for a given nozzle exit pressure
     while abs(seaLevelThrustToWeight - thrustToWeight) > 0.001:
-        idealExhaustVelocity = (
-            specificImpulse * c.GRAVITY
-        )  # [m/s] ideal exhaust velocity
-        coreMassFlowRate = jetThrust / (
-            idealExhaustVelocity * EFFICIENCY_FACTOR**2
-        )  # [kg/s] total mass flow rate
+        jetExhaustVelocity = specificImpulse * c.GRAVITY  # [m/s] ideal exhaust velocity
+        coreMassFlowRate = jetThrust / jetExhaustVelocity  # [kg/s] total mass flow rate
 
-        throatArea = (
-            EFFICIENCY_FACTOR * cstar * coreMassFlowRate / chamberPressure
-        )  # [m^2] throat area
+        throatArea = cstar * coreMassFlowRate / chamberPressure  # [m^2] throat area
         throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
         exitArea = expansionRatio * throatArea  # [m^2] exit area
         exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
@@ -293,7 +375,7 @@ def calculate_propulsion(
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
     injectorOD = (
-        tankOD - 2 * 0.5 - c.IN2M
+        tankOD - 2 * 0.5 * c.IN2M
     )  # [m] Injector OD, an inch smaller than tank OD
     injectorWallThickness = 0.25 * c.IN2M
     injectorLength = 2 * c.IN2M
@@ -318,6 +400,7 @@ def calculate_propulsion(
         fuelMassFlowRate,
         burnTime,
         thrustChamberLength,
+        chamberOD,
         chamberMass,
         injectorMass,
         totalPropulsionMass,
