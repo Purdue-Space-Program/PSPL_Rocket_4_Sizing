@@ -282,9 +282,7 @@ def calculate_propulsion(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = (
-        chamberOD + 2 * c.IN2M
-    )  # [m] Injector OD, an inch smaller than tank OD
+    injectorOD = chamberOD + 2 * c.IN2M  # [m] Injector OD, an inch smaller than tank OD
     injectorWallThickness = 0.25 * c.IN2M
     injectorLength = 2 * c.IN2M
     injectorMass = (
@@ -425,8 +423,12 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
 
     motorLength = 3.5 * c.IN2M
-    oxPumpLength = oxVoluteLength + shaftLength + motorLength  # [m] Length of oxidizer pump
-    fuelPumpLength = fuelVoluteLength + shaftLength + motorLength  # [m] Length of fuel pump
+    oxPumpLength = (
+        oxVoluteLength + shaftLength + motorLength
+    )  # [m] Length of oxidizer pump
+    fuelPumpLength = (
+        fuelVoluteLength + shaftLength + motorLength
+    )  # [m] Length of fuel pump
 
     totalPumpLength = (
         oxPumpLength + fuelPumpLength + 2 * c.MOTOR_LENGTH
