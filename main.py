@@ -681,6 +681,7 @@ def main():
         trajectoryDF.round(c.OUTPUT_PRECISION),
         possibleRocketsDF,
         pumpfedDF.round(c.OUTPUT_PRECISION),
+        plots=1,
     )  # Output the results rounded appropriately
 
     bar.finish()  # Finish the progress bar

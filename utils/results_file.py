@@ -1,6 +1,14 @@
 import pandas as pd
 import os
 from openpyxl.styles import Font, PatternFill, Border, Side
+import matplotlib.pyplot as plt
+
+# Define color constants
+BLACK = "#000000"
+NIGHT_SKY = "#252526"
+CAMPUS_GOLD = "#C28E0E"
+DUST = "#F2EFE9"
+WHITE = "#FFFFFF"
 
 
 def create_results_file(
@@ -13,6 +21,7 @@ def create_results_file(
     trajectoryDF,
     possibleRocketsDF,
     pumpfedDF,
+    plots,
 ):
     # Reset index for all DataFrames to ensure they start at row 0
     fluidsystemsDF.reset_index(drop=True, inplace=True)
@@ -65,3 +74,49 @@ def create_results_file(
         worksheet.freeze_panes = "A2"
 
         writer._save()
+
+        os.makedirs("plots")
+
+        # Change directory to the plots folder
+        os.chdir("plots")
+
+    if plots:
+        # List of parameters to plot
+        parameters = [
+            ("Chamber pressure (psi)"),
+            ("Thrust-to-Weight ratio"),
+            ("Isp [s]"),
+            ("Burn Time [s]"),
+            ("Total Length [ft]"),
+        ]
+
+        for param in parameters:
+            plt.figure(figsize=(10, 6))
+            plt.scatter(
+                combinedDF[param],
+                combinedDF["Altitude [ft]"],
+                color=CAMPUS_GOLD,
+                marker="o",
+                s=10,
+            )
+
+            # Set background color
+            plt.gca().set_facecolor(NIGHT_SKY)
+
+            # Title and labels
+            plt.title(
+                f"{param} vs Altitude", fontsize=18, fontweight="bold", color=NIGHT_SKY
+            )
+            plt.xlabel(param, fontsize=14, color=BLACK)
+            plt.ylabel("Altitude (ft)", fontsize=14, color=BLACK)
+
+            # Add grid
+            plt.grid(color=DUST, linestyle="--", linewidth=0.5)
+
+            # Set limits and ticks
+            plt.xticks(color=BLACK)
+            plt.yticks(color=BLACK)
+
+            # Save the plot as a PNG file
+            plt.savefig(f"{param}_vs_Altitude.png")
+            plt.close()  # Close the figure to free memory
