@@ -1,5 +1,5 @@
 # Rocket 4 Propulsion Script
-# Owner: Andrew Nery, Daniel DeConti, Ian Falk, Eli Solofra
+# Owner: Andrew Nery, Daniel DeConti, Ian Falk, Eli Solofra, Nick Nielsen
 # 27 May 2024
 
 import os
@@ -14,19 +14,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
 
-# Inputs:
-#   chamberPressure:   [Pa] pressure within engine combustion chamber
-#   exitPressureRatio: [1] ratio of chamber pressure to nozzle exit pressure
-#   fuel:              [N/A] name of fuel under CEA conventions
-#   oxidizer:          [N/A] name of oxidizer under CEA conventions
-#   mixRatio:          [1] core ratio of oxidizer to fuel by mass
-
-# Outputs:
-#   chamberTemperature:     [K] temperature of products in combustion chamber
-#   specificHeatRatio:      [1] ratio of specific heats for products at exit
-#   productMolecularWeight: [kg/kmol] molecular weight of products at exit
-#   specificGasConstant:    [J/kg-K] gas constant of products at exit
-
 
 def run_CEA(
     chamberPressure,
@@ -36,47 +23,45 @@ def run_CEA(
     mixRatio,
 ):
     """
-    _summary_
+    Runs the Chemical Equilibrium with Applications (CEA) simulation for a rocket engine
+    using specified propellants and chamber conditions to compute key performance parameters.
 
     Parameters
     ----------
     chamberPressure : float
-        Pressure within the engine combustion chamber [Pa].
+        Pressure within the combustion chamber [Pa].
     exitPressure : float
-        Pressure at nozzle exit [Pa].
-    mixtureRatio : float
-        Ratio of oxidizer to fuel by mass [-].
-    fuelName : str
-        Name of fuel under CEA conventions [N/A].
-    oxName : str
-        Name of oxidizer under CEA conventions [N/A].
-    fuelTemp : float
-        Temperature of fuel upon injection into combustion [K].
-    oxTemp : float
-        Temperature of oxidizer upon injection into combustion [K].
+        Pressure at the nozzle exit [Pa].
+    fuel : str
+        Name of the fuel under CEA naming conventions (e.g., "methane", "ethanol") [N/A].
+    oxidizer : str
+        Name of the oxidizer under CEA naming conventions (e.g., "O2") [N/A].
+    mixRatio : float
+        Mixture ratio of oxidizer to fuel by mass [-].
 
     Returns
     -------
-    chamberTemperature : float
-        Temperature of products in combustion chamber [K].
-    specificHeatRatio : float
-        Ratio of specific heats for products at exit [-].
-    productMolecularWeight : float
-        Molecular weight of products at exit [kg/kmol].
-    specificGasConstant : float
-        Gas constant of products at exit [J/kg-K].
-
+    cstar : float
+        Characteristic velocity of combustion products, reduced by efficiency factor [m/s].
+    specificImpulse : float
+        Specific impulse (Isp) of the engine, reduced by efficiency factor squared [s].
+    expansionRatio : float
+        Nozzle expansion ratio, area of exit to throat [-].
+    fuelTemp : float
+        Temperature of the fuel at the injection point [K].
+    oxTemp : float
+        Temperature of the oxidizer at the injection point [K].
+    characteristicLength : float
+        Characteristic length of the combustion chamber, based on propellant choice [m].
     """
-    EFFICIENCY_FACTOR = 0.9
+
+    EFFICIENCY_FACTOR = 0.9  # Efficiency factor for cstar and specific impulse
 
     # Unit conversions
-    chamberPressure = chamberPressure * c.PA2BAR
-    exitPressure = exitPressure * c.PA2BAR  # shouldn't this be a constant?
-    pressureRatio = chamberPressure / exitPressure
+    chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
+    exitPressure = exitPressure * c.PA2BAR  # [Pa] to [bar]
+    pressureRatio = chamberPressure / exitPressure  # Pressure ratio
 
-    # temperatures & characteristic length [NEEDS TO BE FIXED, ERROR WHEN RUNNING CEA]
-
-    # remove methane
     if fuel.lower() == "methane":
         fuelCEA = "CH4(L)"
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion [CHANGE TO MAX ALLOWABLE]
@@ -87,7 +72,7 @@ def run_CEA(
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
-    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion [CHANGE TO MAX ALLOWABLE]
+    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
@@ -107,9 +92,9 @@ def run_CEA(
     data = rocket.run()
 
     # Extract CEA outputs
-    cstar = data.cstar * EFFICIENCY_FACTOR
-    specificImpulse = data.isp * EFFICIENCY_FACTOR**2
-    expansionRatio = data.ae
+    cstar = data.cstar * EFFICIENCY_FACTOR  # [m/s] characteristic velocity
+    specificImpulse = data.isp * EFFICIENCY_FACTOR**2  # [s] specific impulse
+    expansionRatio = data.ae  # [-] nozzle expansion ratio
 
     return [
         cstar,
@@ -136,66 +121,74 @@ def calculate_propulsion(
     tankOD,
 ):
     """
-    _summary_
+    Calculates key propulsion parameters for a liquid rocket engine based on
+    given inputs such as thrust-to-weight ratio, chamber pressure, and fuel/oxidizer properties.
 
     Parameters
     ----------
     thrustToWeight : float
-        Required thrust to weight at launch [-].
+        Required thrust-to-weight ratio at launch [-].
     vehicleMass : float
-        Vehicle wet mass [kg].
-    vehicleOuterDiameter : float
-        Vehicle outer diameter [m].
+        Total vehicle wet mass [kg].
     chamberPressure : float
-        Pressure within the combustion chamber [Pa].
+        Combustion chamber pressure [Pa].
     exitPressure : float
-        Pressure of engine exhaust at nozzle exit [Pa].
+        Nozzle exit pressure [Pa].
     cstar : float
-        Characteristic velocity of engine [m/s].
+        Characteristic velocity of the engine [m/s].
     specificImpulse : float
-        Specific impulse of engine [s].
+        Specific impulse of the engine [s].
     expansionRatio : float
         Ratio of nozzle exit area to nozzle throat area [-].
     characteristicLength : float
-        Length in chamber needed for full propellant reaction [m].
+        Characteristic length of the combustion chamber for complete propellant combustion [m].
     mixtureRatio : float
-        Ratio of oxidizer to fuel by mass [-].
+        Oxidizer to fuel mass ratio [-].
     oxMass : float
-        Volume of oxidizer tank [m^3].
+        Total oxidizer mass in the tank [kg].
     fuelMass : float
-        Volume of fuel tank [m^3].
-    tankOD: float
-        Outer diameter of tanks [m].
+        Total fuel mass in the tank [kg].
+    tankOD : float
+        Outer diameter of the propellant tanks [m].
 
     Returns
     -------
-    idealThrust : float
-        Ideally expanded engine thrust [N].
+    jetThrust : float
+        Ideal thrust produced by the engine [N].
+    seaLevelThrust : float
+        Thrust produced by the engine at sea level [N].
     oxMassFlowRate : float
-        Mass flow rate of oxidizer [kg/s].
+        Oxidizer mass flow rate [kg/s].
     fuelMassFlowRate : float
-        Mass flow rate of fuel [kg/s].
+        Fuel mass flow rate [kg/s].
     burnTime : float
-        Duration of engine burn [s].
-    chamberLength : float
-        Total length of chamber [m].
+        Total burn time of the engine [s].
+    thrustChamberLength : float
+        Overall length of the combustion chamber including the nozzle [m].
     chamberOD : float
-        Outer diameter of chamber [m].
+        Outer diameter of the combustion chamber [m].
     chamberMass : float
-        Combustion chamber and nozzle mass [kg].
+        Mass of the combustion chamber and nozzle [kg].
     injectorMass : float
-        Mass of injector [kg].
+        Mass of the injector [kg].
+    totalPropulsionMass : float
+        Total mass of the propulsion system [kg].
+    totalMassFlowRate : float
+        Combined mass flow rate of fuel and oxidizer [kg/s].
+    exitArea : float
+        Area of the nozzle exit [m^2].
+
     """
 
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
     CHAMBER_WALL_THICKNESS = 0.25 * c.IN2M  # [m] chamber wall thickness
-    INJECTOR_WALL_THICKNESS = 0.25 * c.IN2M
+    INJECTOR_WALL_THICKNESS = 0.25 * c.IN2M  # [m] injector wall thickness
 
     # Thrust calculations
     requiredSeaLevelThrust = (
         thrustToWeight * vehicleMass * c.GRAVITY
-    )  # Required sea level thrust to meet initial thrust to weight ratio
+    )  # [N] Required sea level thrust to meet initial thrust to weight ratio
 
     jetThrust = 0
     seaLevelThrustToWeight = 0
@@ -241,9 +234,9 @@ def calculate_propulsion(
     ):  # Reset contraction ratio to a reasonable value
         contractionRatio = 4.5
 
-    chamberArea = contractionRatio * throatArea
-    chamberID = 2 * np.sqrt(chamberArea / np.pi)
-    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
+    chamberArea = contractionRatio * throatArea  # [m^2] chamber area
+    chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
+    chamberOD = chamberID + CHAMBER_WALL_THICKNESS  # [m] chamber outer diameter
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
@@ -283,10 +276,8 @@ def calculate_propulsion(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = (
-        chamberOD + 2 * c.IN2M
-    )  # [m] Injector OD, an inch smaller than tank OD
-    injectorLength = 2 * c.IN2M
+    injectorOD = chamberOD + 2 * c.IN2M  # [m] Injector OD, an inch smaller than tank OD
+    injectorLength = 2 * c.IN2M  # [m] Injector length
     injectorMass = (
         injectorMaterialDensity
         * (np.pi / 4)
@@ -316,6 +307,7 @@ def calculate_propulsion(
         exitArea,
     ]
 
+
 def calculate_propulsion_pumpfed(
     chamberPressure,
     exitPressure,
@@ -327,19 +319,66 @@ def calculate_propulsion_pumpfed(
     fuelMassFlowRate,
     tankOD,
 ):
-    SEA_LEVEL_PRESSURE = c.ATM2PA
+    """
+    Calculates various parameters for a pump-fed rocket propulsion system, including
+    thrust, nozzle geometry, chamber dimensions, and system mass.
+
+    Parameters
+    ----------
+    chamberPressure : float
+        Chamber pressure inside the combustion chamber [Pa].
+    exitPressure : float
+        Pressure at the nozzle exit [Pa].
+    cstar : float
+        Characteristic velocity of the propellant combination [m/s].
+    specificImpulse : float
+        Specific impulse of the engine [s].
+    expansionRatio : float
+        Ratio of the nozzle exit area to the throat area (A_exit/A_throat).
+    characteristicLength : float
+        Characteristic length of the combustion chamber [m].
+    oxMassFlowRate : float
+        Oxidizer mass flow rate [kg/s].
+    fuelMassFlowRate : float
+        Fuel mass flow rate [kg/s].
+    tankOD : float
+        Outer diameter of the propellant tank [m].
+
+    Returns
+    -------
+    list
+        A list containing the following:
+        - jetThrust : float
+            Thrust in vacuum conditions [N].
+        - seaLevelThrust : float
+            Thrust at sea level [N].
+        - thrustChamberLength : float
+            Total length of the thrust chamber, including converging and diverging
+            sections [m].
+        - chamberOD : float
+            Outer diameter of the combustion chamber [m].
+        - chamberMass : float
+            Mass of the combustion chamber [kg].
+        - injectorMass : float
+            Mass of the injector [kg].
+        - totalPropulsionMass : float
+            Total propulsion system mass (combustion chamber + injector) [kg].
+        - exitArea : float
+            Nozzle exit area [m^2].
+    """
+    SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
     CHAMBER_WALL_THICKNESS = 0.25 * c.IN2M  # [m] chamber wall thickness
-    INJECTOR_WALL_THICKNESS = 0.25 * c.IN2M
-    
-    coreMassFlowRate = oxMassFlowRate + fuelMassFlowRate
-    jetThrust = coreMassFlowRate * specificImpulse * c.GRAVITY
+    INJECTOR_WALL_THICKNESS = 0.25 * c.IN2M  # [m] injector wall thickness
+
+    coreMassFlowRate = oxMassFlowRate + fuelMassFlowRate  # [kg/s] total mass flow rate
+    jetThrust = coreMassFlowRate * specificImpulse * c.GRAVITY  # [N] ideal thrust
     throatArea = cstar * coreMassFlowRate / chamberPressure  # [m^2] throat area
     throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
     exitArea = expansionRatio * throatArea  # [m^2] exit area
     exitDiameter = 2 * (exitArea / np.pi) ** (1 / 2)  # [m] exit diameter
     seaLevelThrust = jetThrust + exitArea * (
         exitPressure - SEA_LEVEL_PRESSURE
-    )
+    )  # [N] sea level thrust
 
     # Thrust chamber dimensions and mass
     chamberID = tankOD - 2 * (
@@ -353,8 +392,8 @@ def calculate_propulsion_pumpfed(
     ):  # Reset contraction ratio to a reasonable value
         contractionRatio = 4.5
 
-    chamberArea = contractionRatio * throatArea
-    chamberID = 2 * np.sqrt(chamberArea / np.pi)
+    chamberArea = contractionRatio * throatArea  # [m^2] chamber area
+    chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
     chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
@@ -395,9 +434,7 @@ def calculate_propulsion_pumpfed(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = (
-        chamberOD + 2 * c.IN2M
-    )  # [m] Injector OD, an inch smaller than tank OD
+    injectorOD = chamberOD + 2 * c.IN2M  # [m] Injector OD, an inch smaller than tank OD
     injectorLength = 2 * c.IN2M
     injectorMass = (
         injectorMaterialDensity
@@ -423,8 +460,37 @@ def calculate_propulsion_pumpfed(
         totalPropulsionMass,
         exitArea,
     ]
-    
+
+
 def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
+    """
+    Calculates power, pump mass, and pump lengths for a pump-fed rocket propulsion system
+    using provided oxidizer and fuel parameters.
+
+    Parameters
+    ----------
+    oxidizer : str
+        The oxidizer used in the propulsion system (e.g., 'LOX').
+    fuel : str
+        The fuel used in the propulsion system (e.g., 'methane', 'ethanol').
+    oxMassFlowRate : float
+        Mass flow rate of the oxidizer [kg/s].
+    fuelMassFlowRate : float
+        Mass flow rate of the fuel [kg/s].
+
+    Returns
+    -------
+    list
+        A list containing the following:
+        - oxPower : float
+            Power required for the oxidizer pump [W].
+        - fuelPower : float
+            Power required for the fuel pump [W].
+        - pumpsMass : float
+            Total mass of the pump system (oxidizer and fuel pumps) [kg].
+        - totalPumpLength : float
+            Total length of the combined oxidizer and fuel pump system [m].
+    """
 
     INJECTOR_DP_RATIO = (
         1 / 1.2
@@ -532,8 +598,12 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
 
     motorLength = 3.5 * c.IN2M
-    oxPumpLength = oxVoluteLength + shaftLength + motorLength  # [m] Length of oxidizer pump
-    fuelPumpLength = fuelVoluteLength + shaftLength + motorLength  # [m] Length of fuel pump
+    oxPumpLength = (
+        oxVoluteLength + shaftLength + motorLength
+    )  # [m] Length of oxidizer pump
+    fuelPumpLength = (
+        fuelVoluteLength + shaftLength + motorLength
+    )  # [m] Length of fuel pump
 
     totalPumpLength = (
         oxPumpLength + fuelPumpLength + 2 * c.MOTOR_LENGTH
