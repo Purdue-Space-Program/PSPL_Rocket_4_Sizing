@@ -75,22 +75,20 @@ def create_results_file(
 
         writer._save()
 
-        os.makedirs("plots")
-
-        # Change directory to the plots folder
-        os.chdir("plots")
-
     if plots:
+        os.makedirs("plots")
+        os.chdir("plots")
         # List of parameters to plot
         parameters = [
-            ("Chamber pressure (psi)"),
-            ("Thrust-to-Weight ratio"),
-            ("Isp [s]"),
-            ("Burn Time [s]"),
-            ("Total Length [ft]"),
+            ("Chamber pressure (psi)", ("chamber_pressure")),
+            ("Thrust-to-Weight ratio", ("tw_ratio")),
+            ("Core O:F Ratio (mass)", ("core_of_ratio")),
+            ("Total Mass Flow Rate [lbm/s]", ("total_mass_flow_rate")),
+            ("Aspect Ratio [-]", ("aspect_ratio")),
+            ("Wet Mass Ratio [-]", ("wet_mass_ratio")),
         ]
 
-        for param in parameters:
+        for param, fileName in parameters:
             plt.figure(figsize=(10, 6))
             plt.scatter(
                 combinedDF[param],
@@ -118,5 +116,6 @@ def create_results_file(
             plt.yticks(color=BLACK)
 
             # Save the plot as a PNG file
-            plt.savefig(f"{param}_vs_Altitude.png")
+
+            plt.savefig(f"{fileName}_vs_altitude.png")
             plt.close()  # Close the figure to free memory

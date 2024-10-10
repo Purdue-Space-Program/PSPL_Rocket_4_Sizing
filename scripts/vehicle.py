@@ -45,7 +45,9 @@ def calculate_mass(
         totalDryMass + oxidizerMass + fuelMass
     )  # [kg] total mass of the rocket with fuel
 
-    return [totalDryMass, totalWetMass]
+    wetMassRatio = totalWetMass / totalDryMass
+
+    return [totalDryMass, totalWetMass, wetMassRatio]
 
 
 # Rocket 4 length Script

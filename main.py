@@ -23,7 +23,9 @@ import pandas as pd
 import warnings
 import cProfile
 import pstats
+import io
 import re
+
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -365,7 +367,11 @@ def main():
                 tankOD,
             )
 
-            [vehicleDryMassEstimate, vehicleMassEstimate] = vehicle.calculate_mass(
+            [
+                vehicleDryMassEstimate,
+                vehicleMassEstimate,
+                vehicleWetMassRatioEstimate,
+            ] = vehicle.calculate_mass(
                 avionicsMass,
                 fluidsystemsMass,
                 oxPropMass,
@@ -376,6 +382,7 @@ def main():
 
         totalDryMass = vehicleDryMassEstimate
         totalWetMass = vehicleMassEstimate
+        wetMassRatio = vehicleWetMassRatioEstimate
 
         ## Mass
 
@@ -493,7 +500,9 @@ def main():
             {
                 "Total Dry Mass [lbm]": totalDryMass * c.KG2LB,
                 "Total Wet Mass [lbm]": totalWetMass * c.KG2LB,
+                "Wet Mass Ratio [-]": wetMassRatio,
                 "Total Length [ft]": totalLength * c.M2FT,
+                "Aspect Ratio [-]": totalLength / tankOD,
             },
             ignore_index=True,
         )
@@ -602,13 +611,15 @@ def main():
             numberCells,
         ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
-        [pumpfedTotalDryMass, pumpfedTotalWetMass] = vehicle.calculate_mass(
-            pumpfedTotalAvionicsMass,
-            fluidsystemsMass - copvMass + copvMassNew,
-            oxPropMass,
-            fuelPropMass,
-            totalPropulsionMass + pumpsMass,
-            pumpfedTotalStructuresMass,
+        [pumpfedTotalDryMass, pumpfedTotalWetMass, pumpfedWetMassRatio] = (
+            vehicle.calculate_mass(
+                pumpfedTotalAvionicsMass,
+                fluidsystemsMass - copvMass + copvMassNew,
+                oxPropMass,
+                fuelPropMass,
+                totalPropulsionMass + pumpsMass,
+                pumpfedTotalStructuresMass,
+            )
         )
 
         [
@@ -659,6 +670,7 @@ def main():
                 * c.KG2LB,
                 "Pumpfed Total Dry Mass [lbm]": pumpfedTotalDryMass * c.KG2LB,
                 "Pumpfed Total Wet Mass [lbm]": pumpfedTotalWetMass * c.KG2LB,
+                "Pumpfed Wet Mass Ratio [-]": pumpfedWetMassRatio,
                 "Pumpfed Total Length [ft]": pumpfedTotalLength * c.M2FT,
                 "Pumpfed Altitude [ft]": pumpfedAltitude * c.M2FT,
                 "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
@@ -690,4 +702,25 @@ def main():
 
 
 if __name__ == "__main__":
+
+    profiler = cProfile.Profile()
+
+    # Enable the profiler
+    profiler.enable()
+
+    # Call your main function
     main()
+
+    # Disable the profiler
+    profiler.disable()
+
+    # Create a stream to capture the profiling output
+    stream = io.StringIO()
+    stats = pstats.Stats(profiler, stream=stream)
+    stats.strip_dirs()
+    stats.sort_stats("cumulative")  # Sort by cumulative time
+    stats.print_stats()
+
+    # Save the profiling results to a file
+    with open("profile_results.txt", "w") as f:
+        f.write(stream.getvalue())

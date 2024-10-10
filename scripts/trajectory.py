@@ -112,7 +112,7 @@ def calculate_trajectory(
         accel = (thrust - drag - grav) / mass  # acceleration equation of motion
         accelArray.append(accel)
 
-        velocity = velocity + accel * dt  # velocity integration
+        velocity += accel * dt  # velocity integration
         velocityArray.append(velocity)
 
         altitude = altitude + velocity * dt  # position integration
@@ -122,6 +122,7 @@ def calculate_trajectory(
         timeArray.append(time)
 
     # Find the closest altitude to the RAIL_HEIGHT
+    exitVelo, exitAccel = 0, 0
     for i in range(len(altitudeArray)):
         if altitudeArray[i] >= c.RAIL_HEIGHT:
             exitVelo = velocityArray[i]
