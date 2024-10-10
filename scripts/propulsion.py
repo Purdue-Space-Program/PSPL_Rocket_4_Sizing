@@ -393,7 +393,7 @@ def calculate_propulsion_pumpfed(
         contractionRatio = 4.5
         chamberArea = contractionRatio * throatArea  # [m^2] chamber area
         chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
-    
+
     chamberOD = chamberID + CHAMBER_WALL_THICKNESS
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (

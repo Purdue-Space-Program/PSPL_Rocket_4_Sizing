@@ -129,6 +129,8 @@ def calculate_trajectory(
             exitAccel = accelArray[i]
             break
 
+    altitude = altitude * 0.671
+
     if plots == 1:
         plt.figure(1)
         plt.title("Height v. Time")
