@@ -17,8 +17,9 @@ with open(output_file, mode="w", newline="") as file:
         # Get the pressure and density at the current altitude
         pressure = atm.pressure[0]
         density = atm.density[0]
+        a = atm.speed_of_sound[0]
 
         # Write the altitude, pressure, and density to the CSV file in scientific notation
-        writer.writerow([f"{altitude:.18e}", f"{pressure:.18e}", f"{density:.18e}"])
+        writer.writerow([f"{altitude:.18e}", f"{pressure:.18e}", f"{density:.18e}", f"{a:.18e}"])
 
 print(f"Data successfully written to {output_file}")
