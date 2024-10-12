@@ -141,8 +141,10 @@ def fluids_sizing(
         fuelDensity = c.DENSITY_ETHANOL  # [kg/m^3] Ethanol density
     elif fuel.lower() == "jet-a":
         fuelDensity = c.DENSITY_JET_A  # [kg/m^3] Jet-A density
-    elif fuel.lower() == "isopropyl alcohol":
+    elif fuel.lower() == "isopropanol":
         fuelDensity = c.DENSITY_IPA  # [kg/m^3] IPA density
+    elif fuel.lower() == "methanol":
+        fuelDensity = c.DENSITY_METHANOL  # [kg/m^3] Methanol density
 
     # Tank pressure
     tankPressure = chamberPressure / CHAMBER_DP_RATIO  # [Pa] Tank pressure

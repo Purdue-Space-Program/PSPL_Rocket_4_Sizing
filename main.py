@@ -702,25 +702,4 @@ def main():
 
 
 if __name__ == "__main__":
-
-    profiler = cProfile.Profile()
-
-    # Enable the profiler
-    profiler.enable()
-
-    # Call your main function
     main()
-
-    # Disable the profiler
-    profiler.disable()
-
-    # Create a stream to capture the profiling output
-    stream = io.StringIO()
-    stats = pstats.Stats(profiler, stream=stream)
-    stats.strip_dirs()
-    stats.sort_stats("cumulative")  # Sort by cumulative time
-    stats.print_stats()
-
-    # Save the profiling results to a file
-    with open("profile_results.txt", "w") as f:
-        f.write(stream.getvalue())

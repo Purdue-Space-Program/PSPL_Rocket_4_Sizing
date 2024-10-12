@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
 
-chamberPressure = 500  # psi
+chamberPressure = 200  # psi
 chamberPressure = chamberPressure * c.PSI2PA  # Convert psi to Pa
 chamberPressure = chamberPressure * c.PA2BAR  # Convert Pa to bar
 

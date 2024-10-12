@@ -72,6 +72,16 @@ def run_CEA(
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
+    elif fuel.lower() == "isopropanol":
+        fuelCEA = "C3H8O,2propanol"
+        characteristicLength = 45 * c.IN2M
+        fuelTemp = c.T_AMBIENT
+
+    elif fuel.lower() == "methanol":
+        fuelCEA = "CH3OH(L)"
+        characteristicLength = 45 * c.IN2M
+        fuelTemp = c.T_AMBIENT
+
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
@@ -518,7 +528,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
 
-    elif fuel.lower() == "ethanol":
+    else:
         fuelTemp = c.T_AMBIENT  # [K] temperature of fuel upon injection into combustion
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
@@ -526,9 +536,14 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     oxDensity = PropsSI(
         "D", "P", oxInletPressure, "T", oxTemp, oxidizer
     )  # Density [kg/m3]
-    fuelDensity = PropsSI(
-        "D", "P", fuelInletPressure, "T", fuelTemp, fuel
-    )  # Density [kg/m3]
+    if fuel.lower() == "ethanol":
+        fuelDensity = c.DENSITY_ETHANOL  # [kg/m^3] Ethanol density
+    elif fuel.lower() == "methane":
+        fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, fuel)
+    elif fuel.lower() == "isopropanol":
+        fuelDensity = c.DENSITY_IPA
+    elif fuel.lower() == "methanol":
+        fuelDensity = c.DENSITY_METHANOL
 
     oxDevelopedHead = (oxExitPressure - oxInletPressure) / (
         oxDensity * c.GRAVITY
