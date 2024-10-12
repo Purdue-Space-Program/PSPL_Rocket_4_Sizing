@@ -137,32 +137,17 @@ def calculate_trajectory(
     reynoldsArray = []
     viscArray = []
     frictionArray = []
+    tempArray = []
     ncPressureDragArray = []
     finPressureDragArray = []
     baseDrag = []
 
     while velocity >= 0:
-        pressure, rho = get_atmospheric_conditions(atmosphereDF, altitude)
-
-        # atmospheric temperature calculations [C]
-        if altitude < 11000:
-            temp = 15.04 - .00649 * altitude
-        elif altitude >= 11000 and altitude < 20000:
-            temp = -56.46
-        elif altitude >= 20000 and altitude < 32000:
-            temp = -56.46 + .001 * altitude
-        elif altitude >= 32000 and altitude < 47000:
-            temp = -44.5 + .0028 * altitude
-        elif altitude >= 47000 and altitude < 51000:
-            temp = -2.5
-        elif altitude >= 51000:
-            temp = -2.5 - .0028 * altitude
-        
-        visc = 2.791 * (10 ** -7) * ((temp + 273.15) ** 0.7355) # dynamic viscosity of air as a function of temperature
+        pressure, rho, a, visc = get_atmospheric_conditions(atmosphereDF, altitude)
 
         Reynolds = (velocity * totalLength) / visc # Reynold's number
 
-        Mach = velocity / ((GAMMA * R_STAR * (temp + 273.15)) ** 0.5) # current Mach number, with changing speed of sound
+        Mach = velocity / a # current Mach number, with changing speed of sound
 
         # Skin friction drag coeff calcs
         if Reynolds >= R_crit:
@@ -186,7 +171,7 @@ def calculate_trajectory(
         else:
             Cd_f = Cf * friction_scale_factor
 
-        # Nose Cone pressure drag calcs (assuming Von Karman)
+        # Nose Cone pressure drag calcs (assuming conical)
         if Mach >= 0 and Mach < 0.8:
             C_nc = .8 * (np.sin(NC_HALFANGLE)) ** 2
         elif Mach >= 0.8 and Mach < 1.1:
@@ -252,6 +237,12 @@ def calculate_trajectory(
 
         viscArray.append(visc)
 
+        tempArray.append(temp)
+
+        frictionArray.append(Cd_f)
+
+        ncPressureDragArray.append(Cd_nc)
+
     # Find the closest altitude to the RAIL_HEIGHT
     for i in range(len(altitudeArray)):
         if altitudeArray[i] >= Rail_Height:
@@ -269,23 +260,23 @@ def calculate_trajectory(
         plt.show()
         plt.figure(2)
         plt.title("Mach v. Time")
-        plt.plot(timeArray, machArray)
+        plt.plot(timeArray, tempArray)
         plt.ylabel("Mach #")
         plt.xlabel("Time [s]")
         plt.grid()
         plt.show()
         plt.figure(3)
-        plt.title("Reynolds #")
-        plt.plot(timeArray, reynoldsArray)
-        plt.ylabel("Drag Coeff")
-        plt.xlabel("Mach #")
+        plt.title("Friction Drag")
+        plt.plot(machArray, frictionArray)
+        plt.ylabel("friction Drag Coeff")
+        plt.xlabel("mach #")
         plt.grid()
         plt.show()
         plt.figure(4)
-        plt.title("vsicosity")
-        plt.plot(timeArray, viscArray)
-        plt.ylabel("Mach #")
-        plt.xlabel("Time [s]")
+        plt.title("pressure drag")
+        plt.plot(machArray, ncPressureDragArray)
+        plt.ylabel("pressure drag coeff")
+        plt.xlabel("mach #")
         plt.grid()
         plt.show()
 
