@@ -137,7 +137,6 @@ def calculate_trajectory(
     reynoldsArray = []
     viscArray = []
     frictionArray = []
-    tempArray = []
     ncPressureDragArray = []
     finPressureDragArray = []
     baseDrag = []
@@ -237,11 +236,13 @@ def calculate_trajectory(
 
         viscArray.append(visc)
 
-        tempArray.append(temp)
-
         frictionArray.append(Cd_f)
 
         ncPressureDragArray.append(Cd_nc)
+
+        finPressureDragArray.append(Cd_fins)
+
+        baseDrag.append(Cd_b)
 
     # Find the closest altitude to the RAIL_HEIGHT
     for i in range(len(altitudeArray)):
@@ -260,7 +261,7 @@ def calculate_trajectory(
         plt.show()
         plt.figure(2)
         plt.title("Mach v. Time")
-        plt.plot(timeArray, tempArray)
+        plt.plot(timeArray, machArray)
         plt.ylabel("Mach #")
         plt.xlabel("Time [s]")
         plt.grid()
