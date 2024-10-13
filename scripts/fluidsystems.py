@@ -131,6 +131,15 @@ def fluids_sizing(
         1.5  # [1] Ratio of proof pressure to nominal pressure, from FAR requirements
     )
 
+    mixtureName = (
+        fuel
+        + "["
+        + str(1 - c.WATER_PERCENTAGE)
+        + "]&H2O["
+        + str(c.WATER_PERCENTAGE)
+        + "]"
+    )  # [string] Name of the propellant mixture
+
     # Propellant properties
 
     tankMixRatio = mixRatio / (
@@ -150,8 +159,9 @@ def fluids_sizing(
         fuelDensity = PropsSI(
             "D", "P", c.FILL_PRESSURE * c.PSI2PA, "Q", 0, fuel
         )  # [kg/m^3] Methane density at fill pressure
+
     elif fuel.lower() == "ethanol":
-        fuelDensity = c.DENSITY_ETHANOL  # [kg/m^3] Ethanol density
+        fuelDensity = PropsSI("D", "P", c.FILL_PRESSURE * c.PSI2PA, "Q", 0, mixtureName)
     elif fuel.lower() == "jet-a":
         fuelDensity = c.DENSITY_JET_A  # [kg/m^3] Jet-A density
     elif fuel.lower() == "isopropanol":

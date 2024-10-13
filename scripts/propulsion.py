@@ -68,7 +68,7 @@ def run_CEA(
         characteristicLength = 35 * c.IN2M  # [ADD SOURCE]
 
     elif fuel.lower() == "ethanol":
-        fuelCEA = "C2H5OH(L)"
+        fuelCEA = "C2H5OH(L)," + str(int((1 - c.WATER_PERCENTAGE) * 100)) + "%"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
@@ -509,6 +509,15 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         1 / 1.4
     )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
 
+    mixtureName = (
+        fuel
+        + "["
+        + str(1 - c.WATER_PERCENTAGE)
+        + "]&H2O["
+        + str(c.WATER_PERCENTAGE)
+        + "]"
+    )  # [string] Name of the propellant mixture
+
     rpm = 45000  # [1/min] # max RPM of pump based on neumotors 2020
 
     pumpEfficiency = 0.5  # Constant??
@@ -537,7 +546,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         "D", "P", oxInletPressure, "T", oxTemp, oxidizer
     )  # Density [kg/m3]
     if fuel.lower() == "ethanol":
-        fuelDensity = c.DENSITY_ETHANOL  # [kg/m^3] Ethanol density
+        fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, mixtureName)
     elif fuel.lower() == "methane":
         fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, fuel)
     elif fuel.lower() == "isopropanol":

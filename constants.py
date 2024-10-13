@@ -82,6 +82,7 @@ DENSITY_SS316 = 7980  # [kg/m^3] Density
 
 # Fluids Constants
 
+
 FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
 RESIDUAL_PERCENT = (
     7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
@@ -104,6 +105,8 @@ HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Propellant Properties
+
+WATER_PERCENTAGE = 0.30  # [1] Percentage of water in the propellant mixture
 
 DENSITY_ETHANOL = 785  # [kg/m^3] Ethanol density at STP (https://www.engineeringtoolbox.com/ethanol-ethyl-alcohol-properties-C2H6O-d_2027.html)
 DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP (https://www.code7700.com/pdfs/bd700_fuel_density.pdf)
