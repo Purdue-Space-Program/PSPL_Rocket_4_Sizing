@@ -103,6 +103,19 @@ def fluids_sizing(
     CHAMBER_DP_RATIO = (
         0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
     )
+
+    # REGEN
+    VENTURI_DP_RATIO = (
+        0.775  # [1] venturi outlet pressure / tank pressure, based on past rockets
+    )
+    REGEN_DP_RATIO = (
+        1 / 1.3
+    )  # [1] regen inlet pressure / regen inlet pressure (pressure upstream of regen jacket is 30% higher than downstream)
+    INJECTOR_DP_RATIO = 0.775  # [1] injector outlet pressure / injector inlet pressure, based on past rockets
+    CHAMBER_DP_RATIO = VENTURI_DP_RATIO * REGEN_DP_RATIO * INJECTOR_DP_RATIO
+
+    # REGEN
+
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank structure
