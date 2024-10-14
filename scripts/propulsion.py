@@ -68,7 +68,7 @@ def run_CEA(
         characteristicLength = 35 * c.IN2M  # [ADD SOURCE]
 
     elif fuel.lower() == "ethanol":
-        fuelCEA = "C2H5OH(L)," + str(int((1 - c.WATER_PERCENTAGE) * 100)) + "%"
+        fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
@@ -86,14 +86,20 @@ def run_CEA(
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
-    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
+
+    if fuel.lower() == "ethanol" or fuel.lower == "isopropanol":
+        fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=1-c.WATER_PERCENTAGE)
+        water = CEA.Fuel('H2O(L)', temp=298, wt_percent=c.WATER_PERCENTAGE)
+    else:
+        fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+        water = CEA.Fuel('H2O(L)', temp=298, wt_percent=0)
 
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
-        materials=[fuel, oxidizer],
+        materials=[fuel, oxidizer, water],
         o_f=mixRatio,
         filename="engineCEAoutput",
         pressure_units="bar",
