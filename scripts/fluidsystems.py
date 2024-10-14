@@ -163,7 +163,7 @@ def fluids_sizing(
     elif fuel.lower() == "ethanol":
         fuelDensity = PropsSI("D", "P", c.FILL_PRESSURE * c.PSI2PA, "Q", 0, mixtureName)
     elif fuel.lower() == "jet-a":
-        fuelDensity = c.DENSITY_JET_A  # [kg/m^3] Jet-A density
+        fuelDensity = c.DENSITY_JET_A + c.DENSITY_WATER # [kg/m^3] Jet-A density
     elif fuel.lower() == "isopropanol":
         fuelDensity = c.DENSITY_IPA  # [kg/m^3] IPA density
     elif fuel.lower() == "methanol":
