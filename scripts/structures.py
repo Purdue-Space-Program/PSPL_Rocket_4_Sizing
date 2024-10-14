@@ -64,6 +64,8 @@ def calculate_structures(
 
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
 
+    FINENESS = 5 # [-] Ratio of nosecone length to ratio
+
     ### MASS ESTIMATES
 
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
@@ -94,14 +96,14 @@ def calculate_structures(
 
     ### Nosecone Properties
     noseconeLength = (
-        tankOD * 5
-    )  # [m] Length of the nosecone based on a 5:1 fineness ratio
-    noseconeSA = (
-        np.pi * (tankOD / 2) * np.sqrt((tankOD / 2) ** 2 + noseconeLength**2)
-    )  # [m^2] Surface area of the nosecone based on a cone
+        tankOD * FINENESS
+    )  # [m] Length of the nosecone based on the fineness ratio
+    noseconeVolume = (
+        noseconeLength * (np.pi / 2) * ((tankOD * LAYER_THICKNESS * NOSECONE_LAYER_COUNT) - ((LAYER_THICKNESS ** 2) * (NOSECONE_LAYER_COUNT ** 2)))
+    )  # [m^3] Approximate volume of nosecone, assuming von karman
 
     noseconeMass = (
-        (noseconeSA * c.DENSITY_CF * LAYER_THICKNESS * NOSECONE_LAYER_COUNT)
+        (noseconeVolume * c.DENSITY_CF)
         + TIP_MASS_ESTIMATE
         + couplerMass
     )  # [kg]
