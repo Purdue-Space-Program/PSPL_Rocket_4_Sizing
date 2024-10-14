@@ -129,7 +129,7 @@ def check_limits(
         "oxidizer tank volume": (0, maxOxidizerTankVolumeLim),
         "chamber OD": (
             0,
-            tankOD - 2 * (chamberFlangeMargin + c.CHAMBER_WALL_THICKNESS * c.IN2M),
+            tankOD - 2 * (chamberFlangeMargin - c.CHAMBER_WALL_THICKNESS * c.IN2M),
         ),
         # Add more limits as needed
     }
