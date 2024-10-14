@@ -89,11 +89,11 @@ def run_CEA(
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
 
     if fuel.lower() == "ethanol" or fuel.lower == "isopropanol":
-        fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=1-c.WATER_PERCENTAGE)
-        water = CEA.Fuel('H2O(L)', temp=298, wt_percent=c.WATER_PERCENTAGE)
+        fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=1 - c.WATER_PERCENTAGE)
+        water = CEA.Fuel("H2O(L)", temp=298, wt_percent=c.WATER_PERCENTAGE)
     else:
         fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
-        water = CEA.Fuel('H2O(L)', temp=298, wt_percent=0)
+        water = CEA.Fuel("H2O(L)", temp=298, wt_percent=0)
 
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
@@ -198,8 +198,10 @@ def calculate_propulsion(
 
     # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
-    CHAMBER_WALL_THICKNESS = 0.25 * c.IN2M  # [m] chamber wall thickness
     INJECTOR_WALL_THICKNESS = 0.25 * c.IN2M  # [m] injector wall thickness
+    CHAMBER_WALL_THICKNESS = (
+        c.CHAMBER_WALL_THICKNESS * c.IN2M
+    )  # [m] chamber wall thickness
 
     # Thrust calculations
     requiredSeaLevelThrust = (

@@ -70,6 +70,9 @@ def main():
     COPVODMargin = limits.loc["Max", "COPV OD Margin (in)"]
     COPVODMargin = COPVODMargin * c.IN2M
 
+    ChamberFlangeMargin = limits.loc["Max", "Chamber Flange Margin (in)"]
+    ChamberFlangeMargin = ChamberFlangeMargin * c.IN2M
+
     maxFuelVolumeLim = limits.loc["Max", "Fuel Volume (ft^3)"]
     maxFuelVolumeLim = maxFuelVolumeLim * c.FT32M3
 
@@ -411,6 +414,8 @@ def main():
             fuelTankVolume,
             maxOxVolumeLim,
             oxTankVolume,
+            ChamberFlangeMargin,
+            chamberOD,
         )
 
         if not isWithinLimits:

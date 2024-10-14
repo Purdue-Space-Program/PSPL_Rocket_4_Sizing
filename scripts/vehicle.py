@@ -103,6 +103,8 @@ def check_limits(
     fuelTankVolume,
     maxOxidizerTankVolumeLim,
     oxidizerTankVolume,
+    chamberFlangeMargin,
+    chamberOD,
 ):
     """ """
 
@@ -114,6 +116,7 @@ def check_limits(
         "tank OD": tankOD,
         "fuel tank volume": fuelTankVolume,
         "oxidizer tank volume": oxidizerTankVolume,
+        "chamber OD": chamberOD,
         # Add more actual values as needed
     }
 
@@ -124,6 +127,10 @@ def check_limits(
         "tank OD": (minTankODLim, np.inf),
         "fuel tank volume": (0, maxFuelTankVolumeLim),
         "oxidizer tank volume": (0, maxOxidizerTankVolumeLim),
+        "chamber OD": (
+            0,
+            tankOD - 2 * (chamberFlangeMargin + c.CHAMBER_WALL_THICKNESS * c.IN2M),
+        ),
         # Add more limits as needed
     }
 

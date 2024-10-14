@@ -104,7 +104,12 @@ HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 
 FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
+# Prop Constants
+CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
+
+
 # Propellant Properties
+
 
 WATER_PERCENTAGE = 0.30  # [1] Percentage of water in the ethanol & IPA mixtures
 
