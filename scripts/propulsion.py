@@ -23,6 +23,7 @@ def run_CEA(
     fuel,
     oxidizer,
     mixRatio,
+    CEAdata,
 ):
     """
     Runs the Chemical Equilibrium with Applications (CEA) simulation for a rocket engine
@@ -120,12 +121,11 @@ def run_CEA(
     # Sort the data by chamber pressure, exit pressure, and mixture ratio
 
     """
-    data = pd.read_csv("new_cea.csv")
 
     # Extract the relevant columns
-    chamber_pressures = data.iloc[:, 0].values
-    mix_ratios = data.iloc[:, 1].values
-    exit_pressures = data.iloc[:, 2].values
+    chamber_pressures = CEAdata.iloc[:, 0].values
+    mix_ratios = CEAdata.iloc[:, 1].values
+    exit_pressures = CEAdata.iloc[:, 2].values
 
     # Perform binary search for chamber pressure
     idx_chamber = bisect_left(chamber_pressures, chamberPressure)
@@ -155,9 +155,9 @@ def run_CEA(
         idx_exit -= 1
 
     # Retrieve the corresponding CEA values
-    cstar = data.iloc[idx_chamber, 3]  # [m/s] characteristic velocity
-    specificImpulse = data.iloc[idx_chamber, 4]  # [s] specific impulse
-    expansionRatio = data.iloc[idx_chamber, 5]  # [-] nozzle expansion ratio
+    cstar = CEAdata.iloc[idx_chamber, 3]  # [m/s] characteristic velocity
+    specificImpulse = CEAdata.iloc[idx_chamber, 4]  # [s] specific impulse
+    expansionRatio = CEAdata.iloc[idx_chamber, 5]  # [-] nozzle expansion ratio
 
     return [
         cstar,
