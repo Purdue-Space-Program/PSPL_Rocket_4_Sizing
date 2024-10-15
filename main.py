@@ -80,7 +80,8 @@ def main():
     # This section creates a dataframe to store the results of the rocket analysis
     # Owner: Nick Nielsen
 
-    CEAdata = pd.read_csv("new_cea.csv")
+    CEAData = pd.read_csv("new_cea.csv")
+    atmosphereData = pd.read_csv("atmosphere.csv")
 
     fluidsystemsDF = pd.DataFrame(
         columns=[
@@ -318,7 +319,7 @@ def main():
             fuel,
             oxidizer,
             mixRatio,
-            CEAdata,
+            CEAData,
         )
 
         # Structures
@@ -435,6 +436,7 @@ def main():
                 exitPressure,
                 burnTime,
                 totalLength,
+                atmosphereData,
                 plots=0,
             )
         )
@@ -537,7 +539,7 @@ def main():
             oxTemp,
             pumpfedCharacteristicLength,
         ] = propulsion.run_CEA(
-            c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, oxidizer, mixRatio, CEAdata
+            c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, oxidizer, mixRatio, CEAData
         )
 
         # Fluids
@@ -637,6 +639,7 @@ def main():
             exitPressure,
             burnTime,
             pumpfedTotalLength,
+            atmosphereData,
             plots=0,
         )
 
@@ -702,4 +705,20 @@ def main():
 
 
 if __name__ == "__main__":
+    pr = cProfile.Profile()
+    pr.enable()  # Start profiling
+
+    # Call the main function directly
     main()
+
+    pr.disable()  # Stop profiling
+
+    # Create a stream to capture the profiling results
+    s = io.StringIO()
+    sortby = pstats.SortKey.CUMULATIVE  # Sorting by cumulative time
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()  # Print the profiling results
+
+    # Write the output to a text file
+    with open("profiling_results.txt", "w") as f:
+        f.write(s.getvalue())

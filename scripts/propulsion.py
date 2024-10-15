@@ -88,7 +88,6 @@ def run_CEA(
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
-    """
     # CEA Propellant Object Setup
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
 
@@ -115,12 +114,13 @@ def run_CEA(
     cstar = data.cstar * EFFICIENCY_FACTOR  # [m/s] characteristic velocity
     specificImpulse = data.isp * EFFICIENCY_FACTOR**2  # [s] specific impulse
     expansionRatio = data.ae  # [-] nozzle expansion ratio
-    
+
+    """
     USE THIS IF YOU ARE USING THE MEGA CEA FILE
     # Define a function to perform binary search on the CEA data with closest value fallback
     # Sort the data by chamber pressure, exit pressure, and mixture ratio
 
-    """
+    
 
     # Extract the relevant columns
     chamber_pressures = CEAdata.iloc[:, 0].values
@@ -158,6 +158,8 @@ def run_CEA(
     cstar = CEAdata.iloc[idx_chamber, 3]  # [m/s] characteristic velocity
     specificImpulse = CEAdata.iloc[idx_chamber, 4]  # [s] specific impulse
     expansionRatio = CEAdata.iloc[idx_chamber, 5]  # [-] nozzle expansion ratio
+
+    """
 
     return [
         cstar,

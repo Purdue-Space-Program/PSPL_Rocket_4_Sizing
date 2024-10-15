@@ -10,20 +10,6 @@ import constants as c
 atmosphereDF = pd.read_csv("atmosphere.csv")
 
 
-def get_atmospheric_conditions(df, altitude):
-    index = int(altitude // 10)  # Divide altitude by 10 to find index
-
-    if index < 0:
-        return df.iloc[0][1], df.iloc[0][2]  # Return first row if below range
-    elif index >= len(df):
-        return df.iloc[-1][1], df.iloc[-1][2]  # Return last row if above range
-    else:
-        return (
-            df.iloc[index][1],
-            df.iloc[index][2],
-        )  # Return the values at the calculated index
-
-
 def calculate_trajectory(
     wetMass,
     mDotTotal,
@@ -34,6 +20,7 @@ def calculate_trajectory(
     exitPressure,
     burnTime,
     totalLength,
+    atmosphereDF,
     plots,
 ):
     """
@@ -94,7 +81,18 @@ def calculate_trajectory(
     timeArray = []
 
     while velocity >= 0:
-        pressure, rho = get_atmospheric_conditions(atmosphereDF, altitude)
+
+        index = int(altitude // 10)  # Divide altitude by 10 to find index
+
+        if index < 0:
+            pressure = atmosphereDF.iloc[0][1]
+            rho = atmosphereDF.iloc[0][2]  # Return first row if below range
+        elif index >= len(atmosphereDF):
+            pressure = atmosphereDF.iloc[-1][1]
+            rho = atmosphereDF.iloc[-1][2]  # Return last row if above range
+        else:
+            pressure = atmosphereDF.iloc[index][1]
+            rho = atmosphereDF.iloc[index][2]
 
         if time < burnTime:
             mass = mass - mDotTotal * dt  # [kg] mass of the rocket
