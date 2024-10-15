@@ -202,6 +202,9 @@ def calculate_propulsion(
     CHAMBER_WALL_THICKNESS = (
         c.CHAMBER_WALL_THICKNESS * c.IN2M
     )  # [m] chamber wall thickness
+    CHAMBER_FLANGE_WIDTH = (
+        c.CHAMBER_FLANGE_WIDTH * c.IN2M
+    ) # [m] chamber flange width
 
     # Thrust calculations
     requiredSeaLevelThrust = (
@@ -242,19 +245,19 @@ def calculate_propulsion(
 
     # Thrust chamber dimensions and mass
     chamberID = tankOD - 2 * (
-        1 * c.IN2M
-    )  # [m] Chamber inner diameter, 2 inches smaller than tank OD
-    chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
+        CHAMBER_FLANGE_WIDTH
+     + CHAMBER_WALL_THICKNESS)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
+    chamberArea = (np.pi / 4) * chamberID**2  # [m^2] chamber area
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
     if (
         contractionRatio > 6 or contractionRatio < 4
     ):  # Reset contraction ratio to a reasonable value
         contractionRatio = 4.5
-
-    chamberArea = contractionRatio * throatArea  # [m^2] chamber area
-    chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
-    chamberOD = chamberID + CHAMBER_WALL_THICKNESS  # [m] chamber outer diameter
+        chamberArea = contractionRatio * throatArea  # [m^2] chamber area
+        chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
+    
+    chamberOD = chamberID + 2 * CHAMBER_WALL_THICKNESS  # [m] chamber outer diameter
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
@@ -294,7 +297,7 @@ def calculate_propulsion(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = chamberOD + 2 * c.IN2M  # [m] Injector OD, an inch smaller than tank OD
+    injectorOD = chamberOD # [m] injector OD, same as chmaber
     injectorLength = 2 * c.IN2M  # [m] Injector length
     injectorMass = (
         injectorMaterialDensity
@@ -384,9 +387,15 @@ def calculate_propulsion_pumpfed(
         - exitArea : float
             Nozzle exit area [m^2].
     """
+    # Constants
     SEA_LEVEL_PRESSURE = c.ATM2PA  # [Pa] pressure at sea level
-    CHAMBER_WALL_THICKNESS = 0.25 * c.IN2M  # [m] chamber wall thickness
     INJECTOR_WALL_THICKNESS = 0.25 * c.IN2M  # [m] injector wall thickness
+    CHAMBER_WALL_THICKNESS = (
+        c.CHAMBER_WALL_THICKNESS * c.IN2M
+    )  # [m] chamber wall thickness
+    CHAMBER_FLANGE_WIDTH = (
+        c.CHAMBER_FLANGE_WIDTH * c.IN2M
+    ) # [m] chamber flange width
 
     coreMassFlowRate = oxMassFlowRate + fuelMassFlowRate  # [kg/s] total mass flow rate
     jetThrust = coreMassFlowRate * specificImpulse * c.GRAVITY  # [N] ideal thrust
@@ -399,10 +408,10 @@ def calculate_propulsion_pumpfed(
     )  # [N] sea level thrust
 
     # Thrust chamber dimensions and mass
-    chamberID = tankOD - 2 * c.IN2M * (
-        c.CHAMBER_FLANGE_WIDTH
-     + c.CHAMBER_WALL_THICKNESS)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
-    chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
+    chamberID = tankOD - 2 * (
+        CHAMBER_FLANGE_WIDTH
+     + CHAMBER_WALL_THICKNESS)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
+    chamberArea = (np.pi / 4) * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
     if (
@@ -412,7 +421,7 @@ def calculate_propulsion_pumpfed(
         chamberArea = contractionRatio * throatArea  # [m^2] chamber area
         chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
 
-    chamberOD = chamberID + CHAMBER_WALL_THICKNESS
+    chamberOD = chamberID + 2 * CHAMBER_WALL_THICKNESS
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
         0.5 * (exitDiameter - throatDiameter) / np.tan(np.radians(15))
@@ -452,7 +461,7 @@ def calculate_propulsion_pumpfed(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = chamberOD + 2 * c.IN2M  # [m] Injector OD, an inch smaller than tank OD
+    injectorOD = chamberOD # [m] injector OD, same as chmaber
     injectorLength = 2 * c.IN2M
     injectorMass = (
         injectorMaterialDensity
@@ -631,14 +640,14 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
 
     motorLength = 3.5 * c.IN2M
     oxPumpLength = (
-        oxVoluteLength + shaftLength + motorLength
+        oxVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of oxidizer pump
     fuelPumpLength = (
-        fuelVoluteLength + shaftLength + motorLength
+        fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of fuel pump
 
-    totalPumpLength = (
-        oxPumpLength + fuelPumpLength + c.MOTOR_LENGTH
+    totalPumpLength = 1.05 * (
+        oxPumpLength + fuelPumpLength - c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
     return [oxPower, fuelPower, pumpsMass, totalPumpLength]
