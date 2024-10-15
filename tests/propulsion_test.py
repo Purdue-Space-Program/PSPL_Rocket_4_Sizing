@@ -27,7 +27,7 @@ fuMass = 70.269 * c.LB2KG
 tankOD = 8.625 * c.IN2M
 
 
-[   
+[
     jetThrust,
     seaLevelThrust,
     oxMassFlow,
@@ -38,7 +38,7 @@ tankOD = 8.625 * c.IN2M
     InjectorMass,
     totalPropulsionMass,
     totalMassFlow,
-    exitArea
+    exitArea,
 ] = propulsion.calculate_propulsion(
     TWR, vehicleMass, Pc, Pe, cstar, Isp, expRatio, Lstar, OF, oxMass, fuMass, tankOD
 )
@@ -59,4 +59,6 @@ print(f"burnTime: {burnTime:.3f} # [s] Burn time")
 print(f"chamberLength: {chamberLength*c.M2IN:.3f} # [in] Chamber length")
 print(f"chamberMass: {chamberMass*c.KG2LB:.2f} # [lbm] Chamber mass")
 print(f"InjectorMass: {InjectorMass*c.KG2LB:.2f} # [lbm] Injector mass")
-print(f"totalPropulsionMass: {totalPropulsionMass*c.KG2LB:.2f} # [lbm] Total propulsion mass")
+print(
+    f"totalPropulsionMass: {totalPropulsionMass*c.KG2LB:.2f} # [lbm] Total propulsion mass"
+)

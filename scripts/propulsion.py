@@ -8,6 +8,8 @@ import sys
 import numpy as np
 import CEA_Wrap as CEA
 from CoolProp.CoolProp import PropsSI
+import pandas as pd
+from bisect import bisect_left
 
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -111,6 +113,51 @@ def run_CEA(
     cstar = data.cstar * EFFICIENCY_FACTOR  # [m/s] characteristic velocity
     specificImpulse = data.isp * EFFICIENCY_FACTOR**2  # [s] specific impulse
     expansionRatio = data.ae  # [-] nozzle expansion ratio
+    """
+    
+    USE THIS IF YOU ARE USING THE MEGA CEA FILE
+    # Define a function to perform binary search on the CEA data with closest value fallback
+    # Sort the data by chamber pressure, exit pressure, and mixture ratio
+
+    data = pd.read_csv("new_cea.csv")
+
+    # Extract the relevant columns
+    chamber_pressures = data.iloc[:, 0].values
+    mix_ratios = data.iloc[:, 1].values
+    exit_pressures = data.iloc[:, 2].values
+
+    # Perform binary search for chamber pressure
+    idx_chamber = bisect_left(chamber_pressures, chamberPressure)
+    if idx_chamber == len(chamber_pressures):
+        idx_chamber -= 1
+    elif idx_chamber > 0 and abs(
+        chamber_pressures[idx_chamber - 1] - chamberPressure
+    ) < abs(chamber_pressures[idx_chamber] - chamberPressure):
+        idx_chamber -= 1
+
+    # Perform binary search for mixture ratio
+    idx_mr = bisect_left(mix_ratios, mixRatio, lo=idx_chamber)
+    if idx_mr == len(mix_ratios):
+        idx_mr -= 1
+    elif idx_mr > 0 and abs(mix_ratios[idx_mr - 1] - mixRatio) < abs(
+        mix_ratios[idx_mr] - mixRatio
+    ):
+        idx_mr -= 1
+
+    # Perform binary search for exit pressure
+    idx_exit = bisect_left(exit_pressures, exitPressure, lo=idx_mr)
+    if idx_exit == len(exit_pressures):
+        idx_exit -= 1
+    elif idx_exit > 0 and abs(exit_pressures[idx_exit - 1] - exitPressure) < abs(
+        exit_pressures[idx_exit] - exitPressure
+    ):
+        idx_exit -= 1
+
+    # Retrieve the corresponding CEA values
+    cstar = data.iloc[idx_chamber, 3]  # [m/s] characteristic velocity
+    specificImpulse = data.iloc[idx_chamber, 4]  # [s] specific impulse
+    expansionRatio = data.iloc[idx_chamber, 5]  # [-] nozzle expansion ratio
+    """
 
     return [
         cstar,
@@ -202,9 +249,7 @@ def calculate_propulsion(
     CHAMBER_WALL_THICKNESS = (
         c.CHAMBER_WALL_THICKNESS * c.IN2M
     )  # [m] chamber wall thickness
-    CHAMBER_FLANGE_WIDTH = (
-        c.CHAMBER_FLANGE_WIDTH * c.IN2M
-    ) # [m] chamber flange width
+    CHAMBER_FLANGE_WIDTH = c.CHAMBER_FLANGE_WIDTH * c.IN2M  # [m] chamber flange width
 
     # Thrust calculations
     requiredSeaLevelThrust = (
@@ -245,8 +290,8 @@ def calculate_propulsion(
 
     # Thrust chamber dimensions and mass
     chamberID = tankOD - 2 * (
-        CHAMBER_FLANGE_WIDTH
-     + CHAMBER_WALL_THICKNESS)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
+        CHAMBER_FLANGE_WIDTH + CHAMBER_WALL_THICKNESS
+    )  # [m] Chamber inner diameter, 2 inches smaller than tank OD
     chamberArea = (np.pi / 4) * chamberID**2  # [m^2] chamber area
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
@@ -256,7 +301,7 @@ def calculate_propulsion(
         contractionRatio = 4.5
         chamberArea = contractionRatio * throatArea  # [m^2] chamber area
         chamberID = 2 * np.sqrt(chamberArea / np.pi)  # [m] chamber inner diameter
-    
+
     chamberOD = chamberID + 2 * CHAMBER_WALL_THICKNESS  # [m] chamber outer diameter
     # Thrust chamber size estimate, modeled as conical nozzle
     divergeLength = (
@@ -297,7 +342,7 @@ def calculate_propulsion(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = chamberOD # [m] injector OD, same as chmaber
+    injectorOD = chamberOD  # [m] injector OD, same as chmaber
     injectorLength = 2 * c.IN2M  # [m] Injector length
     injectorMass = (
         injectorMaterialDensity
@@ -393,9 +438,7 @@ def calculate_propulsion_pumpfed(
     CHAMBER_WALL_THICKNESS = (
         c.CHAMBER_WALL_THICKNESS * c.IN2M
     )  # [m] chamber wall thickness
-    CHAMBER_FLANGE_WIDTH = (
-        c.CHAMBER_FLANGE_WIDTH * c.IN2M
-    ) # [m] chamber flange width
+    CHAMBER_FLANGE_WIDTH = c.CHAMBER_FLANGE_WIDTH * c.IN2M  # [m] chamber flange width
 
     coreMassFlowRate = oxMassFlowRate + fuelMassFlowRate  # [kg/s] total mass flow rate
     jetThrust = coreMassFlowRate * specificImpulse * c.GRAVITY  # [N] ideal thrust
@@ -409,8 +452,8 @@ def calculate_propulsion_pumpfed(
 
     # Thrust chamber dimensions and mass
     chamberID = tankOD - 2 * (
-        CHAMBER_FLANGE_WIDTH
-     + CHAMBER_WALL_THICKNESS)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
+        CHAMBER_FLANGE_WIDTH + CHAMBER_WALL_THICKNESS
+    )  # [m] Chamber inner diameter, 2 inches smaller than tank OD
     chamberArea = (np.pi / 4) * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
@@ -461,7 +504,7 @@ def calculate_propulsion_pumpfed(
     injectorMaterialDensity = (
         c.DENSITY_INCO
     )  # [kg/m^3] injector material density (Inconel 718)
-    injectorOD = chamberOD # [m] injector OD, same as chmaber
+    injectorOD = chamberOD  # [m] injector OD, same as chmaber
     injectorLength = 2 * c.IN2M
     injectorMass = (
         injectorMaterialDensity
