@@ -85,7 +85,7 @@ def create_results_file(
             ("Core O:F Ratio (mass)", ("core_of_ratio")),
             ("Total Mass Flow Rate [lbm/s]", ("total_mass_flow_rate")),
             ("Aspect Ratio [-]", ("aspect_ratio")),
-            ("Wet Mass Ratio [-]", ("wet_mass_ratio")),
+            ("Mass Ratio [-]", ("wet_mass_ratio")),
         ]
 
         for param, fileName in parameters:

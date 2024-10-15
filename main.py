@@ -370,7 +370,7 @@ def main():
             [
                 vehicleDryMassEstimate,
                 vehicleMassEstimate,
-                vehicleWetMassRatioEstimate,
+                vehicleMassRatioEstimate,
             ] = vehicle.calculate_mass(
                 avionicsMass,
                 fluidsystemsMass,
@@ -382,7 +382,7 @@ def main():
 
         totalDryMass = vehicleDryMassEstimate
         totalWetMass = vehicleMassEstimate
-        wetMassRatio = vehicleWetMassRatioEstimate
+        MassRatio = vehicleMassRatioEstimate
 
         ## Mass
 
@@ -501,7 +501,7 @@ def main():
             {
                 "Total Dry Mass [lbm]": totalDryMass * c.KG2LB,
                 "Total Wet Mass [lbm]": totalWetMass * c.KG2LB,
-                "Wet Mass Ratio [-]": wetMassRatio,
+                "Mass Ratio [-]": MassRatio,
                 "Total Length [ft]": totalLength * c.M2FT,
                 "Aspect Ratio [-]": totalLength / tankOD,
             },
@@ -612,7 +612,7 @@ def main():
             numberCells,
         ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
-        [pumpfedTotalDryMass, pumpfedTotalWetMass, pumpfedWetMassRatio] = (
+        [pumpfedTotalDryMass, pumpfedTotalWetMass, pumpfedMassRatio] = (
             vehicle.calculate_mass(
                 pumpfedTotalAvionicsMass,
                 fluidsystemsMass - copvMass + copvMassNew,
@@ -671,7 +671,7 @@ def main():
                 * c.KG2LB,
                 "Pumpfed Total Dry Mass [lbm]": pumpfedTotalDryMass * c.KG2LB,
                 "Pumpfed Total Wet Mass [lbm]": pumpfedTotalWetMass * c.KG2LB,
-                "Pumpfed Wet Mass Ratio [-]": pumpfedWetMassRatio,
+                "Pumpfed Mass Ratio [-]": pumpfedMassRatio,
                 "Pumpfed Total Length [ft]": pumpfedTotalLength * c.M2FT,
                 "Pumpfed Altitude [ft]": pumpfedAltitude * c.M2FT,
                 "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
