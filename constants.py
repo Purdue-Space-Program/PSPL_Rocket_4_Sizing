@@ -106,6 +106,7 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
 CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
+CHAMBER_FLANGE_WIDTH = 1 # [in] chamber flange thickness
 
 
 # Propellant Properties

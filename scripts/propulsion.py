@@ -399,9 +399,9 @@ def calculate_propulsion_pumpfed(
     )  # [N] sea level thrust
 
     # Thrust chamber dimensions and mass
-    chamberID = tankOD - 2 * (
-        1 * c.IN2M
-    )  # [m] Chamber inner diameter, 2 inches smaller than tank OD
+    chamberID = tankOD - 2 * c.IN2M * (
+        c.CHAMBER_FLANGE_WIDTH
+     + c.CHAMBER_WALL_THICKNESS)  # [m] Chamber inner diameter, 2 inches smaller than tank OD
     chamberArea = np.pi / 4 * chamberID**2  # [m^2] chamber areas
     contractionRatio = chamberArea / throatArea  # [1] contraction ratio
 
