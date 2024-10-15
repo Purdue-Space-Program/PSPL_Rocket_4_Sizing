@@ -39,8 +39,9 @@ with open(output_file, mode="w", newline="") as file:
         1.2, 2.6, 0.05
     )  # From 1.2 to 2.5 with a step size of 0.1
 
-    fuel = CEA.Fuel(FUEL_NAME, temp=FUEL_TEMP)
+    fuel = CEA.Fuel(FUEL_NAME, temp=FUEL_TEMP, wt_percent=70)
     oxidizer = CEA.Oxidizer(OX_NAME, temp=OX_TEMP)
+    water = CEA.Oxidizer("H2O(L)", temp=FUEL_TEMP, wt_percent=30)
 
     total_iterations = (
         len(chamber_pressures) * len(mixture_ratios) * len(exit_pressures)
@@ -59,7 +60,7 @@ with open(output_file, mode="w", newline="") as file:
                     rocket = CEA.RocketProblem(
                         pressure=chamber_pressure,
                         pip=pressure_ratio,
-                        materials=[fuel, oxidizer],
+                        materials=[fuel, oxidizer, water],
                         o_f=mixture_ratio,
                         filename="engineCEAoutput",
                         pressure_units="bar",
