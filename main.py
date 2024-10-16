@@ -705,20 +705,4 @@ def main():
 
 
 if __name__ == "__main__":
-    pr = cProfile.Profile()
-    pr.enable()  # Start profiling
-
-    # Call the main function directly
     main()
-
-    pr.disable()  # Stop profiling
-
-    # Create a stream to capture the profiling results
-    s = io.StringIO()
-    sortby = pstats.SortKey.CUMULATIVE  # Sorting by cumulative time
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()  # Print the profiling results
-
-    # Write the output to a text file
-    with open("profiling_results.txt", "w") as f:
-        f.write(s.getvalue())

@@ -38,7 +38,7 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     # Calculate the number of battery cells required
     series = np.ceil(MAX_VOLTS / c.LIPO_CELL_VOLTAGE)  # number of cells in series
     paralell = np.ceil(
-        totalPowerRequired / (c.LIPO_CELL_DISCHARGE_CURRENT * c.LIPO_CELL_VOLTAGE)
+        totalPowerRequired / (c.LIPO_CELL_DISCHARGE_CURRENT * MAX_VOLTS)
     )  # number of cells in parallel
 
     numCells = series * paralell  # total number of cells

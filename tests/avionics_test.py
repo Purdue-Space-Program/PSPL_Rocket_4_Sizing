@@ -9,21 +9,17 @@ from scripts import avionics
 import constants as c
 
 # Inputs for oxidizer and fuel pump powers
-oxPower = 15000  # [W] power required by the oxidizer pump
-fuelPower = 12000  # [W] power required by the fuel pump
+oxPower = 20000  # [W] power required by the oxidizer pump
+fuelPower = 16800  # [W] power required by the fuel pump
 
 # Run test case
 [
-    optimalMass,
-    optimalNumParallelCells,
-    optimalNumSeriesCells,
-    optimalTotalCells,
-    optimalBatteryMass,
-] = avionics.pumpfed_avionics_sizing(oxPower, fuelPower)
+    batteryMass,
+    pumpAviMass,
+    numCells,
+] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
 # Display results
-print(f"Optimal Mass: {optimalMass:.2f} kg")
-print(f"Optimal Num Series Cells: {optimalNumSeriesCells}")
-print(f"Optimal Num Parallel Cells: {optimalNumParallelCells}")
-print(f"Optimal Total Cells: {optimalTotalCells}")
-print(f"Optimal Battery Mass: {optimalBatteryMass:.2f} kg")
+print(f"Battery mass: {batteryMass} kg")
+print(f"Pump-fed avionics mass: {pumpAviMass} kg")
+print(f"Number of battery cells: {numCells}")
