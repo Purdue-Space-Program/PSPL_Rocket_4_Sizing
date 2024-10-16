@@ -106,7 +106,7 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
 CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
-CHAMBER_FLANGE_WIDTH = 1 # [in] chamber flange thickness
+CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
 
 # Propellant Properties
@@ -119,6 +119,7 @@ DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP (https://www.code7700.com/p
 DENSITY_IPA = 785  # [kg/m^3] Isopropyl alcohol density at STP (https://macro.lsu.edu/HowTo/solvents/IPA.htm)
 DENSITY_METHANOL = 792  # [kg/m^3] Methanol density at STP (https://www.engineeringtoolbox.com/methanol-d_937.html)
 DENSITY_WATER = 1000  # [kg/m^3] Water density at STP (https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.html)
+DENSITY_GASOLINE = 703  # [kg/m^3] Gasoline density at STP (https://www.engineeringtoolbox.com/gasoline-d_1592.html)
 
 # Pump Constants
 
@@ -126,7 +127,7 @@ REQUIRED_NPSH = (
     85 * PSI2PA
 )  # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
 PUMP_CHAMBER_PRESSURE = (
-    700 * PSI2PA
+    500 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
 
 # FAR Constants

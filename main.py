@@ -80,8 +80,12 @@ def main():
     # This section creates a dataframe to store the results of the rocket analysis
     # Owner: Nick Nielsen
 
-    CEAData = pd.read_csv("new_cea.csv")
-    atmosphereData = pd.read_csv("atmosphere.csv")
+    CEA_DATA = pd.read_csv("new_cea.csv")
+    ATMOSPHERE_DATA = pd.read_csv("atmosphere.csv")
+
+    CEA_CHAMBER_PRESSURES = CEA_DATA.iloc[:, 0].values
+    CEA_EXIT_PRESSURES = CEA_DATA.iloc[:, 1].values
+    CEA_MIXTURE_RATIOS = CEA_DATA.iloc[:, 2].values
 
     fluidsystemsDF = pd.DataFrame(
         columns=[
@@ -317,9 +321,8 @@ def main():
             chamberPressure,
             exitPressure,
             fuel,
-            oxidizer,
             mixRatio,
-            CEAData,
+            CEA_DATA,
         )
 
         # Structures
@@ -436,7 +439,7 @@ def main():
                 exitPressure,
                 burnTime,
                 totalLength,
-                atmosphereData,
+                ATMOSPHERE_DATA,
                 plots=0,
             )
         )
@@ -539,7 +542,7 @@ def main():
             oxTemp,
             pumpfedCharacteristicLength,
         ] = propulsion.run_CEA(
-            c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, oxidizer, mixRatio, CEAData
+            c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, mixRatio, CEA_DATA
         )
 
         # Fluids
@@ -639,7 +642,7 @@ def main():
             exitPressure,
             burnTime,
             pumpfedTotalLength,
-            atmosphereData,
+            ATMOSPHERE_DATA,
             plots=0,
         )
 
