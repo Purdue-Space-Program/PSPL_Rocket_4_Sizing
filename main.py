@@ -553,24 +553,29 @@ def main():
 
         # Propulsion
         [
-            pumpfedJetThrust,
             pumpfedSeaLevelThrust,
+            pumpfedOxMassFlowRate,
+            pumpfedFuelMassFlowRate,
+            pumpfedBurnTime,
             pumpfedChamberLength,
             pumpfedChamberOd,
             pumpfedContractionRatio,
             pumpfedChamberMass,
             pumpfedInjectorMass,
             pumpfedTotalPropulsionMass,
+            pumpfedTotalMassFlowRate,
             pumpfedExitArea,
         ] = propulsion.calculate_propulsion_pumpfed(
+            idealThrust,
             c.PUMP_CHAMBER_PRESSURE,
             exitPressure,
             pumpfedCstar,
             pumpfedSpecificImpulse,
             pumpfedExpansionRatio,
             characteristicLength,
-            oxMassFlowRate,
-            fuelMassFlowRate,
+            mixRatio,
+            oxPropMass,
+            fuelPropMass,
             tankOD,
         )
 
@@ -635,7 +640,7 @@ def main():
         ] = trajectory.calculate_trajectory(
             pumpfedTotalWetMass,
             totalMassFlowRate,
-            pumpfedJetThrust,
+            idealThrust,
             tankOD,
             dragCoeff,
             pumpfedExitArea,
@@ -654,8 +659,11 @@ def main():
                 "Pumpfed Tank Pressure [psi]": pumpfedTankPressure * c.PA2PSI,
                 "Pumpfed COPV Mass [lbm]": copvMassNew * c.KG2LB,
                 "Pumpfed COPV [-]": copvNew,
-                "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
+                "Pumpfed Jet Thrust [lbf]": idealThrust * c.N2LBF,
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
+                "Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate * c.KG2LB,
+                "Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate * c.KG2LB,
+                "Burn Time [s]": pumpfedBurnTime,                
                 "Pumpfed Chamber Length [in]": pumpfedChamberLength * c.M2IN,
                 "Pumpfed Chamber OD [in]": pumpfedChamberOd * c.M2IN,
                 "Pumpfed Contraction Ratio": pumpfedContractionRatio, 
@@ -663,6 +671,7 @@ def main():
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
                 * c.KG2LB,
+                "Total Mass Flow Rate [lbm/s]": totalMassFlowRate * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
