@@ -671,7 +671,7 @@ def main():
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
                 * c.KG2LB,
-                "Total Mass Flow Rate [lbm/s]": totalMassFlowRate * c.KG2LB,
+                "Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
