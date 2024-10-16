@@ -322,7 +322,6 @@ def main():
             exitPressure,
             fuel,
             mixRatio,
-            CEA_DATA,
         )
 
         # Structures
@@ -541,9 +540,7 @@ def main():
             fuelTemp,
             oxTemp,
             pumpfedCharacteristicLength,
-        ] = propulsion.run_CEA(
-            c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, mixRatio, CEA_DATA
-        )
+        ] = propulsion.run_CEA(c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, mixRatio)
 
         # Fluids
         [

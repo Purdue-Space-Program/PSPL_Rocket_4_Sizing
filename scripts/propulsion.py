@@ -22,7 +22,6 @@ def run_CEA(
     exitPressure,
     fuel,
     mixRatio,
-    CEAdata,
 ):
     """
     Runs the Chemical Equilibrium with Applications (CEA) simulation for a rocket engine
