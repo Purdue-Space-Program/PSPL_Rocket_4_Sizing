@@ -21,7 +21,6 @@ def run_CEA(
     chamberPressure,
     exitPressure,
     fuel,
-    oxidizer,
     mixRatio,
     CEAdata,
 ):
@@ -58,9 +57,9 @@ def run_CEA(
         Characteristic length of the combustion chamber, based on propellant choice [m].
     """
 
+    # Unit conversion
     EFFICIENCY_FACTOR = 0.9  # Efficiency factor for cstar and specific impulse
 
-    # Unit conversions
     chamberPressure = chamberPressure * c.PA2BAR  # [Pa] to [bar]
     exitPressure = exitPressure * c.PA2BAR  # [Pa] to [bar]
     pressureRatio = chamberPressure / exitPressure  # Pressure ratio
@@ -75,34 +74,19 @@ def run_CEA(
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
         fuelTemp = c.T_AMBIENT
 
-    elif fuel.lower() == "isopropanol":
-        fuelCEA = "C3H8O,2propanol"
-        characteristicLength = 45 * c.IN2M
-        fuelTemp = c.T_AMBIENT
-
-    elif fuel.lower() == "methanol":
-        fuelCEA = "CH3OH(L)"
-        characteristicLength = 45 * c.IN2M
-        fuelTemp = c.T_AMBIENT
-
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
-
-    if fuel.lower() == "ethanol" or fuel.lower == "isopropanol":
-        fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=1 - c.WATER_PERCENTAGE)
-        water = CEA.Fuel("H2O(L)", temp=298, wt_percent=c.WATER_PERCENTAGE)
-    else:
-        fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
-        water = CEA.Fuel("H2O(L)", temp=298, wt_percent=0)
+    gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
 
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
-        materials=[fuel, oxidizer, water],
+        materials=[fuel, oxidizer, gasoline],
         o_f=mixRatio,
         filename="engineCEAoutput",
         pressure_units="bar",
@@ -114,13 +98,11 @@ def run_CEA(
     cstar = data.cstar * EFFICIENCY_FACTOR  # [m/s] characteristic velocity
     specificImpulse = data.isp * EFFICIENCY_FACTOR**2  # [s] specific impulse
     expansionRatio = data.ae  # [-] nozzle expansion ratio
-
     """
+    
     USE THIS IF YOU ARE USING THE MEGA CEA FILE
     # Define a function to perform binary search on the CEA data with closest value fallback
     # Sort the data by chamber pressure, exit pressure, and mixture ratio
-
-    
 
     # Extract the relevant columns
     chamber_pressures = CEAdata.iloc[:, 0].values
@@ -160,7 +142,6 @@ def run_CEA(
     expansionRatio = CEAdata.iloc[idx_chamber, 5]  # [-] nozzle expansion ratio
 
     """
-
     return [
         cstar,
         specificImpulse,
@@ -572,12 +553,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
 
     mixtureName = (
-        fuel
-        + "["
-        + str(1 - c.WATER_PERCENTAGE)
-        + "]&H2O["
-        + str(c.WATER_PERCENTAGE)
-        + "]"
+        fuel + "[0.98]&n-Octane[0.02]"
     )  # [string] Name of the propellant mixture
 
     rpm = 45000  # [1/min] # max RPM of pump based on neumotors 2020

@@ -162,8 +162,8 @@ def fluids_sizing(
 
     elif fuel.lower() == "ethanol":
         fuelDensity = (
-            1 - c.WATER_PERCENTAGE
-        ) * c.DENSITY_ETHANOL + c.WATER_PERCENTAGE * c.DENSITY_WATER  # [kg/m^3] Watered ethanol density
+            0.98 * c.DENSITY_ETHANOL + 0.02 * c.DENSITY_GASOLINE
+        )  # [kg/m^3] gasolined ethanol density
     elif fuel.lower() == "jet-a":
         fuelDensity = c.DENSITY_JET_A  # [kg/m^3] Jet-A density
     elif fuel.lower() == "isopropanol":
