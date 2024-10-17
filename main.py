@@ -175,6 +175,7 @@ def main():
             "Pumpfed Sea Level Thrust [lbf]",
             "Pumpfed Oxidizer Mass Flow Rate [lbm/s]",
             "Pumpfed Fuel Mass Flow Rate [lbm/s]",
+            "Pumpfed Burn Time [s]",
             "Pumpfed Chamber Length [in]",
             "Pumpfed Chamber OD [in]",
             "Pumpfed Chamber Mass [lbm]",
@@ -668,6 +669,7 @@ def main():
                 * c.KG2LB,
                 "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate
                 * c.KG2LB,
+                "Burn Time [s]": pumpfedBurnTime,
                 "Pumpfed Chamber Length [in]": pumpfedChamberLength * c.M2IN,
                 "Pumpfed Chamber OD [in]": pumpfedChamberOd * c.M2IN,
                 "Pumpfed Contraction Ratio": pumpfedContractionRatio,
