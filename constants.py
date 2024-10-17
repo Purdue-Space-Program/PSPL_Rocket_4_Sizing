@@ -151,7 +151,7 @@ MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 MOTOR_LENGTH = 0.093  # [m] length of a single motor
 
 # LIPO Battery Constants
-LIPO_CELL_MASS = 0.0222  # [kg] mass of a LiPo cell
+LIPO_CELL_MASS = 0.400  # [kg] mass of a LiPo cell
 LIPO_CELL_VOLTAGE = 22.2  # [V] nominal voltage of a LiPo cell
 LIPO_CELL_DISCHARGE_CURRENT = 80  # [A] maximum discharge current of a LiPo cell
 
