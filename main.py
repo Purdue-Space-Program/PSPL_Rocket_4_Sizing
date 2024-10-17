@@ -576,10 +576,10 @@ def main():
             pumpfedCstar,
             pumpfedSpecificImpulse,
             pumpfedExpansionRatio,
-            characteristicLength,
+            pumpfedCharacteristicLength,
             mixRatio,
             oxPropMass,
-            fuelMassFlowRate,
+            fuelPropMass,
             tankOD,
         )
 
@@ -669,7 +669,7 @@ def main():
                 * c.KG2LB,
                 "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate
                 * c.KG2LB,
-                "Burn Time [s]": pumpfedBurnTime,
+                "Pumpfed Burn Time [s]": pumpfedBurnTime,
                 "Pumpfed Chamber Length [in]": pumpfedChamberLength * c.M2IN,
                 "Pumpfed Chamber OD [in]": pumpfedChamberOd * c.M2IN,
                 "Pumpfed Contraction Ratio": pumpfedContractionRatio,

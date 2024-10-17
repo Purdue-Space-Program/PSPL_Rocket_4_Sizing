@@ -443,7 +443,7 @@ def calculate_propulsion_pumpfed(
     burnTime = (
         (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate
     )
-
+    
     # Thrust chamber dimensions and mass
     chamberID = tankOD - 2 * (
         CHAMBER_FLANGE_WIDTH + CHAMBER_WALL_THICKNESS
