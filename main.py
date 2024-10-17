@@ -648,7 +648,7 @@ def main():
             dragCoeff,
             pumpfedExitArea,
             exitPressure,
-            burnTime,
+            pumpfedBurnTime,
             pumpfedTotalLength,
             ATMOSPHERE_DATA,
             plots=0,
@@ -675,7 +675,7 @@ def main():
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
                 * c.KG2LB,
-                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate,
+                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
