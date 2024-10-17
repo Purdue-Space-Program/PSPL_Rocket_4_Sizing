@@ -358,14 +358,16 @@ def calculate_propulsion(
 
 
 def calculate_propulsion_pumpfed(
+    jetThrust,
     chamberPressure,
     exitPressure,
     cstar,
     specificImpulse,
     expansionRatio,
     characteristicLength,
-    oxMassFlowRate,
-    fuelMassFlowRate,
+    mixtureRatio,
+    oxMass,
+    fuelMass,
     tankOD,
 ):
     """
@@ -423,8 +425,9 @@ def calculate_propulsion_pumpfed(
     )  # [m] chamber wall thickness
     CHAMBER_FLANGE_WIDTH = c.CHAMBER_FLANGE_WIDTH * c.IN2M  # [m] chamber flange width
 
-    coreMassFlowRate = oxMassFlowRate + fuelMassFlowRate  # [kg/s] total mass flow rate
-    jetThrust = coreMassFlowRate * specificImpulse * c.GRAVITY  # [N] ideal thrust
+    jetExhaustVelocity = specificImpulse * c.GRAVITY
+    coreMassFlowRate = jetThrust / jetExhaustVelocity
+
     throatArea = cstar * coreMassFlowRate / chamberPressure  # [m^2] throat area
     throatDiameter = 2 * (throatArea / np.pi) ** (1 / 2)  # [m] throat diameter
     exitArea = expansionRatio * throatArea  # [m^2] exit area
@@ -432,6 +435,14 @@ def calculate_propulsion_pumpfed(
     seaLevelThrust = jetThrust + exitArea * (
         exitPressure - SEA_LEVEL_PRESSURE
     )  # [N] sea level thrust
+
+    fuelMassFlowRate = coreMassFlowRate / (1 + mixtureRatio)
+    oxMassFlowRate = mixtureRatio * fuelMassFlowRate
+
+    totalMassFlowRate = coreMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
+    burnTime = (
+        (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate
+    )
 
     # Thrust chamber dimensions and mass
     chamberID = tankOD - 2 * (
@@ -504,14 +515,17 @@ def calculate_propulsion_pumpfed(
     )  # [kg] total propulsion system mass
 
     return [
-        jetThrust,
         seaLevelThrust,
+        oxMassFlowRate,
+        fuelMassFlowRate,
+        burnTime,
         thrustChamberLength,
         chamberOD,
         contractionRatio,
         chamberMass,
         injectorMass,
         totalPropulsionMass,
+        totalMassFlowRate,
         exitArea,
     ]
 
