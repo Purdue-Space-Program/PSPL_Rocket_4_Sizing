@@ -59,6 +59,8 @@ def calculate_trajectory(
         Maximum acceleration of the rocket [m/s^2].
     exitVelo : float
         Exit velocity of the rocket [m/s].
+    totalImpulse : float
+        Total impulse of the rocket [Ns].
     """
 
     # Rocket Properties
@@ -80,6 +82,8 @@ def calculate_trajectory(
     accelArray = []
     timeArray = []
 
+    totalImpulse = 0  # Initialize total impulse
+
     while velocity >= 0:
 
         index = int(altitude // 10)  # Divide altitude by 10 to find index
@@ -99,6 +103,7 @@ def calculate_trajectory(
             thrust = (
                 jetThrust - (exitPressure - pressure) * exitArea
             )  # [N] force of thrust, accounting for pressure thrust
+            totalImpulse += thrust * dt  # Accumulate impulse
         else:
             thrust = 0  # [N] total thrust of the rocket
 
@@ -138,4 +143,10 @@ def calculate_trajectory(
         plt.grid()
         plt.show()
 
-    return [float(altitude), float(max(accelArray)), float(exitVelo), float(exitAccel)]
+    return [
+        float(altitude),
+        float(max(accelArray)),
+        float(exitVelo),
+        float(exitAccel),
+        float(totalImpulse),
+    ]

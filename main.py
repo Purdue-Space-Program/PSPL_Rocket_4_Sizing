@@ -157,6 +157,7 @@ def main():
     trajectoryDF = pd.DataFrame(
         columns=[
             "Altitude [ft]",
+            "Total Impulse [lbm-s]",
             "Max Acceleration [g]",
             "Rail Exit Velocity [ft/s]",
             "Rail Exit Acceleration [g]",
@@ -192,6 +193,7 @@ def main():
             "Pumpfed Total Wet Mass [lbm]",
             "Pumpfed Total Length [ft]",
             "Pumpfed Altitude [ft]",
+            "Pumpfed Total Impulse [lbm-s]",
             "Pumpfed Max Acceleration [g]",
             "Pumpfed Rail Exit Velocity [ft/s]",
             "Pumpfed Rail Exit Acceleration [g]",
@@ -428,7 +430,7 @@ def main():
             continue  # Skip the rest of the loop if the rocket is not within limits
 
         # Trajectory
-        [altitude, maxAccel, railExitVelo, railExitAccel] = (
+        [altitude, maxAccel, railExitVelo, railExitAccel, totalImpulse] = (
             trajectory.calculate_trajectory(
                 totalWetMass,
                 totalMassFlowRate,
@@ -520,6 +522,7 @@ def main():
         trajectoryDF = trajectoryDF._append(
             {
                 "Altitude [ft]": altitude * c.M2FT,
+                "Total Impulse [lbm-s]": totalImpulse * c.N2LBF,
                 "Max Acceleration [g]": maxAccel / c.GRAVITY,
                 "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
                 "Rail Exit Acceleration [g]": railExitAccel / c.GRAVITY,
@@ -632,6 +635,7 @@ def main():
             pumpfedMaxAccel,
             pumpfedRailExitVelo,
             pumpfedRailExitAccel,
+            pumpfedTotalImpulse,
         ] = trajectory.calculate_trajectory(
             pumpfedTotalWetMass,
             totalMassFlowRate,
@@ -658,7 +662,7 @@ def main():
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
                 "Pumpfed Chamber Length [in]": pumpfedChamberLength * c.M2IN,
                 "Pumpfed Chamber OD [in]": pumpfedChamberOd * c.M2IN,
-                "Pumpfed Contraction Ratio": pumpfedContractionRatio, 
+                "Pumpfed Contraction Ratio": pumpfedContractionRatio,
                 "Pumpfed Chamber Mass [lbm]": pumpfedChamberMass * c.KG2LB,
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
@@ -680,6 +684,7 @@ def main():
                 "Pumpfed Mass Ratio [-]": pumpfedMassRatio,
                 "Pumpfed Total Length [ft]": pumpfedTotalLength * c.M2FT,
                 "Pumpfed Altitude [ft]": pumpfedAltitude * c.M2FT,
+                "Pumpfed Total Impulse [lbm-s]": pumpfedTotalImpulse * c.N2LBF,
                 "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
                 "Pumpfed Rail Exit Velocity [ft/s]": pumpfedRailExitVelo * c.M2FT,
                 "Pumpfed Rail Exit Acceleration [g]": pumpfedRailExitAccel / c.GRAVITY,
