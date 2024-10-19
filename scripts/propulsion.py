@@ -549,18 +549,9 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
             Total length of the combined oxidizer and fuel pump system [m].
     """
 
-    INJECTOR_DP_RATIO = (
-        1 / 1.2
-    )  # [1] Assumed pressure drop ratio over injector, from RPE
-    REGEN_DP_RATIO = (
-        1 / 1.4
-    )  # [1] Assumed pressure drop ratio over regen channels (assuming fuel-only regen)
-
     mixtureName = (
         fuel + "[0.98]&n-Octane[0.02]"
     )  # [string] Name of the propellant mixture
-
-    rpm = 45000  # [1/min] # max RPM of pump based on neumotors 2020
 
     pumpEfficiency = 0.5  # Constant??
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
@@ -570,10 +561,10 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     fuelInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
 
     oxExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE / INJECTOR_DP_RATIO
+        c.PUMP_CHAMBER_PRESSURE / c.INJECTOR_DP_RATIO
     )  # [Pa] pressure at pump exit
     fuelExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE / INJECTOR_DP_RATIO / REGEN_DP_RATIO
+        c.PUMP_CHAMBER_PRESSURE / c.INJECTOR_DP_RATIO / c.REGEN_DP_RATIO
     )  # [Pa] pressure at pump exit
 
     if fuel.lower() == "methane":
@@ -622,11 +613,11 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     # Impellers
     oxImpellerDia = np.sqrt(
         (8 * c.GRAVITY * oxDevelopedHead)
-        / (((rpm * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
+        / (((c.MOTOR_RPM  * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
     )  # Ox Impeller Diameter [m]
     fuelImpellerDia = np.sqrt(
         (8 * c.GRAVITY * fuelDevelopedHead)
-        / (((rpm * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
+        / (((c.MOTOR_RPM * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
     )  # Fuel Impeller Diameter [m]
     impellerThickness = 0.375 * c.IN2M  # Impeller Thickness [m]
 

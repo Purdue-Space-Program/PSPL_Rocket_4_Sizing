@@ -55,6 +55,7 @@ M32FT3 = 35.3147  # [ft^3/m^3] Conversion factor from m^3 to ft^3
 FT32M3 = 1 / M32FT3  # [m^3/ft^3] Conversion factor from ft^3 to m^3
 
 ## Force
+
 N2LBF = 0.224809  # [lbf/N] Conversion factor from N to lbf
 LBF2N = 1 / N2LBF  # [N/lbf] Conversion factor from lbf to N
 
@@ -82,22 +83,16 @@ DENSITY_SS316 = 7980  # [kg/m^3] Density
 
 # Fluids Constants
 
+VENTURI_DP_RATIO = 1 / 1.2  # [1] venturi outlet pressure / tank pressure, based on NASA venturi documentation & testing
+MISC_DP_RATIO = 1 / 1.15 # [1] outlet pressure / inlet pressure from misc components, based on CMS numbers
 
 FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
-RESIDUAL_PERCENT = (
-    7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
-)
-ULLAGE_PERCENT = (
-    10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
-)
+RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
+ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
 
-R_PROP = (
-    1 - ULLAGE_PERCENT / 100
-)  # [1] Ratio of total tank volume to total propellant volume
+R_PROP = 1 - ULLAGE_PERCENT / 100  # [1] Ratio of total tank volume to total propellant volume
 
-BURNOUT_PRESSURE_RATIO = (
-    2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
-)
+BURNOUT_PRESSURE_RATIO = 2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
 
 K_PRESSURIZATION = 0.64  # [1] Ratio of ideal tank volume to actual tank volume, calculated based on average from past rocket designs
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
@@ -105,12 +100,14 @@ HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
 FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
+
 CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
+INJECTOR_DP_RATIO = 1 / 1.2 # injector outlet pressure / injector inlet pressure, based on past rockets & RPE
+REGEN_DP_RATIO  = 1 / 1.3 # [1] regen outlet pressure / regen inlet pressure [NEEDS SOURCE]
 
 # Propellant Properties
-
 
 WATER_PERCENTAGE = 0.30  # [1] Percentage of water in the ethanol & IPA mixtures
 
@@ -145,8 +142,9 @@ BZ1_COPV_VOLUME = 4.7 * L2M3  # [m^3] Volume of the BZ1 COPV (Luxfer L45M)
 BZ1_COPV_PRESSURE = 4500 * PSI2PA  # [Pa] Maximum pressure of the BZ1 COPV
 BZ1_COPV_MASS = 3  # [kg] Mass of BZ1 COPV
 
-# Motor Constants
-## All motor constans are based on the Neumotors 2020 Series motor
+# Motor Constants (based on the Neumotors 2020 Series motor)
+
+MOTOR_RPM = 45000 # [1/min] max RPM of pump based on neumotors 2020
 MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 MOTOR_LENGTH = 0.093  # [m] length of a single motor
 

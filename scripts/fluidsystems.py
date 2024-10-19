@@ -100,21 +100,9 @@ def fluids_sizing(
     """
 
     # Plumbing
-    CHAMBER_DP_RATIO = (
-        0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
-    )
+    # CHAMBER_DP_RATIO = 0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
 
-    # REGEN
-    VENTURI_DP_RATIO = (
-        0.775  # [1] venturi outlet pressure / tank pressure, based on past rockets
-    )
-    REGEN_DP_RATIO = (
-        1 / 1.3
-    )  # [1] regen inlet pressure / regen inlet pressure (pressure upstream of regen jacket is 30% higher than downstream)
-    INJECTOR_DP_RATIO = 0.775  # [1] injector outlet pressure / injector inlet pressure, based on past rockets
-    CHAMBER_DP_RATIO = VENTURI_DP_RATIO * REGEN_DP_RATIO * INJECTOR_DP_RATIO
-
-    # REGEN
+    CHAMBER_DP_RATIO = c.VENTURI_DP_RATIO * c.REGEN_DP_RATIO * c.INJECTOR_DP_RATIO * c.MISC_DP_RATIO
 
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
@@ -331,11 +319,10 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
     tankTotalVolume = oxTankVolume + fuelTankVolume
 
     # Plumbing
-    PUMP_DP_RATIO = 0.9  # [1] Pump inlet pressure / tank pressure, calculated based on average from CMS run lines
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank pressure using pumps
-    pumpTankPressure = c.REQUIRED_NPSH / PUMP_DP_RATIO  # [Pa] Tank pressure
+    pumpTankPressure = c.REQUIRED_NPSH / c.MISC_DP_RATIO  # [Pa] Tank pressure
 
     # Volume checks
     heliumCv = PropsSI(
