@@ -476,7 +476,7 @@ def calculate_propulsion_pumpfed(
         characteristicLength * throatArea
     ) - convergeVolume  # [m^3] chamber volume
     chamberLength = chamberVolume / chamberArea  # [m] chamber length
-    thrustChamberLength = (
+    totalThrustChamberLength = (
         chamberLength + convergeLength + divergeLength
     )  # [m] overall thrust chamber length
 
@@ -487,7 +487,7 @@ def calculate_propulsion_pumpfed(
         chamberMaterialDensity
         * (np.pi / 4)
         * (chamberOD**2 - chamberID**2)
-        * thrustChamberLength
+        * totalThrustChamberLength
     )  # [kg] estimated combustion chamber mass, modeled as a hollow cylinder
 
     # Injector dimensions and mass
@@ -513,7 +513,10 @@ def calculate_propulsion_pumpfed(
     return [
         jetThrust,
         seaLevelThrust,
-        thrustChamberLength,
+        totalThrustChamberLength,
+        chamberLength,
+        convergeLength,
+        divergeLength,
         chamberOD,
         contractionRatio,
         chamberMass,
@@ -619,7 +622,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     # Impellers
     oxImpellerDia = np.sqrt(
         (8 * c.GRAVITY * oxDevelopedHead)
-        / (((c.MOTOR_RPM  * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
+        / (((c.MOTOR_RPM * 2 * np.pi / 60) ** 2) * (1 + dynaHeadLoss * exitFlowCoef**2))
     )  # Ox Impeller Diameter [m]
     fuelImpellerDia = np.sqrt(
         (8 * c.GRAVITY * fuelDevelopedHead)
@@ -659,7 +662,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
-    
+
     oxPumpLength = (
         oxVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of oxidizer pump
