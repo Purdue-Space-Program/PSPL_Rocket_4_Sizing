@@ -150,14 +150,15 @@ MOTOR_LENGTH = 0.093  # [m] length of a single motor
 MOTOR_DIAMETER = 3.1 * IN2M
 
 # LIPO Battery Constants
+
 LIPO_CELL_MASS = 0.400  # [kg] mass of a LiPo cell
 LIPO_CELL_VOLTAGE = 22.2  # [V] nominal voltage of a LiPo cell
 LIPO_CELL_DISCHARGE_CURRENT = 80  # [A] maximum discharge current of a LiPo cell
 
+# Misc
+
 GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
-COPV_OD_MARGIN = (
-    0.061 * 1.5
-)  # [in] Minimum permissible gap between the COPV OD and the tanks OD, based on CMS helium tube thickness with a 1.5 safety factor
 
 # Assumptions
+
 MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]
