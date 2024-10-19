@@ -67,25 +67,29 @@ def run_CEA(
         fuelCEA = "CH4(L)"
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion [CHANGE TO MAX ALLOWABLE]
         characteristicLength = 35 * c.IN2M  # [ADD SOURCE]
-
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
+        fuelTemp = c.T_AMBIENT
+    elif fuel.lower() == "jet-a":
+        fuelCEA = "Jet-A(L)"
+        characteristicLength = 45 * c.IN2M
         fuelTemp = c.T_AMBIENT
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
-    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
+    # fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
-    gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
+    # gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
 
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
-        materials=[fuel, oxidizer, gasoline],
+        materials=[fuel, oxidizer],
         o_f=mixRatio,
         filename="engineCEAoutput",
         pressure_units="bar",
@@ -588,6 +592,8 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, mixtureName)
     elif fuel.lower() == "methane":
         fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, fuel)
+    elif fuel.lower() == "jet-a":
+        fuelDensity = c.DENSITY_JET_A
     elif fuel.lower() == "isopropanol":
         fuelDensity = c.DENSITY_IPA
     elif fuel.lower() == "methanol":
