@@ -122,6 +122,7 @@ def main():
             "Burn Time [s]",
             "Chamber Length [in]",
             "Chamber OD [in]",
+            "Contraction Ratio",
             "Chamber Mass [lbm]",
             "Injector Mass [lbm]",
             "Total Propulsion Mass [lbm]",
@@ -174,15 +175,21 @@ def main():
             "Pumpfed COPV [-]",
             "Pumpfed Jet Thrust [lbf]",
             "Pumpfed Sea Level Thrust [lbf]",
+            "Pumpfed Oxidizer Mass Flow Rate [lbm/s]",
+            "Pumpfed Fuel Mass Flow Rate [lbm/s]",
+            "Pumpfed Burn Time [s]",
             "Pumpfed Chamber Length [in]",
             "Pumpfed Chamber OD [in]",
+            "Pumpfed Contraction Ratio",
             "Pumpfed Chamber Mass [lbm]",
             "Pumpfed Injector Mass [lbm]",
             "Pumpfed Total Propulsion Mass [lbm]",
+            "Pumpfed Total Mass Flow Rate [lbm/s]",
             "Pumpfed Exit Area [in^2]",
             "Pumpfed Oxidizer Power [W]",
             "Pumpfed Fuel Power [W]",
             "Pumpfed Pumps Mass [lbm]",
+            "Pump Package Diameter [in]",
             "Pumpfed Battery Mass [lbm]",
             "Pumpfed Total Avionics Mass [lbm]",
             "Pumpfed Number of Cells [-]",
@@ -552,18 +559,50 @@ def main():
             pumpfedTankPressure,
             copvMassNew,
             copvNew,
-        ] = fluidsystems.pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMass)
+        ] = fluidsystems.pumpfed_fluids_sizing(
+            oxTankVolume, fuelTankVolume, copvMass
+        )  # Propulsion
+
+        [
+            pumpfedJetThrust,
+            pumpfedSeaLevelThrust,
+            pumpfedOxMassFlowRate,
+            pumpfedFuelMassFLowRate,
+            pumpfedBurnTime,
+            pumpfedChamberLength,
+            pumpfedChamberOd,
+            pumpfedContractionRatio,
+            pumpfedChamberMass,
+            pumpfedInjectorMass,
+            pumpfedTotalPropulsionMass,
+            pumpfedTotalMassFlowRate,
+            pumpfedExitArea,
+        ] = propulsion.calculate_propulsion(
+            thrustToWeight,
+            vehicleMass,
+            c.PUMP_CHAMBER_PRESSURE,
+            exitPressure,
+            pumpfedCstar,
+            pumpfedSpecificImpulse,
+            pumpfedExpansionRatio,
+            pumpfedCharacteristicLength,
+            mixRatio,
+            oxPropMass,
+            fuelPropMass,
+            tankOD,
+        )
 
         [
             oxPower,
             fuelPower,
             pumpsMass,
             totalPumpLength,
+            totalPumpDiameter,
         ] = propulsion.calculate_pumps(
             oxidizer,
             fuel,
-            oxMassFlowRate,
-            fuelMassFlowRate,
+            pumpfedOxMassFlowRate,
+            pumpfedFuelMassFLowRate,
         )
 
         [
@@ -667,6 +706,11 @@ def main():
                 "Pumpfed COPV [-]": copvNew,
                 "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
+                "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate
+                * c.KG2LB,
+                "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFLowRate
+                * c.KG2LB,
+                "Pumpfed Burn Time [s]": pumpfedBurnTime,
                 "Pumpfed Chamber Length [in]": pumpfedChamberLength * c.M2IN,
                 "Pumpfed Chamber OD [in]": pumpfedChamberOd * c.M2IN,
                 "Pumpfed Contraction Ratio": pumpfedContractionRatio,
@@ -674,10 +718,13 @@ def main():
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
                 * c.KG2LB,
+                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate
+                * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
                 "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,
+                "Pumpfed Package Diameter [in]": totalPumpDiameter * c.M2IN,
                 "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
                 "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,
                 "Pumpfed Number of Cells [-]": numberCells,

@@ -665,8 +665,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
-
-    motorLength = 3.5 * c.IN2M
+    
     oxPumpLength = (
         oxVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of oxidizer pump
@@ -674,8 +673,11 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of fuel pump
 
+    # Pump package dimensions **THIS IS FOR A VERTICAL ADJACENT**
+    totalPumpDiameter = c.MOTOR_DIAMETER + ((oxVoluteOD + fuelVoluteOD) / 2)
+
     totalPumpLength = 1.05 * (
-        oxPumpLength + fuelPumpLength - c.MOTOR_LENGTH
+        oxVoluteLength + fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
-    return [oxPower, fuelPower, pumpsMass, totalPumpLength]
+    return [oxPower, fuelPower, pumpsMass, totalPumpLength, totalPumpDiameter]
