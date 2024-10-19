@@ -301,7 +301,7 @@ def calculate_propulsion(
             + (throatDiameter / 2) ** 2
             + ((chamberID * throatDiameter) / 2) ** 2
         )
-    )  # [m^3] nozzle converging section volume
+    )  # [m^3] nozzle converging section volumec
     chamberVolume = (
         characteristicLength * throatArea
     ) - convergeVolume  # [m^3] chamber volume

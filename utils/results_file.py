@@ -86,6 +86,7 @@ def create_results_file(
             ("Total Mass Flow Rate [lbm/s]", ("total_mass_flow_rate")),
             ("Aspect Ratio [-]", ("aspect_ratio")),
             ("Mass Ratio [-]", ("wet_mass_ratio")),
+            ("Ideal Thrust [lbf]", ("thrust")),
         ]
 
         for param, fileName in parameters:

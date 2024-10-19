@@ -552,9 +552,33 @@ def main():
             pumpfedTankPressure,
             copvMassNew,
             copvNew,
-        ] = fluidsystems.pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMass)
+        ] = fluidsystems.pumpfed_fluids_sizing(
+            oxTankVolume, fuelTankVolume, copvMass
+        )  # Propulsion
 
-        # Propulsion
+        [
+            oxPower,
+            fuelPower,
+            pumpsMass,
+            totalPumpLength,
+        ] = propulsion.calculate_pumps(
+            oxidizer,
+            fuel,
+            oxMassFlowRate,
+            fuelMassFlowRate,
+        )
+        [
+            pumpfedLowerAirframeLength,
+            pumpfedLowerAirframeMass,
+            pumpfedTotalStructuresMass,
+        ] = structures.calculate_pumpfed_structures(
+            totalPumpLength,
+            lowerPlumbingLength,
+            upperPlumbingLength,
+            copvLength,
+            tankOD,
+        )
+
         [
             pumpfedJetThrust,
             pumpfedSeaLevelThrust,
@@ -577,30 +601,7 @@ def main():
             tankOD,
         )
 
-        [
-            oxPower,
-            fuelPower,
-            pumpsMass,
-            totalPumpLength,
-        ] = propulsion.calculate_pumps(
-            oxidizer,
-            fuel,
-            oxMassFlowRate,
-            fuelMassFlowRate,
-        )
-
         # Structures
-        [
-            pumpfedLowerAirframeLength,
-            pumpfedLowerAirframeMass,
-            pumpfedTotalStructuresMass,
-        ] = structures.calculate_pumpfed_structures(
-            totalPumpLength,
-            lowerPlumbingLength,
-            upperPlumbingLength,
-            copvLength,
-            tankOD,
-        )
 
         [pumpfedTotalLength] = vehicle.calculate_length(
             noseconeLength,
