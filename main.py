@@ -56,6 +56,7 @@ def main():
     # Limits
     # This section reads the limits from the input spreadsheet
     # Owner: Nick Nielsen
+    useLimits = limits.loc["Min", "Use Limits:"]
 
     maxThrustLim = limits.loc["Max", "Thrust (lbf)"]
     maxThrustLim = maxThrustLim * c.LBF2N
@@ -436,10 +437,11 @@ def main():
         )
 
         if not isWithinLimits:
-            possibleRocketsDF.drop(
-                idx, inplace=True
-            )  # Drop the rocket if it is not within limits
-            continue  # Skip the rest of the loop if the rocket is not within limits
+            if useLimits:
+                possibleRocketsDF.drop(
+                    idx, inplace=True
+                )  # Drop the rocket if it is not within limits
+                continue  # Skip the rest of the loop if the rocket is not within limits
 
         # Trajectory
         [altitude, maxAccel, railExitVelo, railExitAccel, totalImpulse] = (
@@ -704,7 +706,7 @@ def main():
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
                 "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,
-                "Pumpfed Package Diameter [in]": totalPumpDiameter * c.M2IN,
+                "Pump Package Diameter [in]": totalPumpDiameter * c.M2IN,
                 "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
                 "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,
                 "Pumpfed Number of Cells [-]": numberCells,
