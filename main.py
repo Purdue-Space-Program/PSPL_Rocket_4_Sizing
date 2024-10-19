@@ -123,7 +123,7 @@ def main():
             "Total Thrust Chamber Length [in]",
             "Combustion Chamber Length [in]",
             "Converging Section Length [in]",
-            "Diverging Sction Length [in]",
+            "Diverging Section Length [in]",
             "Chamber OD [in]",
             "Contraction Ratio",
             "Chamber Mass [lbm]",
