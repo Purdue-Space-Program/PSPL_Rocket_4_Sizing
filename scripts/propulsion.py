@@ -67,25 +67,29 @@ def run_CEA(
         fuelCEA = "CH4(L)"
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion [CHANGE TO MAX ALLOWABLE]
         characteristicLength = 35 * c.IN2M  # [ADD SOURCE]
-
     elif fuel.lower() == "ethanol":
         fuelCEA = "C2H5OH(L)"
         characteristicLength = 45 * c.IN2M  # [ADD SOURCE]
+        fuelTemp = c.T_AMBIENT
+    elif fuel.lower() == "jet-a":
+        fuelCEA = "Jet-A(L)"
+        characteristicLength = 45 * c.IN2M
         fuelTemp = c.T_AMBIENT
 
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
-    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
+    # fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
-    gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
+    # gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
 
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
-        materials=[fuel, oxidizer, gasoline],
+        materials=[fuel, oxidizer],
         o_f=mixRatio,
         filename="engineCEAoutput",
         pressure_units="bar",
@@ -301,7 +305,7 @@ def calculate_propulsion(
             + (throatDiameter / 2) ** 2
             + ((chamberID * throatDiameter) / 2) ** 2
         )
-    )  # [m^3] nozzle converging section volume
+    )  # [m^3] nozzle converging section volumec
     chamberVolume = (
         characteristicLength * throatArea
     ) - convergeVolume  # [m^3] chamber volume
@@ -582,6 +586,8 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, mixtureName)
     elif fuel.lower() == "methane":
         fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, fuel)
+    elif fuel.lower() == "jet-a":
+        fuelDensity = c.DENSITY_JET_A
     elif fuel.lower() == "isopropanol":
         fuelDensity = c.DENSITY_IPA
     elif fuel.lower() == "methanol":
@@ -653,8 +659,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
-
-    motorLength = 3.5 * c.IN2M
+    
     oxPumpLength = (
         oxVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of oxidizer pump
@@ -662,8 +667,11 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Length of fuel pump
 
+    # Pump package dimensions **THIS IS FOR A VERTICAL ADJACENT**
+    totalPumpDiameter = c.MOTOR_DIAMETER + ((oxVoluteOD + fuelVoluteOD) / 2)
+
     totalPumpLength = 1.05 * (
-        oxPumpLength + fuelPumpLength - c.MOTOR_LENGTH
+        oxVoluteLength + fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
-    return [oxPower, fuelPower, pumpsMass, totalPumpLength]
+    return [oxPower, fuelPower, pumpsMass, totalPumpLength, totalPumpDiameter]

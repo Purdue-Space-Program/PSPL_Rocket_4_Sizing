@@ -147,6 +147,7 @@ BZ1_COPV_MASS = 3  # [kg] Mass of BZ1 COPV
 MOTOR_RPM = 45000 # [1/min] max RPM of pump based on neumotors 2020
 MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 MOTOR_LENGTH = 0.093  # [m] length of a single motor
+MOTOR_DIAMETER = 3.1 * IN2M
 
 # LIPO Battery Constants
 LIPO_CELL_MASS = 0.400  # [kg] mass of a LiPo cell
