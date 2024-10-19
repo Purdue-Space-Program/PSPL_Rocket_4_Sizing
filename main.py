@@ -120,7 +120,10 @@ def main():
             "Oxidizer Mass Flow Rate [lbm/s]",
             "Fuel Mass Flow Rate [lbm/s]",
             "Burn Time [s]",
-            "Chamber Length [in]",
+            "Total Thrust Chamber Length [in]",
+            "Combustion Chamber Length [in]",
+            "Converging Section Length [in]",
+            "Diverging Sction Length [in]",
             "Chamber OD [in]",
             "Chamber Mass [lbm]",
             "Injector Mass [lbm]",
@@ -353,7 +356,10 @@ def main():
                 oxMassFlowRate,
                 fuelMassFlowRate,
                 burnTime,
-                chamberLength,
+                thrustChamberLength,
+                combustionChamberLength,
+                convergeLength,
+                divergeLength,
                 chamberOD,
                 contractionRatio,
                 chamberMass,
@@ -404,7 +410,7 @@ def main():
             upperAirframeLength,
             tankTotalLength,
             lowerAirframeLength,
-            chamberLength,
+            thrustChamberLength,
         )
 
         isWithinLimits = vehicle.check_limits(
@@ -468,7 +474,10 @@ def main():
                 "Oxidizer Mass Flow Rate [lbm/s]": oxMassFlowRate * c.KG2LB,
                 "Fuel Mass Flow Rate [lbm/s]": fuelMassFlowRate * c.KG2LB,
                 "Burn Time [s]": burnTime,
-                "Chamber Length [in]": chamberLength * c.M2IN,
+                "Total Thrust Chamber Length [in]": thrustChamberLength * c.M2IN,
+                "Combustion Chamber Length [in]": combustionChamberLength * c.M2IN,
+                "Converging Section Length [in]": convergeLength * c.M2IN,
+                "Diverging Sction Length [in]": divergeLength * c.M2IN,
                 "Chamber OD [in]": chamberOD * c.M2IN,
                 "Contraction Ratio": contractionRatio,
                 "Chamber Mass [lbm]": chamberMass * c.KG2LB,
@@ -610,7 +619,7 @@ def main():
             tankTotalLength,
             recoveryBayLength,
             pumpfedLowerAirframeLength,
-            chamberLength,
+            thrustChamberLength,
         )
 
         [
