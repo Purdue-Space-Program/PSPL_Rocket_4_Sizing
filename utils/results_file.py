@@ -37,12 +37,12 @@ def create_results_file(
     combinedDF = pd.concat(
         [
             possibleRocketsDF,
+            trajectoryDF,
             fluidsystemsDF,
             combustionDF,
             propulsionDF,
             structuresDF,
             vehicleDF,
-            trajectoryDF,
             pumpfedDF,
         ],
         axis=1,

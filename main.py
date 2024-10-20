@@ -88,6 +88,16 @@ def main():
     CEA_EXIT_PRESSURES = CEA_DATA.iloc[:, 1].values
     CEA_MIXTURE_RATIOS = CEA_DATA.iloc[:, 2].values
 
+    trajectoryDF = pd.DataFrame(
+    columns=[
+        "Altitude [ft]",
+        "Total Impulse [lbm-s]",
+        "Max Acceleration [g]",
+        "Rail Exit Velocity [ft/s]",
+        "Rail Exit Acceleration [g]",
+    ]
+    )
+
     fluidsystemsDF = pd.DataFrame(
         columns=[
             "Fluid Systems Mass [lbm]",
@@ -159,19 +169,14 @@ def main():
         ]
     )
 
-    trajectoryDF = pd.DataFrame(
-        columns=[
-            "Altitude [ft]",
-            "Total Impulse [lbm-s]",
-            "Max Acceleration [g]",
-            "Rail Exit Velocity [ft/s]",
-            "Rail Exit Acceleration [g]",
-        ]
-    )
-
     pumpfedDF = pd.DataFrame(
         columns=[
-            "Pumpfed Cstar [m/s]",
+            "Pumpfed Altitude [ft]",
+            "Pumpfed Total Impulse [lbm-s]",
+            "Pumpfed Max Acceleration [g]",
+            "Pumpfed Rail Exit Velocity [ft/s]",
+            "Pumpfed Rail Exit Acceleration [g]",
+            "Pumpfed C* [m/s]",
             "Pumpfed Isp [s]",
             "Pumpfed Expansion Ratio [-]",
             "Pumpfed Tank Pressure [psi]",
@@ -179,6 +184,9 @@ def main():
             "Pumpfed COPV [-]",
             "Pumpfed Jet Thrust [lbf]",
             "Pumpfed Sea Level Thrust [lbf]",
+            "Pumpfed Oxidizer Mass Flow Rate [lbm/s]",
+            "Pumpfed Fuel Mass Flow Rate [lbm/s]",
+            "Pumpfed Burn Time [s]",
             "Pumpfed Total Thrust Chamber Length [in]",
             "Pumpfed Combustion Chamber Length [in]",
             "Pumpfed Converging Section Length [in]",
@@ -188,6 +196,7 @@ def main():
             "Pumpfed Chamber Mass [lbm]",
             "Pumpfed Injector Mass [lbm]",
             "Pumpfed Total Propulsion Mass [lbm]",
+            "Pumpfed Total Mass Flow Rate [lbm/s]",
             "Pumpfed Exit Area [in^2]",
             "Pumpfed Oxidizer Power [W]",
             "Pumpfed Fuel Power [W]",
@@ -202,11 +211,6 @@ def main():
             "Pumpfed Total Dry Mass [lbm]",
             "Pumpfed Total Wet Mass [lbm]",
             "Pumpfed Total Length [ft]",
-            "Pumpfed Altitude [ft]",
-            "Pumpfed Total Impulse [lbm-s]",
-            "Pumpfed Max Acceleration [g]",
-            "Pumpfed Rail Exit Velocity [ft/s]",
-            "Pumpfed Rail Exit Acceleration [g]",
         ]
     )
     # Progress Bar
@@ -460,6 +464,17 @@ def main():
             )
         )
 
+        trajectoryDF = trajectoryDF._append(
+            {
+                "Altitude [ft]": altitude * c.M2FT,
+                "Total Impulse [lbm-s]": totalImpulse * c.N2LBF,
+                "Max Acceleration [g]": maxAccel / c.GRAVITY,
+                "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
+                "Rail Exit Acceleration [g]": railExitAccel / c.GRAVITY,
+            },
+            ignore_index=True,
+        )
+
         fluidsystemsDF = fluidsystemsDF._append(
             {
                 "Fluid Systems Mass [lbm]": fluidsystemsMass * c.KG2LB,
@@ -536,17 +551,6 @@ def main():
             ignore_index=True,
         )
 
-        trajectoryDF = trajectoryDF._append(
-            {
-                "Altitude [ft]": altitude * c.M2FT,
-                "Total Impulse [lbm-s]": totalImpulse * c.N2LBF,
-                "Max Acceleration [g]": maxAccel / c.GRAVITY,
-                "Rail Exit Velocity [ft/s]": railExitVelo * c.M2FT,
-                "Rail Exit Acceleration [g]": railExitAccel / c.GRAVITY,
-            },
-            ignore_index=True,
-        )
-
         # ██████  ██    ██ ███    ███ ██████      ██ ████████     ██    ██ ██████
         # ██   ██ ██    ██ ████  ████ ██   ██     ██    ██        ██    ██ ██   ██
         # ██████  ██    ██ ██ ████ ██ ██████      ██    ██        ██    ██ ██████
@@ -578,7 +582,7 @@ def main():
             fuelPower,
             pumpsMass,
             totalPumpLength,
-            totalPumpDiameter,
+            pumpPackageDiameter,
         ] = propulsion.calculate_pumps(
             oxidizer,
             fuel,
@@ -625,8 +629,11 @@ def main():
             [
                 pumpfedJetThrust,
                 pumpfedSeaLevelThrust,
+                pumpfedOxMassFlowRate,
+                pumpfedFuelMassFlowRate,
+                pumpfedBurnTime,
                 pumpfedTotalThrustChamberLength,
-                pumpfedChamberLength,
+                pumpfedCombustionChamberLength,
                 pumpfedConvergeLength,
                 pumpfedDivergeLength,
                 pumpfedChamberOd,
@@ -634,14 +641,18 @@ def main():
                 pumpfedChamberMass,
                 pumpfedInjectorMass,
                 pumpfedTotalPropulsionMass,
+                pumpfedTotalMassFlowRate,
                 pumpfedExitArea,
-            ] = propulsion.calculate_propulsion_pumpfed(
+            ] = propulsion.calculate_propulsion(
+                thrustToWeight,
+                pumpfedVehicleMass,
                 c.PUMP_CHAMBER_PRESSURE,
                 exitPressure,
                 pumpfedCstar,
                 pumpfedSpecificImpulse,
                 pumpfedExpansionRatio,
                 characteristicLength,
+                mixRatio,
                 oxMassFlowRate,
                 fuelMassFlowRate,
                 tankOD,
@@ -682,7 +693,12 @@ def main():
 
         pumpfedDF = pumpfedDF._append(
             {
-                "Pumpfed Cstar [m/s]": pumpfedCstar,
+                "Pumpfed Altitude [ft]": pumpfedAltitude * c.M2FT,
+                "Pumpfed Total Impulse [lbm-s]": pumpfedTotalImpulse * c.N2LBF,
+                "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
+                "Pumpfed Rail Exit Velocity [ft/s]": pumpfedRailExitVelo * c.M2FT,
+                "Pumpfed Rail Exit Acceleration [g]": pumpfedRailExitAccel / c.GRAVITY,
+                "Pumpfed C* [m/s]": pumpfedCstar,
                 "Pumpfed Isp [s]": pumpfedSpecificImpulse,
                 "Pumpfed Expansion Ratio [-]": pumpfedExpansionRatio,
                 "Pumpfed Tank Pressure [psi]": pumpfedTankPressure * c.PA2PSI,
@@ -690,9 +706,12 @@ def main():
                 "Pumpfed COPV [-]": copvNew,
                 "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
+                "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate * c.KG2LB,
+                "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate * c.KG2LB,
+                "Pumpfed Burn Time [s]": pumpfedBurnTime,
                 "Pumpfed Total Thrust Chamber Length [in]": pumpfedTotalThrustChamberLength
                 * c.M2IN,
-                "Pumpfed Combustion Chamber Length [in]": pumpfedChamberLength * c.M2IN,
+                "Pumpfed Combustion Chamber Length [in]": pumpfedCombustionChamberLength * c.M2IN,
                 "Pumpfed Converging Section Length [in]": pumpfedConvergeLength
                 * c.M2IN,
                 "Pumpfed Diverging Section Length [in]": pumpfedDivergeLength * c.M2IN,
@@ -702,11 +721,12 @@ def main():
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
                 * c.KG2LB,
+                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
                 "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,
-                "Pump Package Diameter [in]": totalPumpDiameter * c.M2IN,
+                "Pump Package Diameter [in]": pumpPackageDiameter * c.M2IN,
                 "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
                 "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,
                 "Pumpfed Number of Cells [-]": numberCells,
@@ -719,11 +739,6 @@ def main():
                 "Pumpfed Total Wet Mass [lbm]": pumpfedTotalWetMass * c.KG2LB,
                 "Pumpfed Mass Ratio [-]": pumpfedMassRatio,
                 "Pumpfed Total Length [ft]": pumpfedTotalLength * c.M2FT,
-                "Pumpfed Altitude [ft]": pumpfedAltitude * c.M2FT,
-                "Pumpfed Total Impulse [lbm-s]": pumpfedTotalImpulse * c.N2LBF,
-                "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
-                "Pumpfed Rail Exit Velocity [ft/s]": pumpfedRailExitVelo * c.M2FT,
-                "Pumpfed Rail Exit Acceleration [g]": pumpfedRailExitAccel / c.GRAVITY,
             },
             ignore_index=True,
         )

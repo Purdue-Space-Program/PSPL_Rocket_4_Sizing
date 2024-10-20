@@ -309,9 +309,9 @@ def calculate_propulsion(
     chamberVolume = (
         characteristicLength * throatArea
     ) - convergeVolume  # [m^3] chamber volume
-    chamberLength = chamberVolume / chamberArea  # [m] chamber length
+    combustionChamberLength = chamberVolume / chamberArea  # [m] chamber length
     thrustChamberLength = (
-        chamberLength + convergeLength + divergeLength
+        combustionChamberLength + convergeLength + divergeLength
     )  # [m] overall thrust chamber length
 
     chamberMaterialDensity = (
@@ -351,7 +351,7 @@ def calculate_propulsion(
         fuelMassFlowRate,
         burnTime,
         thrustChamberLength,
-        chamberLength,
+        combustionChamberLength,
         convergeLength,
         divergeLength,
         chamberOD,
