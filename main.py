@@ -89,13 +89,13 @@ def main():
     CEA_MIXTURE_RATIOS = CEA_DATA.iloc[:, 2].values
 
     trajectoryDF = pd.DataFrame(
-    columns=[
-        "Altitude [ft]",
-        "Total Impulse [lbm-s]",
-        "Max Acceleration [g]",
-        "Rail Exit Velocity [ft/s]",
-        "Rail Exit Acceleration [g]",
-    ]
+        columns=[
+            "Altitude [ft]",
+            "Total Impulse [lbm-s]",
+            "Max Acceleration [g]",
+            "Rail Exit Velocity [ft/s]",
+            "Rail Exit Acceleration [g]",
+        ]
     )
 
     fluidsystemsDF = pd.DataFrame(
@@ -577,36 +577,6 @@ def main():
             oxTankVolume, fuelTankVolume, copvMass
         )  # Propulsion
 
-        [
-            oxPower,
-            fuelPower,
-            pumpsMass,
-            totalPumpLength,
-            pumpPackageDiameter,
-        ] = propulsion.calculate_pumps(
-            oxidizer,
-            fuel,
-            oxMassFlowRate,
-            fuelMassFlowRate,
-        )
-
-        [
-            pumpfedLowerAirframeLength,
-            pumpfedLowerAirframeMass,
-            pumpfedTotalStructuresMass,
-        ] = structures.calculate_pumpfed_structures(
-            totalPumpLength,
-            lowerPlumbingLength,
-            upperPlumbingLength,
-            copvLength,
-            tankOD,
-        )
-        [
-            batteryMass,
-            pumpfedTotalAvionicsMass,
-            numberCells,
-        ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
-
         pumpfedVehicleMassEstimate = vehicleMass
         pumpfedVehicleMass = -np.inf
 
@@ -614,17 +584,6 @@ def main():
             abs(pumpfedVehicleMassEstimate - pumpfedVehicleMass) > c.CONVERGE_TOLERANCE
         ):
             pumpfedVehicleMass = pumpfedVehicleMassEstimate
-
-            [pumpfedTotalDryMass, pumpfedTotalWetMass, pumpfedMassRatio] = (
-                vehicle.calculate_mass(
-                    pumpfedTotalAvionicsMass,
-                    fluidsystemsMass - copvMass + copvMassNew,
-                    oxPropMass,
-                    fuelPropMass,
-                    totalPropulsionMass + pumpsMass,
-                    pumpfedTotalStructuresMass,
-                )
-            )
 
             [
                 pumpfedJetThrust,
@@ -658,7 +617,51 @@ def main():
                 tankOD,
             )
 
-            # Structures
+            [
+                oxPower,
+                fuelPower,
+                pumpsMass,
+                totalPumpLength,
+                pumpPackageDiameter,
+            ] = propulsion.calculate_pumps(
+                oxidizer,
+                fuel,
+                pumpfedOxMassFlowRate,
+                pumpfedFuelMassFlowRate,
+            )
+
+            [
+                pumpfedLowerAirframeLength,
+                pumpfedLowerAirframeMass,
+                pumpfedTotalStructuresMass,
+            ] = structures.calculate_pumpfed_structures(
+                totalPumpLength,
+                lowerPlumbingLength,
+                upperPlumbingLength,
+                copvLength,
+                tankOD,
+            )
+            [
+                batteryMass,
+                pumpfedTotalAvionicsMass,
+                numberCells,
+            ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
+
+            [pumpfedDryMassEstimate, pumpfedMassEstimate, pumpfedMassRatioEstimate] = (
+                vehicle.calculate_mass(
+                    pumpfedTotalAvionicsMass,
+                    fluidsystemsMass - copvMass + copvMassNew,
+                    oxPropMass,
+                    fuelPropMass,
+                    totalPropulsionMass + pumpsMass,
+                    pumpfedTotalStructuresMass,
+                )
+            )
+        pumpfedTotalDryMass = pumpfedDryMassEstimate
+        pumpfedTotalWetMass = pumpfedMassEstimate
+        pumpfedMassRatio = pumpfedMassRatioEstimate
+
+        # Structures
 
         [pumpfedTotalLength] = vehicle.calculate_length(
             noseconeLength,
@@ -706,12 +709,15 @@ def main():
                 "Pumpfed COPV [-]": copvNew,
                 "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
-                "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate * c.KG2LB,
-                "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate * c.KG2LB,
+                "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate
+                * c.KG2LB,
+                "Pumpfed Fuel Mass Flow Rate [lbm/s]": pumpfedFuelMassFlowRate
+                * c.KG2LB,
                 "Pumpfed Burn Time [s]": pumpfedBurnTime,
                 "Pumpfed Total Thrust Chamber Length [in]": pumpfedTotalThrustChamberLength
                 * c.M2IN,
-                "Pumpfed Combustion Chamber Length [in]": pumpfedCombustionChamberLength * c.M2IN,
+                "Pumpfed Combustion Chamber Length [in]": pumpfedCombustionChamberLength
+                * c.M2IN,
                 "Pumpfed Converging Section Length [in]": pumpfedConvergeLength
                 * c.M2IN,
                 "Pumpfed Diverging Section Length [in]": pumpfedDivergeLength * c.M2IN,
@@ -721,7 +727,8 @@ def main():
                 "Pumpfed Injector Mass [lbm]": pumpfedInjectorMass * c.KG2LB,
                 "Pumpfed Total Propulsion Mass [lbm]": pumpfedTotalPropulsionMass
                 * c.KG2LB,
-                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate * c.KG2LB,
+                "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate
+                * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Pumpfed Oxidizer Power [W]": oxPower,
                 "Pumpfed Fuel Power [W]": fuelPower,
