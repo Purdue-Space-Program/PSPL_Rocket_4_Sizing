@@ -653,8 +653,8 @@ def main():
                 pumpfedExpansionRatio,
                 characteristicLength,
                 mixRatio,
-                oxMassFlowRate,
-                fuelMassFlowRate,
+                oxPropMass,
+                fuelPropMass,
                 tankOD,
             )
 
