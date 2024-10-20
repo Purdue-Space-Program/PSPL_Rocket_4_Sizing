@@ -647,7 +647,7 @@ def main():
                 numberCells,
             ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
-            [pumpfedDryMassEstimate, pumpfedMassEstimate, pumpfedMassRatioEstimate] = (
+            [pumpfedDryMassEstimate, pumpfedVehicleMassEstimate, pumpfedMassRatioEstimate] = (
                 vehicle.calculate_mass(
                     pumpfedTotalAvionicsMass,
                     fluidsystemsMass - copvMass + copvMassNew,
@@ -658,7 +658,7 @@ def main():
                 )
             )
         pumpfedTotalDryMass = pumpfedDryMassEstimate
-        pumpfedTotalWetMass = pumpfedMassEstimate
+        pumpfedTotalWetMass = pumpfedVehicleMassEstimate
         pumpfedMassRatio = pumpfedMassRatioEstimate
 
         # Structures
@@ -682,13 +682,13 @@ def main():
             pumpfedTotalImpulse,
         ] = trajectory.calculate_trajectory(
             pumpfedTotalWetMass,
-            totalMassFlowRate,
+            pumpfedTotalMassFlowRate,
             pumpfedJetThrust,
             tankOD,
             dragCoeff,
             pumpfedExitArea,
             exitPressure,
-            burnTime,
+            pumpfedBurnTime,
             pumpfedTotalLength,
             ATMOSPHERE_DATA,
             plots=0,
