@@ -608,6 +608,15 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     )  # [m] Developed Head
     fuelPower = (fuelMassFlowRate * c.GRAVITY * fuelDevelopedHead) / pumpEfficiency
 
+    # Specific speeds
+    rotationRate = (c.MOTOR_RPM * 2 * np.pi) / 60
+    oxVolumeFlowRate = oxMassFlowRate / oxDensity
+    fuelVolumeFlowRate = fuelMassFlowRate / fuelDensity
+    oxUnivSpecificSpeed = (rotationRate * np.sqrt(oxVolumeFlowRate)) / (c.GRAVITY * oxDevelopedHead)**(3/4)
+    fuelUnivSpecificSpeed = (rotationRate * np.sqrt(fuelVolumeFlowRate)) / (c.GRAVITY * fuelDevelopedHead)**(3/4)
+    oxSpecificSpeedUS = oxUnivSpecificSpeed * 2733
+    fuelSpecificSpeedUS = fuelUnivSpecificSpeed * 2733
+
     # Mass Correlations
     # Shafts
     shaftMaterialDensity = (
@@ -633,6 +642,14 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     impellerMass = (oxImpellerDia / 2) ** 2 * np.pi * impellerThickness + (
         fuelImpellerDia / 2
     ) ** 2 * np.pi * impellerThickness  # [kg] Mass of impellers for both pumps
+
+    if oxSpecificSpeedUS > 500:
+        oxHeadCoeff = 0.383 / (oxUnivSpecificSpeed**(1/4))
+        oxImpellerDia = 2 * ((1/rotationRate) * np.sqrt((c.GRAVITY * oxDevelopedHead) / oxHeadCoeff))
+
+    if fuelSpecificSpeedUS > 500:
+        fuelHeadCoeff = 0.383 / (fuelUnivSpecificSpeed**(1/4))
+        fuelImpellerDia = 2 * ((1/rotationRate) * np.sqrt((c.GRAVITY * fuelDevelopedHead) / fuelHeadCoeff))
 
     # Housings
     voluteMaterialDensity = (
@@ -677,4 +694,4 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         oxVoluteLength + fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
-    return [oxPower, fuelPower, pumpsMass, totalPumpLength, totalPumpDiameter]
+    return [oxPower, fuelPower, oxSpecificSpeedUS, fuelSpecificSpeedUS, pumpsMass, totalPumpLength, totalPumpDiameter]
