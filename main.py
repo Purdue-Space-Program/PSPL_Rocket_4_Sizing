@@ -240,7 +240,7 @@ def main():
     for idx, rocket in possibleRocketsDF.iterrows():
 
         # Mass Estimation & Initialization
-        vehicleMassEstimate = 160  # [lbs] Estimate of the vehicle mass
+        vehicleMassEstimate = 300  # [lbs] Estimate of the vehicle mass
         vehicleMassEstimate = (
             vehicleMassEstimate * c.LB2KG
         )  # [kg] Convert the vehicle mass to kilograms
