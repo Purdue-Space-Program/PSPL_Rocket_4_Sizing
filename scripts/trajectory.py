@@ -101,7 +101,7 @@ def calculate_trajectory(
         if time < burnTime:
             mass = mass - mDotTotal * dt  # [kg] mass of the rocket
             thrust = (
-                jetThrust - (exitPressure - pressure) * exitArea
+                jetThrust + (exitPressure - pressure) * exitArea
             )  # [N] force of thrust, accounting for pressure thrust
             totalImpulse += thrust * dt  # Accumulate impulse
         else:
