@@ -101,7 +101,8 @@ def main():
     fluidsystemsDF = pd.DataFrame(
         columns=[
             "Fluid Systems Mass [lbm]",
-            "Tank Pressure [psi]",
+            "Oxidizer Tank Pressure [psi]",
+            "Fuel Tank Pressure [psi]",
             "Upper Plumbing Length [ft]",
             "Tank Total Length [ft]",
             "Lower Plumbing Length [ft]",
@@ -310,7 +311,8 @@ def main():
         # Fluid Systems
         [
             fluidsystemsMass,
-            tankPressure,
+            oxTankPressure,
+            fuelTankPressure,
             upperPlumbingLength,
             tankTotalLength,
             lowerPlumbingLength,
@@ -483,7 +485,8 @@ def main():
         fluidsystemsDF = fluidsystemsDF._append(
             {
                 "Fluid Systems Mass [lbm]": fluidsystemsMass * c.KG2LB,
-                "Tank Pressure [psi]": tankPressure * c.PA2PSI,
+                "Oxidizer Tank Pressure [psi]": oxTankPressure * c.PA2PSI,
+                "Fuel Tank Pressure [psi]": fuelTankPressure * c.PA2PSI,
                 "Upper Plumbing Length [ft]": upperPlumbingLength * c.M2FT,
                 "Tank Total Length [ft]": tankTotalLength * c.M2FT,
                 "Lower Plumbing Length [ft]": lowerPlumbingLength * c.M2FT,
