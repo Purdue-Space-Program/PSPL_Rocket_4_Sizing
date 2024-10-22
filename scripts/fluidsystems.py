@@ -102,7 +102,7 @@ def fluids_sizing(
     # Plumbing
     # CHAMBER_DP_RATIO = 0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
 
-    CHAMBER_DP_RATIO = c.VENTURI_DP_RATIO * (1 + c.REGEN_DP_RATIO + c.INJECTOR_DP_RATIO) * c.MISC_DP_RATIO
+    CHAMBER_DP_RATIO = c.VENTURI_DP_RATIO * 1 / (1 + c.REGEN_DP_CHAMBER + c.INJECTOR_DP_CHAMBER) * c.MISC_DP_RATIO
 
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
