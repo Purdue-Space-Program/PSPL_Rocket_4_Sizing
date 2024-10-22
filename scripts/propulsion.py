@@ -568,10 +568,10 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     fuelInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
 
     oxExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER)
+        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
     fuelExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER)
+        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
 
     if fuel.lower() == "methane":

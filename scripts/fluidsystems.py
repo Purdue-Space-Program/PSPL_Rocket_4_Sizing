@@ -322,7 +322,7 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank pressure using pumps
-    pumpTankPressure = c.AVAILABLE_NPSH / c.MISC_DP_RATIO  # [Pa] Tank pressure
+    pumpTankPressure = c.AVAILABLE_NPSH / m.sqrt(c.MISC_DP_RATIO)  # [Pa] Tank pressure
 
     # Volume checks
     heliumCv = PropsSI(
