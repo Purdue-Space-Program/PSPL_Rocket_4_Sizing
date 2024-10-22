@@ -675,7 +675,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         + fuelVoluteLength * ((np.pi / 4) * (fuelVoluteOD**2 - fuelVoluteID**2))
     )  # [kg] Fuel volute mass, approximated as hollow cylinder
 
-    voluteMass = fuelVoluteMass * 1.05 + oxVoluteMass * 1.1  # [kg] Total Volute Mass
+    voluteMass = fuelVoluteMass + oxVoluteMass  # [kg] Total Volute Mass
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
