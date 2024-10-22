@@ -120,9 +120,9 @@ DENSITY_GASOLINE = 703  # [kg/m^3] Gasoline density at STP (https://www.engineer
 
 # Pump Constants
 
-REQUIRED_NPSH = (
-    85 * PSI2PA
-)  # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
+AVAILABLE_NPSH = (
+    80 * PSI2PA
+)  # [Pa] Pfleiderer correlation for min NPSH for LOX with 100% margin
 PUMP_CHAMBER_PRESSURE = (
     500 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
@@ -144,7 +144,7 @@ BZ1_COPV_MASS = 3  # [kg] Mass of BZ1 COPV
 
 # Motor Constants (based on the Neumotors 2020 Series motor)
 
-MOTOR_RPM = 45000 # [1/min] max RPM of pump based on neumotors 2020
+MOTOR_RPM = 30000 # [1/min] max RPM of pump based on neumotors 2020
 MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 MOTOR_LENGTH = 0.093  # [m] length of a single motor
 MOTOR_DIAMETER = 3.1 * IN2M

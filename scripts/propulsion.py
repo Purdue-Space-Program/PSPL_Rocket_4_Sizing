@@ -564,8 +564,8 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
-    fuelInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
+    oxInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
+    fuelInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
 
     oxExitPressure = (
         c.PUMP_CHAMBER_PRESSURE / c.INJECTOR_DP_RATIO
