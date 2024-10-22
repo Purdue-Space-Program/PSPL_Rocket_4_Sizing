@@ -420,7 +420,6 @@ def main():
         [totalLength] = vehicle.calculate_length(
             noseconeLength,
             copvLength,
-            heliumBayLength,
             recoveryBayLength,
             upperAirframeLength,
             tankTotalLength,
@@ -674,7 +673,6 @@ def main():
         [pumpfedTotalLength] = vehicle.calculate_length(
             noseconeLength,
             copvLength,
-            heliumBayLength,
             upperAirframeLength,
             tankTotalLength,
             recoveryBayLength,
