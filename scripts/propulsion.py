@@ -574,6 +574,9 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
 
+    oxPressureRise = oxExitPressure - oxInletPressure # [Pa] pressure rise over ox pump
+    fuelPressureRise = fuelExitPressure - fuelInletPressure # [Pa] pressure rise over fuel pump
+
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
 
@@ -694,4 +697,4 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         oxVoluteLength + fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
-    return [oxPower, fuelPower, oxSpecificSpeedUS, fuelSpecificSpeedUS, pumpsMass, totalPumpLength, totalPumpDiameter]
+    return [oxPower, fuelPower, oxSpecificSpeedUS, fuelSpecificSpeedUS, pumpsMass, totalPumpLength, totalPumpDiameter, oxPressureRise, fuelPressureRise]
