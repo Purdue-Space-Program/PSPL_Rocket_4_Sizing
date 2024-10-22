@@ -198,8 +198,10 @@ def main():
             "Pumpfed Total Propulsion Mass [lbm]",
             "Pumpfed Total Mass Flow Rate [lbm/s]",
             "Pumpfed Exit Area [in^2]",
-            "Pumpfed Oxidizer Power [W]",
-            "Pumpfed Fuel Power [W]",
+            "Oxidizer Pump Motor Power [W]",
+            "Fuel Pump Motor Power [W]",
+            "Oxidizer Pump Motor Torque [N-m]",
+            "Fuel Pump Motor Torque [N-m]",
             "Oxidizer Pump Specific Speed",
             "Fuel Pump Specific Speed",
             "Pumpfed Pumps Mass [lbm]",
@@ -652,6 +654,10 @@ def main():
                 batteryMass,
                 pumpfedTotalAvionicsMass,
                 numberCells,
+                oxMotorPower,
+                fuelMotorPower,
+                oxMotorTorque,
+                fuelMotorTorque
             ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
             [pumpfedDryMassEstimate, pumpfedVehicleMassEstimate, pumpfedMassRatioEstimate] = (
@@ -736,8 +742,10 @@ def main():
                 "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate
                 * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
-                "Pumpfed Oxidizer Power [W]": oxPower,
-                "Pumpfed Fuel Power [W]": fuelPower,
+                "Oxidizer Pump Motor Power [W]": oxMotorPower,
+                "Fuel Pump Motor Power [W]": fuelMotorPower,
+                "Oxidizer Pump Motor Torque [N-m]": oxMotorTorque,
+                "Fuel Pump Motor Torque [N-m]": fuelMotorTorque,
                 "Oxidizer Pump Specific Speed": oxSpecificSpeedUS,
                 "Fuel Pump Specific Speed": fuelSpecificSpeedUS,
                 "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,

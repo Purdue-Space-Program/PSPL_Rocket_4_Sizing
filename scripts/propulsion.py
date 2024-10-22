@@ -612,7 +612,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     fuelPower = (fuelMassFlowRate * c.GRAVITY * fuelDevelopedHead) / pumpEfficiency
 
     # Specific speeds
-    rotationRate = (c.MOTOR_RPM * 2 * np.pi) / 60
+    rotationRate = c.MOTOR_RPM * c.RPM2RADS
     oxVolumeFlowRate = oxMassFlowRate / oxDensity
     fuelVolumeFlowRate = fuelMassFlowRate / fuelDensity
     oxUnivSpecificSpeed = (rotationRate * np.sqrt(oxVolumeFlowRate)) / (c.GRAVITY * oxDevelopedHead)**(3/4)
