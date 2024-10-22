@@ -104,8 +104,8 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
-INJECTOR_DP_RATIO = 1 / 1.2 # injector outlet pressure / injector inlet pressure, based on past rockets & RPE
-REGEN_DP_RATIO  = 1 / 1.3 # [1] regen outlet pressure / regen inlet pressure [NEEDS SOURCE]
+INJECTOR_DP_RATIO = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
+REGEN_DP_RATIO  = 0.3 # [1] pressure drop / chamber pressure
 
 # Propellant Properties
 
