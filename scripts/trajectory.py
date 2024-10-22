@@ -132,7 +132,7 @@ def calculate_trajectory(
             exitAccel = accelArray[i]
             break
 
-    altitude = altitude * 0.671
+    altitude = altitude * 0.651
 
     if plots == 1:
         plt.figure(1)
