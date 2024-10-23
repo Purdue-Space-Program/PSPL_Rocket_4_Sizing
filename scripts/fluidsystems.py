@@ -106,8 +106,8 @@ def fluids_sizing(
 
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
-    CFC_OX = 2.242 # [1] Oxidizer tank cumulative collapse factor
-    CFC_FUEL = 1 # [1] Feul tank cumulative collapse factor
+    CFC_OX = 1.75 # [1] Oxidizer tank cumulative collapse factor
+    CFC_FUEL = 1 # [1] Fuel tank cumulative collapse factor
 
     # Tank structure
     NUM_BULKHEADS = 4  # [1] Number of bulkheads the tanks use, assuming separate tanks for conservatism
@@ -164,7 +164,7 @@ def fluids_sizing(
     elif fuel.lower() == "methanol":
         fuelDensity = c.DENSITY_METHANOL  # [kg/m^3] Methanol density
 
-    tankVolRatio = tankMixRatio * (fuelDensity / oxDensity) # [1] Ratio of oxidizer tank volume to fuel tank volume
+    tankVolumeRatio = tankMixRatio * (fuelDensity / oxDensity) # [1] Ratio of oxidizer tank volume to fuel tank volume
 
     # Tank pressures
     oxTankPressure = chamberPressure / OX_DP_RATIO  # [Pa] Estimated oxidizer tank pressure
@@ -207,14 +207,14 @@ def fluids_sizing(
             - (copvDensity2 * copvVolume * copvEnergy2)
         )
         / (
-            (CFC_OX * oxTankPressure * tankVolRatio * heliumCv / c.HE_GAS_CONSTANT)
+            (CFC_OX * oxTankPressure * tankVolumeRatio * heliumCv / c.HE_GAS_CONSTANT)
+            + (CFC_OX * oxTankPressure * tankVolumeRatio)
             + (CFC_FUEL * fuelTankPressure * heliumCv / c.HE_GAS_CONSTANT)
-            + (oxTankPressure * tankVolRatio)
-            + (fuelTankPressure)
+            + (CFC_FUEL * fuelTankPressure)
+            )
         )
-    )
 
-    oxTankVolume = fuelTankVolume * tankVolRatio
+    oxTankVolume = fuelTankVolume * tankVolumeRatio
 
     bulkheadVolume = (
         m.sqrt(2) * tankID**3
