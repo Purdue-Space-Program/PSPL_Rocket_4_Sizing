@@ -84,7 +84,6 @@ def calculate_length(
         + tankTotalLength
         + lowerAirframeLength
         + chamberLength
-        + heliumBayLength
     )
 
     return [totalLength]
