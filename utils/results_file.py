@@ -106,7 +106,6 @@ def create_results_file(
         combinedDF.to_excel(writer, sheet_name="Results", index=False)
 
         # Access the workbook and sheet to format
-        workbook = writer.book
         worksheet = writer.sheets["Results"]
 
         # Auto-adjust column width
