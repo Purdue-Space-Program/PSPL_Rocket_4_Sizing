@@ -180,9 +180,6 @@ def main():
             "Pumpfed C* [m/s]",
             "Pumpfed Isp [s]",
             "Pumpfed Expansion Ratio [-]",
-            "Pumpfed Tank Pressure [psi]",
-            "Pumpfed COPV Mass [lbm]",
-            "Pumpfed COPV [-]",
             "Pumpfed Jet Thrust [lbf]",
             "Pumpfed Sea Level Thrust [lbf]",
             "Pumpfed Oxidizer Mass Flow Rate [lbm/s]",
@@ -576,15 +573,6 @@ def main():
             pumpfedCharacteristicLength,
         ] = propulsion.run_CEA(c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, mixRatio)
 
-        # Fluids
-        [
-            pumpfedTankPressure,
-            copvMassNew,
-            copvNew,
-        ] = fluidsystems.pumpfed_fluids_sizing(
-            oxTankVolume, fuelTankVolume, copvMass
-        )  # Propulsion
-
         pumpfedVehicleMassEstimate = vehicleMass
         pumpfedVehicleMass = -np.inf
 
@@ -628,7 +616,7 @@ def main():
             [
                 oxPower,
                 fuelPower,
-                oxSpecificSpeedUS, 
+                oxSpecificSpeedUS,
                 fuelSpecificSpeedUS,
                 pumpsMass,
                 totalPumpLength,
@@ -660,18 +648,20 @@ def main():
                 oxMotorPower,
                 fuelMotorPower,
                 oxMotorTorque,
-                fuelMotorTorque
+                fuelMotorTorque,
             ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
-            [pumpfedDryMassEstimate, pumpfedVehicleMassEstimate, pumpfedMassRatioEstimate] = (
-                vehicle.calculate_mass(
-                    pumpfedTotalAvionicsMass,
-                    fluidsystemsMass - copvMass + copvMassNew,
-                    oxPropMass,
-                    fuelPropMass,
-                    totalPropulsionMass + pumpsMass,
-                    pumpfedTotalStructuresMass,
-                )
+            [
+                pumpfedDryMassEstimate,
+                pumpfedVehicleMassEstimate,
+                pumpfedMassRatioEstimate,
+            ] = vehicle.calculate_mass(
+                pumpfedTotalAvionicsMass,
+                fluidsystemsMass,
+                oxPropMass,
+                fuelPropMass,
+                totalPropulsionMass,
+                pumpfedTotalStructuresMass,
             )
         pumpfedTotalDryMass = pumpfedDryMassEstimate
         pumpfedTotalWetMass = pumpfedVehicleMassEstimate
@@ -719,9 +709,6 @@ def main():
                 "Pumpfed C* [m/s]": pumpfedCstar,
                 "Pumpfed Isp [s]": pumpfedSpecificImpulse,
                 "Pumpfed Expansion Ratio [-]": pumpfedExpansionRatio,
-                "Pumpfed Tank Pressure [psi]": pumpfedTankPressure * c.PA2PSI,
-                "Pumpfed COPV Mass [lbm]": copvMassNew * c.KG2LB,
-                "Pumpfed COPV [-]": copvNew,
                 "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
                 "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate
