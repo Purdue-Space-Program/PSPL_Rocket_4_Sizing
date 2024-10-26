@@ -107,7 +107,7 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
 
-CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
+CHAMBER_WALL_THICKNESS = 0.125  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
 INJECTOR_DP_CHAMBER = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
@@ -132,6 +132,8 @@ AVAILABLE_NPSH = (
 PUMP_CHAMBER_PRESSURE = (
     500 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
+
+MAX_POWER = 12000 # max pump power [W]
 
 # FAR Constants
 
