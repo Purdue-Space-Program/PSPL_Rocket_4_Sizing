@@ -26,7 +26,6 @@ def run_CEA(
     """
     Runs the Chemical Equilibrium with Applications (CEA) simulation for a rocket engine
     using specified propellants and chamber conditions to compute key performance parameters.
-
     Parameters
     ----------
     chamberPressure : float
@@ -39,7 +38,6 @@ def run_CEA(
         Name of the oxidizer under CEA naming conventions (e.g., "O2") [N/A].
     mixRatio : float
         Mixture ratio of oxidizer to fuel by mass [-].
-
     Returns
     -------
     cstar : float
@@ -106,12 +104,10 @@ def run_CEA(
     USE THIS IF YOU ARE USING THE MEGA CEA FILE
     # Define a function to perform binary search on the CEA data with closest value fallback
     # Sort the data by chamber pressure, exit pressure, and mixture ratio
-
     # Extract the relevant columns
     chamber_pressures = CEAdata.iloc[:, 0].values
     mix_ratios = CEAdata.iloc[:, 1].values
     exit_pressures = CEAdata.iloc[:, 2].values
-
     # Perform binary search for chamber pressure
     idx_chamber = bisect_left(chamber_pressures, chamberPressure)
     if idx_chamber == len(chamber_pressures):
@@ -120,7 +116,6 @@ def run_CEA(
         chamber_pressures[idx_chamber - 1] - chamberPressure
     ) < abs(chamber_pressures[idx_chamber] - chamberPressure):
         idx_chamber -= 1
-
     # Perform binary search for mixture ratio
     idx_mr = bisect_left(mix_ratios, mixRatio, lo=idx_chamber)
     if idx_mr == len(mix_ratios):
@@ -129,7 +124,6 @@ def run_CEA(
         mix_ratios[idx_mr] - mixRatio
     ):
         idx_mr -= 1
-
     # Perform binary search for exit pressure
     idx_exit = bisect_left(exit_pressures, exitPressure, lo=idx_mr)
     if idx_exit == len(exit_pressures):
@@ -138,12 +132,10 @@ def run_CEA(
         exit_pressures[idx_exit] - exitPressure
     ):
         idx_exit -= 1
-
     # Retrieve the corresponding CEA values
     cstar = CEAdata.iloc[idx_chamber, 3]  # [m/s] characteristic velocity
     specificImpulse = CEAdata.iloc[idx_chamber, 4]  # [s] specific impulse
     expansionRatio = CEAdata.iloc[idx_chamber, 5]  # [-] nozzle expansion ratio
-
     """
     return [
         cstar,
@@ -172,7 +164,6 @@ def calculate_propulsion(
     """
     Calculates key propulsion parameters for a liquid rocket engine based on
     given inputs such as thrust-to-weight ratio, chamber pressure, and fuel/oxidizer properties.
-
     Parameters
     ----------
     thrustToWeight : float
@@ -199,7 +190,6 @@ def calculate_propulsion(
         Total fuel mass in the tank [kg].
     tankOD : float
         Outer diameter of the propellant tanks [m].
-
     Returns
     -------
     jetThrust : float
@@ -226,7 +216,6 @@ def calculate_propulsion(
         Combined mass flow rate of fuel and oxidizer [kg/s].
     exitArea : float
         Area of the nozzle exit [m^2].
-
     """
 
     # Constants
@@ -378,7 +367,6 @@ def calculate_propulsion_pumpfed(
     """
     Calculates various parameters for a pump-fed rocket propulsion system, including
     thrust, nozzle geometry, chamber dimensions, and system mass.
-
     Parameters
     ----------
     chamberPressure : float
@@ -399,7 +387,6 @@ def calculate_propulsion_pumpfed(
         Fuel mass flow rate [kg/s].
     tankOD : float
         Outer diameter of the propellant tank [m].
-
     Returns
     -------
     list
@@ -526,11 +513,10 @@ def calculate_propulsion_pumpfed(
     ]
 
 
-def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPressure, fuelTankPressure):
+def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     """
     Calculates power, pump mass, and pump lengths for a pump-fed rocket propulsion system
     using provided oxidizer and fuel parameters.
-
     Parameters
     ----------
     oxidizer : str
@@ -541,7 +527,6 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPres
         Mass flow rate of the oxidizer [kg/s].
     fuelMassFlowRate : float
         Mass flow rate of the fuel [kg/s].
-
     Returns
     -------
     list
@@ -564,15 +549,22 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPres
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = oxTankPressure # [Pa] pressure at pump inlet
-    fuelInletPressure = fuelTankPressure # [Pa] pressure at pump inlet
+    oxInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
+    fuelInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
 
+    oxExitPressure = (
+        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
+    )  # [Pa] pressure at pump exit
     fuelExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
+        c.PUMP_CHAMBER_PRESSURE
+        * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER)
+        / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
 
-    oxPressureRise = oxExitPressure - oxInletPressure # [Pa] pressure rise over ox pump
-    fuelPressureRise = fuelExitPressure - fuelInletPressure # [Pa] pressure rise over fuel pump
+    oxPressureRise = oxExitPressure - oxInletPressure  # [Pa] pressure rise over ox pump
+    fuelPressureRise = (
+        fuelExitPressure - fuelInletPressure
+    )  # [Pa] pressure rise over fuel pump
 
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
@@ -596,25 +588,28 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPres
     elif fuel.lower() == "methanol":
         fuelDensity = c.DENSITY_METHANOL
 
-    fuelExitPressure = ((pumpEfficiency * c.MAX_POWER * fuelDensity) / fuelMassFlowRate) + (fuelTankPressure / 1.1)
-    chamberPressure = fuelExitPressure / (1.1 * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER))
-    
-    oxExitPressure = (
-        chamberPressure * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
-    )  # [Pa] pressure at pump exit
+    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (
+        oxDensity * c.GRAVITY
+    )  # [m] Developed Head
     oxPower = (
-        oxMassFlowRate * (oxExitPressure - oxTankPressure)
-    ) / (pumpEfficiency * oxDensity)  # [W] Power
+        oxMassFlowRate * c.GRAVITY * oxDevelopedHead
+    ) / pumpEfficiency  # [W] Power
 
-    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (oxDensity * c.GRAVITY)
-    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (fuelDensity * c.GRAVITY)
+    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (
+        fuelDensity * c.GRAVITY
+    )  # [m] Developed Head
+    fuelPower = (fuelMassFlowRate * c.GRAVITY * fuelDevelopedHead) / pumpEfficiency
 
     # Specific speeds
     rotationRate = c.MOTOR_RPM * c.RPM2RADS
     oxVolumeFlowRate = oxMassFlowRate / oxDensity
     fuelVolumeFlowRate = fuelMassFlowRate / fuelDensity
-    oxUnivSpecificSpeed = (rotationRate * np.sqrt(oxVolumeFlowRate)) / (c.GRAVITY * oxDevelopedHead)**(3/4)
-    fuelUnivSpecificSpeed = (rotationRate * np.sqrt(fuelVolumeFlowRate)) / (c.GRAVITY * fuelDevelopedHead)**(3/4)
+    oxUnivSpecificSpeed = (rotationRate * np.sqrt(oxVolumeFlowRate)) / (
+        c.GRAVITY * oxDevelopedHead
+    ) ** (3 / 4)
+    fuelUnivSpecificSpeed = (rotationRate * np.sqrt(fuelVolumeFlowRate)) / (
+        c.GRAVITY * fuelDevelopedHead
+    ) ** (3 / 4)
     oxSpecificSpeedUS = oxUnivSpecificSpeed * 2733
     fuelSpecificSpeedUS = fuelUnivSpecificSpeed * 2733
 
@@ -645,12 +640,17 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPres
     ) ** 2 * np.pi * impellerThickness  # [kg] Mass of impellers for both pumps
 
     if oxSpecificSpeedUS > 500:
-        oxHeadCoeff = 0.383 / (oxUnivSpecificSpeed**(1/4))
-        oxImpellerDia = 2 * ((1/rotationRate) * np.sqrt((c.GRAVITY * oxDevelopedHead) / oxHeadCoeff))
+        oxHeadCoeff = 0.383 / (oxUnivSpecificSpeed ** (1 / 4))
+        oxImpellerDia = 2 * (
+            (1 / rotationRate) * np.sqrt((c.GRAVITY * oxDevelopedHead) / oxHeadCoeff)
+        )
 
     if fuelSpecificSpeedUS > 500:
-        fuelHeadCoeff = 0.383 / (fuelUnivSpecificSpeed**(1/4))
-        fuelImpellerDia = 2 * ((1/rotationRate) * np.sqrt((c.GRAVITY * fuelDevelopedHead) / fuelHeadCoeff))
+        fuelHeadCoeff = 0.383 / (fuelUnivSpecificSpeed ** (1 / 4))
+        fuelImpellerDia = 2 * (
+            (1 / rotationRate)
+            * np.sqrt((c.GRAVITY * fuelDevelopedHead) / fuelHeadCoeff)
+        )
 
     # Housings
     voluteMaterialDensity = (
@@ -695,4 +695,14 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPres
         oxVoluteLength + fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
-    return [oxPower, fuelPower, oxSpecificSpeedUS, fuelSpecificSpeedUS, pumpsMass, totalPumpLength, totalPumpDiameter, oxPressureRise, fuelPressureRise]
+    return [
+        oxPower,
+        fuelPower,
+        oxSpecificSpeedUS,
+        fuelSpecificSpeedUS,
+        pumpsMass,
+        totalPumpLength,
+        totalPumpDiameter,
+        oxPressureRise,
+        fuelPressureRise,
+    ]
