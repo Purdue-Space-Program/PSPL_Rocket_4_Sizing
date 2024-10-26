@@ -100,11 +100,14 @@ def fluids_sizing(
     """
 
     # Plumbing
-    # CHAMBER_DP_RATIO = 0.6  # [1] Chamber pressure / tank pressure, based on minimum from past rockets
 
-    CHAMBER_DP_RATIO = c.VENTURI_DP_RATIO * c.REGEN_DP_RATIO * c.INJECTOR_DP_RATIO * c.MISC_DP_RATIO
+    FUEL_DP_RATIO = c.VENTURI_DP_RATIO * (1 / (1 + c.REGEN_DP_CHAMBER + c.INJECTOR_DP_CHAMBER)) * c.MISC_DP_RATIO
+    OX_DP_RATIO = c.VENTURI_DP_RATIO * (1 / (1 + c.INJECTOR_DP_CHAMBER)) * c.MISC_DP_RATIO
 
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
+
+    CFC_OX = 1.75 # [1] Oxidizer tank cumulative collapse factor
+    CFC_FUEL = 1 # [1] Fuel tank cumulative collapse factor
 
     # Tank structure
     NUM_BULKHEADS = 4  # [1] Number of bulkheads the tanks use, assuming separate tanks for conservatism
@@ -161,54 +164,57 @@ def fluids_sizing(
     elif fuel.lower() == "methanol":
         fuelDensity = c.DENSITY_METHANOL  # [kg/m^3] Methanol density
 
-    # Tank pressure
-    tankPressure = chamberPressure / CHAMBER_DP_RATIO  # [Pa] Tank pressure
+    tankVolumeRatio = tankMixRatio * (fuelDensity / oxDensity) # [1] Ratio of oxidizer tank volume to fuel tank volume
+
+    # Tank pressures
+    oxTankPressure = chamberPressure / OX_DP_RATIO  # [Pa] Estimated oxidizer tank pressure
+    fuelTankPressure = chamberPressure / FUEL_DP_RATIO  # [Pa] Extimated fuel tank pressure
 
     # Tank volumes
     tankID = tankOD - 2 * tankThickness  # [m] Tank wall inner diameter
 
     heliumCv = PropsSI(
-        "CVMASS", "P", 1 * c.ATM2PA, "T", c.T_AMBIENT, "helium"
+        "CVMASS", "P", 1 * c.ATM2PA, "T", c.T_AMBIENT, 'helium'
     )  # [J/kgK] Constant-volume specific heat of helium at STP (assumed constant)
 
     copvPressure1 = copvPressure  # [Pa] COPV initial pressure
     copvPressure2 = (
-        c.BURNOUT_PRESSURE_RATIO * tankPressure
+        c.BURNOUT_PRESSURE_RATIO * max(oxTankPressure, fuelTankPressure)
     )  # [Pa] COPV burnout pressure
 
     copvEntropy1 = PropsSI(
-        "S", "P", copvPressure1, "T", COPV_TEMP_1, "helium"
+        "S", "P", copvPressure1, "T", COPV_TEMP_1, 'helium'
     )  # [J/kgK] COPV initial specific entropy
     copvEntropy2 = copvEntropy1  # [J/kgK] COPV burnout specific entropy (assumed isentropic expansion)
 
     copvDensity1 = PropsSI(
-        "D", "P", copvPressure1, "T", COPV_TEMP_1, "helium"
+        "D", "P", copvPressure1, "T", COPV_TEMP_1, 'helium'
     )  # [kg/m^3] COPV initial density
     copvDensity2 = PropsSI(
-        "D", "P", copvPressure2, "S", copvEntropy2, "helium"
+        "D", "P", copvPressure2, "S", copvEntropy2, 'helium'
     )  # [kg/m^3] COPV burnout density
 
     copvEnergy1 = PropsSI(
-        "U", "P", copvPressure1, "T", COPV_TEMP_1, "helium"
+        "U", "P", copvPressure1, "T", COPV_TEMP_1, 'helium'
     )  # [J/kg] COPV initial specific energy
     copvEnergy2 = PropsSI(
-        "U", "P", copvPressure2, "S", copvEntropy2, "helium"
+        "U", "P", copvPressure2, "S", copvEntropy2, 'helium'
     )  # [J/kg] COPV burnout specific energy
 
-    tankTotalVolume = c.K_PRESSURIZATION * (
+    fuelTankVolume = (
         (
             (copvDensity1 * copvVolume * copvEnergy1)
             - (copvDensity2 * copvVolume * copvEnergy2)
         )
-        / (tankPressure * (heliumCv / c.HE_GAS_CONSTANT + c.R_PROP))
-    )  # [m^3] Total propellant tank volume
+        / (
+            (CFC_OX * oxTankPressure * tankVolumeRatio * heliumCv / c.HE_GAS_CONSTANT)
+            + (CFC_OX * oxTankPressure * tankVolumeRatio)
+            + (CFC_FUEL * fuelTankPressure * heliumCv / c.HE_GAS_CONSTANT)
+            + (CFC_FUEL * fuelTankPressure)
+            )
+        )
 
-    oxTankVolume = (
-        tankMixRatio
-        * (tankTotalVolume * fuelDensity)
-        / (oxDensity + tankMixRatio * fuelDensity)
-    )  # [m^3] Oxidizer tank volume
-    fuelTankVolume = tankTotalVolume - oxTankVolume  # [m^3] Fuel tank volume
+    oxTankVolume = fuelTankVolume * tankVolumeRatio
 
     bulkheadVolume = (
         m.sqrt(2) * tankID**3
@@ -264,7 +270,7 @@ def fluids_sizing(
 
     # Tank structures
     tankProofPressure = (
-        PROOF_FACTOR * tankPressure
+        PROOF_FACTOR * max(fuelTankPressure, oxTankPressure)
     )  # [pa] Pressure to proof the tanks at
 
     yieldMargin = (
@@ -290,7 +296,8 @@ def fluids_sizing(
     # Return outputs
     return [
         fluidSystemsMass,
-        tankPressure,
+        oxTankPressure,
+        fuelTankPressure,
         upperPlumbingLength,
         tankTotalLength,
         lowerPlumbingLength,
@@ -322,7 +329,7 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
     COPV_TEMP_1 = c.T_AMBIENT + 15  # [K] Assumed initial COPV temperature
 
     # Tank pressure using pumps
-    pumpTankPressure = c.REQUIRED_NPSH / c.MISC_DP_RATIO  # [Pa] Tank pressure
+    pumpTankPressure = c.AVAILABLE_NPSH / m.sqrt(c.MISC_DP_RATIO)  # [Pa] Tank pressure
 
     # Volume checks
     heliumCv = PropsSI(

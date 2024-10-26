@@ -101,7 +101,8 @@ def main():
     fluidsystemsDF = pd.DataFrame(
         columns=[
             "Fluid Systems Mass [lbm]",
-            "Tank Pressure [psi]",
+            "Oxidizer Tank Pressure [psi]",
+            "Fuel Tank Pressure [psi]",
             "Upper Plumbing Length [ft]",
             "Tank Total Length [ft]",
             "Lower Plumbing Length [ft]",
@@ -179,9 +180,6 @@ def main():
             "Pumpfed C* [m/s]",
             "Pumpfed Isp [s]",
             "Pumpfed Expansion Ratio [-]",
-            "Pumpfed Tank Pressure [psi]",
-            "Pumpfed COPV Mass [lbm]",
-            "Pumpfed COPV [-]",
             "Pumpfed Jet Thrust [lbf]",
             "Pumpfed Sea Level Thrust [lbf]",
             "Pumpfed Oxidizer Mass Flow Rate [lbm/s]",
@@ -198,12 +196,16 @@ def main():
             "Pumpfed Total Propulsion Mass [lbm]",
             "Pumpfed Total Mass Flow Rate [lbm/s]",
             "Pumpfed Exit Area [in^2]",
-            "Pumpfed Oxidizer Power [W]",
-            "Pumpfed Fuel Power [W]",
+            "Oxidizer Pump Motor Power [W]",
+            "Fuel Pump Motor Power [W]",
+            "Oxidizer Pump Motor Torque [N-m]",
+            "Fuel Pump Motor Torque [N-m]",
             "Oxidizer Pump Specific Speed",
             "Fuel Pump Specific Speed",
             "Pumpfed Pumps Mass [lbm]",
             "Pump Package Diameter [in]",
+            "Oxidizer Pump Pressure Rise [psi]",
+            "Fuel Pump Pressure Rise [psi]",
             "Pumpfed Battery Mass [lbm]",
             "Pumpfed Total Avionics Mass [lbm]",
             "Pumpfed Number of Cells [-]",
@@ -306,7 +308,8 @@ def main():
         # Fluid Systems
         [
             fluidsystemsMass,
-            tankPressure,
+            oxTankPressure,
+            fuelTankPressure,
             upperPlumbingLength,
             tankTotalLength,
             lowerPlumbingLength,
@@ -418,7 +421,6 @@ def main():
         [totalLength] = vehicle.calculate_length(
             noseconeLength,
             copvLength,
-            heliumBayLength,
             recoveryBayLength,
             upperAirframeLength,
             tankTotalLength,
@@ -480,7 +482,8 @@ def main():
         fluidsystemsDF = fluidsystemsDF._append(
             {
                 "Fluid Systems Mass [lbm]": fluidsystemsMass * c.KG2LB,
-                "Tank Pressure [psi]": tankPressure * c.PA2PSI,
+                "Oxidizer Tank Pressure [psi]": oxTankPressure * c.PA2PSI,
+                "Fuel Tank Pressure [psi]": fuelTankPressure * c.PA2PSI,
                 "Upper Plumbing Length [ft]": upperPlumbingLength * c.M2FT,
                 "Tank Total Length [ft]": tankTotalLength * c.M2FT,
                 "Lower Plumbing Length [ft]": lowerPlumbingLength * c.M2FT,
@@ -570,15 +573,6 @@ def main():
             pumpfedCharacteristicLength,
         ] = propulsion.run_CEA(c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, mixRatio)
 
-        # Fluids
-        [
-            pumpfedTankPressure,
-            copvMassNew,
-            copvNew,
-        ] = fluidsystems.pumpfed_fluids_sizing(
-            oxTankVolume, fuelTankVolume, copvMass
-        )  # Propulsion
-
         pumpfedVehicleMassEstimate = vehicleMass
         pumpfedVehicleMass = -np.inf
 
@@ -622,11 +616,13 @@ def main():
             [
                 oxPower,
                 fuelPower,
-                oxSpecificSpeedUS, 
+                oxSpecificSpeedUS,
                 fuelSpecificSpeedUS,
                 pumpsMass,
                 totalPumpLength,
                 pumpPackageDiameter,
+                oxPressureRise,
+                fuelPressurerise,
             ] = propulsion.calculate_pumps(
                 oxidizer,
                 fuel,
@@ -649,17 +645,23 @@ def main():
                 batteryMass,
                 pumpfedTotalAvionicsMass,
                 numberCells,
+                oxMotorPower,
+                fuelMotorPower,
+                oxMotorTorque,
+                fuelMotorTorque,
             ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
 
-            [pumpfedDryMassEstimate, pumpfedVehicleMassEstimate, pumpfedMassRatioEstimate] = (
-                vehicle.calculate_mass(
-                    pumpfedTotalAvionicsMass,
-                    fluidsystemsMass - copvMass + copvMassNew,
-                    oxPropMass,
-                    fuelPropMass,
-                    totalPropulsionMass + pumpsMass,
-                    pumpfedTotalStructuresMass,
-                )
+            [
+                pumpfedDryMassEstimate,
+                pumpfedVehicleMassEstimate,
+                pumpfedMassRatioEstimate,
+            ] = vehicle.calculate_mass(
+                pumpfedTotalAvionicsMass,
+                fluidsystemsMass,
+                oxPropMass,
+                fuelPropMass,
+                totalPropulsionMass,
+                pumpfedTotalStructuresMass,
             )
         pumpfedTotalDryMass = pumpfedDryMassEstimate
         pumpfedTotalWetMass = pumpfedVehicleMassEstimate
@@ -670,7 +672,6 @@ def main():
         [pumpfedTotalLength] = vehicle.calculate_length(
             noseconeLength,
             copvLength,
-            heliumBayLength,
             upperAirframeLength,
             tankTotalLength,
             recoveryBayLength,
@@ -708,9 +709,6 @@ def main():
                 "Pumpfed C* [m/s]": pumpfedCstar,
                 "Pumpfed Isp [s]": pumpfedSpecificImpulse,
                 "Pumpfed Expansion Ratio [-]": pumpfedExpansionRatio,
-                "Pumpfed Tank Pressure [psi]": pumpfedTankPressure * c.PA2PSI,
-                "Pumpfed COPV Mass [lbm]": copvMassNew * c.KG2LB,
-                "Pumpfed COPV [-]": copvNew,
                 "Pumpfed Jet Thrust [lbf]": pumpfedJetThrust * c.N2LBF,
                 "Pumpfed Sea Level Thrust [lbf]": pumpfedSeaLevelThrust * c.N2LBF,
                 "Pumpfed Oxidizer Mass Flow Rate [lbm/s]": pumpfedOxMassFlowRate
@@ -734,12 +732,16 @@ def main():
                 "Pumpfed Total Mass Flow Rate [lbm/s]": pumpfedTotalMassFlowRate
                 * c.KG2LB,
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
-                "Pumpfed Oxidizer Power [W]": oxPower,
-                "Pumpfed Fuel Power [W]": fuelPower,
+                "Oxidizer Pump Motor Power [W]": oxMotorPower,
+                "Fuel Pump Motor Power [W]": fuelMotorPower,
+                "Oxidizer Pump Motor Torque [N-m]": oxMotorTorque,
+                "Fuel Pump Motor Torque [N-m]": fuelMotorTorque,
                 "Oxidizer Pump Specific Speed": oxSpecificSpeedUS,
                 "Fuel Pump Specific Speed": fuelSpecificSpeedUS,
                 "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,
                 "Pump Package Diameter [in]": pumpPackageDiameter * c.M2IN,
+                "Oxidizer Pump Pressure Rise [psi]": oxPressureRise * c.PA2PSI,
+                "Fuel Pump Pressure Rise [psi]": fuelPressurerise * c.PA2PSI,
                 "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
                 "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,
                 "Pumpfed Number of Cells [-]": numberCells,

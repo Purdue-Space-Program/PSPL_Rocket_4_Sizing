@@ -69,7 +69,6 @@ def calculate_mass(
 def calculate_length(
     noseconeLength,
     copvLength,
-    heliumBayLength,
     recoveryBayLength,
     upperAirframeLength,
     tankTotalLength,

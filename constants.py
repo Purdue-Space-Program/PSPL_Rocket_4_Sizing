@@ -1,3 +1,5 @@
+import numpy as np
+
 # Main function
 
 CONVERGE_TOLERANCE = 0.01  # [kg] Allowable difference between masses for Structures and Propulsion to converge
@@ -59,6 +61,10 @@ FT32M3 = 1 / M32FT3  # [m^3/ft^3] Conversion factor from ft^3 to m^3
 N2LBF = 0.224809  # [lbf/N] Conversion factor from N to lbf
 LBF2N = 1 / N2LBF  # [N/lbf] Conversion factor from lbf to N
 
+# Speed
+
+RPM2RADS = (2 * np.pi) / 60
+
 # Material Properties
 
 ## 6000-Series Aluminum (https://asm.matweb.com/search/specificmaterial.asp?bassnum=ma6061t6)
@@ -101,11 +107,11 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
 
-CHAMBER_WALL_THICKNESS = 0.25  # [in] chamber wall thickness
+CHAMBER_WALL_THICKNESS = 0.125  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
-INJECTOR_DP_RATIO = 1 / 1.2 # injector outlet pressure / injector inlet pressure, based on past rockets & RPE
-REGEN_DP_RATIO  = 1 / 1.3 # [1] regen outlet pressure / regen inlet pressure [NEEDS SOURCE]
+INJECTOR_DP_CHAMBER = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
+REGEN_DP_CHAMBER  = 0.3 # [1] pressure drop / chamber pressure, conservatively based on RPE
 
 # Propellant Properties
 
@@ -120,12 +126,14 @@ DENSITY_GASOLINE = 703  # [kg/m^3] Gasoline density at STP (https://www.engineer
 
 # Pump Constants
 
-REQUIRED_NPSH = (
-    85 * PSI2PA
-)  # [Pa] [BASED ON WORST-CASE CFTURBO OUTPUT, NEEDS TO BE CHECKED] Required net positive suction head for pumps (assumed constant)
+AVAILABLE_NPSH = (
+    80 * PSI2PA
+)  # [Pa] Pfleiderer correlation for min NPSH for LOX with 100% margin
 PUMP_CHAMBER_PRESSURE = (
     500 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
+
+MAX_POWER = 12000 # max pump power [W]
 
 # FAR Constants
 
@@ -144,7 +152,7 @@ BZ1_COPV_MASS = 3  # [kg] Mass of BZ1 COPV
 
 # Motor Constants (based on the Neumotors 2020 Series motor)
 
-MOTOR_RPM = 45000 # [1/min] max RPM of pump based on neumotors 2020
+MOTOR_RPM = 30000 # [1/min] max RPM of pump based on neumotors 2020
 MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 MOTOR_LENGTH = 0.093  # [m] length of a single motor
 MOTOR_DIAMETER = 3.1 * IN2M

@@ -32,6 +32,11 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     oxPowerRequired = oxPower / MOTOR_EFFICIENCY  # [W] Adjust oxidizer power
     fuelPowerRequired = fuelPower / MOTOR_EFFICIENCY  # [W] Adjust fuel power
 
+    # Motor torques
+    motorRotationRate = c.RPM2RADS * c.MOTOR_RPM
+    oxTorqueRequired = oxPowerRequired / motorRotationRate
+    fuelTorqueRequired = fuelPowerRequired / motorRotationRate
+
     # Total power required
     totalPowerRequired = oxPowerRequired + fuelPowerRequired  # [W]
 
@@ -56,4 +61,8 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
         batteryMass,
         pumpAviMass,
         numCells,
+        oxPowerRequired,
+        fuelPowerRequired,
+        oxTorqueRequired,
+        fuelTorqueRequired
     ]

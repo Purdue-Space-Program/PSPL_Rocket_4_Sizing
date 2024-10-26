@@ -526,7 +526,7 @@ def calculate_propulsion_pumpfed(
     ]
 
 
-def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
+def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPressure, fuelTankPressure):
     """
     Calculates power, pump mass, and pump lengths for a pump-fed rocket propulsion system
     using provided oxidizer and fuel parameters.
@@ -564,15 +564,15 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
-    fuelInletPressure = c.REQUIRED_NPSH  # [Pa] pressure at pump inlet
+    oxInletPressure = oxTankPressure # [Pa] pressure at pump inlet
+    fuelInletPressure = fuelTankPressure # [Pa] pressure at pump inlet
 
-    oxExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE / c.INJECTOR_DP_RATIO
-    )  # [Pa] pressure at pump exit
     fuelExitPressure = (
-        c.PUMP_CHAMBER_PRESSURE / c.INJECTOR_DP_RATIO / c.REGEN_DP_RATIO
+        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
+
+    oxPressureRise = oxExitPressure - oxInletPressure # [Pa] pressure rise over ox pump
+    fuelPressureRise = fuelExitPressure - fuelInletPressure # [Pa] pressure rise over fuel pump
 
     if fuel.lower() == "methane":
         fuelTemp = 111  # [K] temperature of fuel upon injection into combustion
@@ -596,20 +596,21 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     elif fuel.lower() == "methanol":
         fuelDensity = c.DENSITY_METHANOL
 
-    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (
-        oxDensity * c.GRAVITY
-    )  # [m] Developed Head
+    fuelExitPressure = ((pumpEfficiency * c.MAX_POWER * fuelDensity) / fuelMassFlowRate) + (fuelTankPressure / 1.1)
+    chamberPressure = fuelExitPressure / (1.1 * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER))
+    
+    oxExitPressure = (
+        chamberPressure * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
+    )  # [Pa] pressure at pump exit
     oxPower = (
-        oxMassFlowRate * c.GRAVITY * oxDevelopedHead
-    ) / pumpEfficiency  # [W] Power
+        oxMassFlowRate * (oxExitPressure - oxTankPressure)
+    ) / (pumpEfficiency * oxDensity)  # [W] Power
 
-    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (
-        fuelDensity * c.GRAVITY
-    )  # [m] Developed Head
-    fuelPower = (fuelMassFlowRate * c.GRAVITY * fuelDevelopedHead) / pumpEfficiency
+    oxDevelopedHead = (oxExitPressure - oxInletPressure) / (oxDensity * c.GRAVITY)
+    fuelDevelopedHead = (fuelExitPressure - fuelInletPressure) / (fuelDensity * c.GRAVITY)
 
     # Specific speeds
-    rotationRate = (c.MOTOR_RPM * 2 * np.pi) / 60
+    rotationRate = c.MOTOR_RPM * c.RPM2RADS
     oxVolumeFlowRate = oxMassFlowRate / oxDensity
     fuelVolumeFlowRate = fuelMassFlowRate / fuelDensity
     oxUnivSpecificSpeed = (rotationRate * np.sqrt(oxVolumeFlowRate)) / (c.GRAVITY * oxDevelopedHead)**(3/4)
@@ -675,7 +676,7 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         + fuelVoluteLength * ((np.pi / 4) * (fuelVoluteOD**2 - fuelVoluteID**2))
     )  # [kg] Fuel volute mass, approximated as hollow cylinder
 
-    voluteMass = fuelVoluteMass * 1.05 + oxVoluteMass * 1.1  # [kg] Total Volute Mass
+    voluteMass = fuelVoluteMass + oxVoluteMass  # [kg] Total Volute Mass
     # total pump mass with rough additional mass percent depending on pump complexity
 
     pumpsMass = shaftMass + impellerMass + voluteMass  # [kg] Total Pump Mass
@@ -694,4 +695,4 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
         oxVoluteLength + fuelVoluteLength + shaftLength + c.MOTOR_LENGTH
     )  # [m] Total Pump Length
 
-    return [oxPower, fuelPower, oxSpecificSpeedUS, fuelSpecificSpeedUS, pumpsMass, totalPumpLength, totalPumpDiameter]
+    return [oxPower, fuelPower, oxSpecificSpeedUS, fuelSpecificSpeedUS, pumpsMass, totalPumpLength, totalPumpDiameter, oxPressureRise, fuelPressureRise]
