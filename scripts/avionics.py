@@ -26,7 +26,7 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     MOTOR_EFFICIENCY = 0.85  # estimated motor efficiency
 
     MAX_VOLTS = 103  # [V] maximum voltage of the motor
-    MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
+    MOTOR_MASS = 0.660  # [kg] weight of a single motor
 
     # Adjust power required for oxidizer and fuel pumps separately
     oxPowerRequired = oxPower / MOTOR_EFFICIENCY  # [W] Adjust oxidizer power
@@ -49,11 +49,12 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     numCells = series * paralell  # total number of cells
 
     # Total motor weight (2 motors: one for oxidizer, one for fuel)
-    totalMotorWeight = MOTOR_WEIGHT * 2  # [kg]
+    totalMotorMass = MOTOR_MASS * 2  # [kg]
 
     # Total weight of the battery and motors
     batteryMass = numCells * c.LIPO_CELL_MASS  # [kg]
-    pumpAviMass = batteryMass + totalMotorWeight + BASE_AVI_MASS  # [kg]
+    pumpAviMass = batteryMass + totalMotorMass + BASE_AVI_MASS  # [kg]
+    upperAviMass = batteryMass + BASE_AVI_MASS # [kg]
 
     # Total mass of the avionics system
 
@@ -64,5 +65,7 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
         oxPowerRequired,
         fuelPowerRequired,
         oxTorqueRequired,
-        fuelTorqueRequired
+        fuelTorqueRequired,
+        totalMotorMass,
+        upperAviMass
     ]

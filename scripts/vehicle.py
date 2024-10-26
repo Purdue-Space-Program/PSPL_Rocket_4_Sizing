@@ -59,7 +59,7 @@ def calculate_mass(
 #   copvLength: [m] length of the COPV
 #   recoveryBayLength: [m] length of the recovery bay
 #   upperAirframeLength: [m] length of the upper airframe
-#   tankTotalLength: [m] length of the tanks
+#   totalTankLength: [m] length of both tanks combined
 #   lowerAirframeLength: [m] length of the lower airframe
 #   chamberLength: [m] length of the chamber
 # Outputs:
@@ -71,7 +71,7 @@ def calculate_length(
     copvLength,
     recoveryBayLength,
     upperAirframeLength,
-    tankTotalLength,
+    totalTankLength,
     lowerAirframeLength,
     chamberLength,
 ):
@@ -80,7 +80,7 @@ def calculate_length(
         + copvLength
         + recoveryBayLength
         + upperAirframeLength
-        + tankTotalLength
+        + totalTankLength
         + lowerAirframeLength
         + chamberLength
     )

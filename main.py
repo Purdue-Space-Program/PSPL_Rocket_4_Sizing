@@ -36,7 +36,7 @@ from progressbar import Timer, ETA
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
-from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory
+from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory, CoM
 from utils import output_folder, rocket_defining_input_handler, results_file
 
 
@@ -111,6 +111,11 @@ def main():
             "Fuel Propellant Mass [lbm]",
             "Oxidizer Tank Volume [in^3]",
             "Fuel Tank Volume [in^3]",
+            "Tank Total Mass [kg]",
+            "Oxidizer Tank Length [m]",
+            "Oxidizer Tank Mass [kg]",
+            "Fuel Tank Length [m]",
+            "Fuel Tank Mass [kg]",
         ]
     )
 
@@ -311,13 +316,18 @@ def main():
             oxTankPressure,
             fuelTankPressure,
             upperPlumbingLength,
-            tankTotalLength,
+            totalTankLength,
             lowerPlumbingLength,
             tankMixRatio,
             oxPropMass,
             fuelPropMass,
             oxTankVolume,
             fuelTankVolume,
+            totalTankMass,
+            oxTankLength,
+            oxTankMass,
+            fuelTankLength,
+            fuelTankMass
         ] = fluidsystems.fluids_sizing(
             oxidizer,
             fuel,
@@ -358,7 +368,6 @@ def main():
             noseconeLength,
             noseconeMass,
             structuresMass,
-            dragCoeff,
         ] = structures.calculate_structures(
             lowerPlumbingLength, upperPlumbingLength, copvLength, tankOD
         )
@@ -423,7 +432,7 @@ def main():
             copvLength,
             recoveryBayLength,
             upperAirframeLength,
-            tankTotalLength,
+            totalTankLength,
             lowerAirframeLength,
             thrustChamberLength,
         )
@@ -458,7 +467,6 @@ def main():
                 totalMassFlowRate,
                 idealThrust,
                 tankOD,
-                dragCoeff,
                 exitArea,
                 exitPressure,
                 burnTime,
@@ -485,13 +493,18 @@ def main():
                 "Oxidizer Tank Pressure [psi]": oxTankPressure * c.PA2PSI,
                 "Fuel Tank Pressure [psi]": fuelTankPressure * c.PA2PSI,
                 "Upper Plumbing Length [ft]": upperPlumbingLength * c.M2FT,
-                "Tank Total Length [ft]": tankTotalLength * c.M2FT,
+                "Tank Total Length [ft]": totalTankLength * c.M2FT,
                 "Lower Plumbing Length [ft]": lowerPlumbingLength * c.M2FT,
                 "Tank O:F Ratio (mass) [-]": tankMixRatio,
                 "Oxidizer Propellant Mass [lbm]": oxPropMass * c.KG2LB,
                 "Fuel Propellant Mass [lbm]": fuelPropMass * c.KG2LB,
                 "Oxidizer Tank Volume [in^3]": oxTankVolume * c.M32IN3,
                 "Fuel Tank Volume [in^3]": fuelTankVolume * c.M32IN3,
+                "Tank Total Mass [lbm]": totalTankMass * c.KG2LB,
+                "Oxidizer Tank Length [ft]": oxTankLength * c.M2FT,
+                "Oxidizer Tank Mass [lbm]": oxTankMass * c.KG2LB,
+                "Fuel Tank Length [ft]": fuelTankLength * c.M2FT,
+                "Fuel Tank Mass [lbm]": fuelTankMass * c.KG2LB,
             },
             ignore_index=True,
         )
@@ -634,6 +647,16 @@ def main():
                 pumpfedLowerAirframeLength,
                 pumpfedLowerAirframeMass,
                 pumpfedTotalStructuresMass,
+                heliumBayMass,
+                heliumBayLength,
+                lowerAirframeLength,
+                lowerAirframeMass,
+                upperAirframeLength,
+                upperAirframeMass,
+                noseconeMass,
+                noseconeLength,
+                recoveryBayMass,
+                recoveryBayLength,
             ] = structures.calculate_pumpfed_structures(
                 totalPumpLength,
                 lowerPlumbingLength,
@@ -649,7 +672,12 @@ def main():
                 fuelMotorPower,
                 oxMotorTorque,
                 fuelMotorTorque,
-            ] = avionics.calculate_pumpfed_avionics(oxPower, fuelPower)
+                totalMotorMass,
+                upperAviMass,
+            ] = avionics.calculate_pumpfed_avionics(
+                oxPower, 
+                fuelPower,
+            )
 
             [
                 pumpfedDryMassEstimate,
@@ -673,10 +701,62 @@ def main():
             noseconeLength,
             copvLength,
             upperAirframeLength,
-            tankTotalLength,
+            totalTankLength,
             recoveryBayLength,
             pumpfedLowerAirframeLength,
             thrustChamberLength,
+        )
+
+        [
+            pumpfedInitialCoM,
+            pumpfedFinalCoM,
+         ] = CoM.calculate_center_of_mass(
+            noseconeLength,
+            noseconeMass,
+            recoveryBayLength,
+            recoveryBayMass,
+            heliumBayLength,
+            heliumBayMass,
+            upperAirframeLength,
+            upperAirframeMass,
+            totalTankLength,
+            totalTankMass,
+            pumpfedLowerAirframeLength,
+            pumpfedLowerAirframeMass,
+            pumpfedTotalThrustChamberLength,
+            pumpfedTotalPropulsionMass,
+            totalMotorMass,
+            upperAviMass,
+            oxPropMass,
+            fuelPropMass,
+            pumpsMass,
+        )
+
+        [
+            pumpfedInitialModifiedCoM,
+            pumpfedFinalModifiedCoM,
+        ] = CoM.calculate_modified_center_of_mass(
+            noseconeLength,
+            noseconeMass,
+            recoveryBayLength,
+            recoveryBayMass,
+            heliumBayLength,
+            heliumBayMass,
+            upperAirframeLength,
+            upperAirframeMass,
+            oxTankLength,
+            oxTankMass,
+            fuelTankLength,
+            fuelTankMass,
+            pumpfedLowerAirframeLength,
+            pumpfedLowerAirframeMass,
+            pumpfedTotalThrustChamberLength,
+            pumpfedTotalPropulsionMass,
+            totalMotorMass,
+            upperAviMass,
+            oxPropMass,
+            fuelPropMass,
+            pumpsMass,
         )
 
         [
@@ -690,7 +770,6 @@ def main():
             pumpfedTotalMassFlowRate,
             pumpfedJetThrust,
             tankOD,
-            dragCoeff,
             pumpfedExitArea,
             exitPressure,
             pumpfedBurnTime,
@@ -750,6 +829,10 @@ def main():
                 "Pumpfed Lower Airframe Mass [lbm]": pumpfedLowerAirframeMass * c.KG2LB,
                 "Pumpfed Total Structures Mass [lbm]": pumpfedTotalStructuresMass
                 * c.KG2LB,
+                "Pumpfed Initial CoM [ft]": pumpfedInitialCoM * c.M2FT,
+                "Pumpfed Final CoM [ft]": pumpfedFinalCoM * c.M2FT,
+                "Pumpfed Initial Modified CoM [ft]": pumpfedInitialModifiedCoM * c.M2FT,
+                "Pumpfed Final Modified CoM [ft]": pumpfedFinalModifiedCoM * c.M2FT,
                 "Pumpfed Total Dry Mass [lbm]": pumpfedTotalDryMass * c.KG2LB,
                 "Pumpfed Total Wet Mass [lbm]": pumpfedTotalWetMass * c.KG2LB,
                 "Pumpfed Mass Ratio [-]": pumpfedMassRatio,

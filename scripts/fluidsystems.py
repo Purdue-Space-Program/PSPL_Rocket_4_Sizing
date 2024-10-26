@@ -28,7 +28,7 @@ import constants as c
 #   fluidSystemsMass [kg]: The total (dry) mass of all fluid systems components
 #   tankPressure [Pa]: The nominal tank pressure (assumed same for both tanks)
 #   upperPlumbingLength [m]: The length of upper plumbing (not including COPV)
-#   tankTotalLength [m]: The total length of both tanks (bulkhead to bulkhead)
+#   totalTankLength [m]: The total length of both tanks (bulkhead to bulkhead)
 #   lowerPlumbingLength [m]: The length of lower plumbing
 #   tankMixRatio [1]: The ratio of oxidizer to fuel by mass in the tanks, accounting for film cooling.
 #   oxPropMass [kg]: The nominal mass of oxidizer the vehicle will carry
@@ -83,7 +83,7 @@ def fluids_sizing(
             Pressure in the propellant tanks [pa].
         upperPlumbingLength : float
             Length of upper plumbing (without the helium COPV) [m].
-        tankTotalLength : float
+        totalTankLength : float
             End-to-end length of the propellant tanks [m].
         lowerPlumbingLength : float
             Length of lower plumbing [m].
@@ -223,6 +223,7 @@ def fluids_sizing(
     oxWallLength = (oxTankVolume - bulkheadVolume) / (
         (m.pi * tankID**2) / 4
     )  # [m] Oxidizer tank wall length
+
     fuelWallLength = (fuelTankVolume - bulkheadVolume) / (
         (m.pi * tankID**2) / 4
     )  # [m] Fuel tank wall length
@@ -233,7 +234,7 @@ def fluids_sizing(
 
     # Mass estimates
 
-    tankWallMass = (
+    totalWallMass = (
         (oxWallLength + fuelWallLength)
         * (tankOD**2 - tankID**2)
         * m.pi
@@ -241,24 +242,56 @@ def fluids_sizing(
         * c.DENSITY_AL
     )  # [kg] Mass of tank walls
 
-    tankBulkheadmass = (
+    oxWallMass = (
+        (oxWallLength)
+        * (tankOD**2 - tankID**2)
+        * m.pi
+        / 4
+        * c.DENSITY_AL
+    )  # [kg] Mass of ox tank wall
+
+    fuelWallMass = (
+        (fuelWallLength)
+        * (tankOD**2 - tankID**2)
+        * m.pi
+        / 4
+        * c.DENSITY_AL
+    )  # [kg] Mass of fuel tank wall
+
+    totalBulkheadMass = (
         NUM_BULKHEADS
         * K_BULKHEAD
         * ((tankOD**3 - tankID**3) * m.sqrt(2) / 12 * c.DENSITY_AL)
     )  # [kg] Mass of bulkheads
 
-    tankMass = tankWallMass + tankBulkheadmass  # [kg] Total tank mass
+    oxTankMass = (
+        oxWallMass + totalBulkheadMass / 2
+    )
+
+    fuelTankMass = (
+        fuelWallMass + totalBulkheadMass / 2
+    )
+    
+    totalTankMass = totalWallMass + totalBulkheadMass  # [kg] Total tank mass
     upperPlumbingMass = 7.25  # [kg] Mass of upper plumbing system (see corellations from sizing writeup page)
     lowerPlumbingMass = 13.115 * tankOD ** (
         0.469
     )  # [kg] Mass of lower plumbing system (see corellations from sizing writeup page)
 
     fluidSystemsMass = (
-        tankMass + copvMass + upperPlumbingMass + lowerPlumbingMass
+        totalTankMass + copvMass + upperPlumbingMass + lowerPlumbingMass
     )  # [kg] Total mass of fluid systems
 
     # Size estimates
-    tankTotalLength = (
+    oxTankLength = (
+        oxWallLength + (NUM_BULKHEADS / 2) * m.sqrt(2) / 4 * tankOD
+    ) # [m] length of ox tank with bulkheads
+
+    fuelTankLength = (
+        fuelWallLength + (NUM_BULKHEADS / 2) * m.sqrt(2) / 4 * tankOD
+    ) # [m] length of fuel tank with bulkheads
+
+    totalTankLength = (
         oxWallLength + fuelWallLength + NUM_BULKHEADS * m.sqrt(2) / 4 * tankOD
     )  # [m] Total length of tanks end-to-end with bulkheads
     upperPlumbingLength = (
@@ -299,13 +332,19 @@ def fluids_sizing(
         oxTankPressure,
         fuelTankPressure,
         upperPlumbingLength,
-        tankTotalLength,
+        totalTankLength,
         lowerPlumbingLength,
         tankMixRatio,
         oxPropMass,
         fuelPropMass,
         oxTankVolume,
         fuelTankVolume,
+        totalTankMass,
+        oxTankLength,
+        oxTankMass,
+        fuelTankLength,
+        fuelTankMass
+
     ]
 
 
@@ -321,7 +360,11 @@ def fluids_sizing(
 #   copvNew [string]: The name of the new COPV
 
 
-def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
+def pumpfed_fluids_sizing(
+    oxTankVolume, 
+    fuelTankVolume, 
+    copvMassOld
+    ):
 
     tankTotalVolume = oxTankVolume + fuelTankVolume
 
@@ -423,4 +466,8 @@ def pumpfed_fluids_sizing(oxTankVolume, fuelTankVolume, copvMassOld):
         copvMassNew = copvMassOld
         copvNew = "Same as pressure-fed"
 
-    return [pumpTankPressure, copvMassNew, copvNew]
+    return [
+        pumpTankPressure, 
+        copvMassNew, 
+        copvNew
+    ]
