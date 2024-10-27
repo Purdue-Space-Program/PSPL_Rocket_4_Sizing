@@ -111,7 +111,7 @@ CHAMBER_WALL_THICKNESS = 0.125  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
 INJECTOR_DP_CHAMBER = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
-REGEN_DP_CHAMBER  = 0.3 # [1] pressure drop / chamber pressure, conservatively based on RPE
+REGEN_DP_CHAMBER  = 1 # [1] pressure drop / chamber pressure, conservatively based on RPE
 
 # Propellant Properties
 

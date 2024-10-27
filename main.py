@@ -628,6 +628,8 @@ def main():
                 fuel,
                 pumpfedOxMassFlowRate,
                 pumpfedFuelMassFlowRate,
+                oxTankPressure,
+                fuelTankPressure
             )
 
             [

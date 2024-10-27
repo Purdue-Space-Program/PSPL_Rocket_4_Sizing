@@ -513,7 +513,7 @@ def calculate_propulsion_pumpfed(
     ]
 
 
-def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
+def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate, oxTankPressure, fuelTankPressure):
     """
     Calculates power, pump mass, and pump lengths for a pump-fed rocket propulsion system
     using provided oxidizer and fuel parameters.
@@ -549,8 +549,8 @@ def calculate_pumps(oxidizer, fuel, oxMassFlowRate, fuelMassFlowRate):
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
-    fuelInletPressure = c.AVAILABLE_NPSH  # [Pa] pressure at pump inlet
+    oxInletPressure = oxTankPressure * np.sqrt(c.MISC_DP_RATIO)  # [Pa] pressure at pump inlet
+    fuelInletPressure = fuelTankPressure * np.sqrt(c.MISC_DP_RATIO)  # [Pa] pressure at pump inlet
 
     oxExitPressure = (
         c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
