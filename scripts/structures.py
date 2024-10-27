@@ -29,7 +29,8 @@
 # -  Upper Airframe Length [m]
 # -  Upper Airframe Mass [kg]
 
-# -  Helium Tube Mass [kg]
+# -  Helium Bay Mass [kg]
+# -  Helium Bay Length [m]
 
 # -  Recovery Bay Length [m]
 # -  Recovery Bay Mass [kg]
@@ -39,7 +40,6 @@
 
 # -  Total Structures Mass [kg]
 # -  Total Rocket Mass [kg]
-# -  Drag Coefficients [1]
 
 import numpy as np
 
@@ -60,8 +60,6 @@ def calculate_structures(
 ):
     ### Constants and Inputs
 
-    CD_NOSECODE = 0.5  # [-] Drag coefficient of the nosecone
-
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
 
     FINENESS = 5 # [-] Ratio of nosecone length to ratio
@@ -71,7 +69,7 @@ def calculate_structures(
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
     FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
 
-    RECOVERY_MASS_ESTIMATE = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
+    RECOVERY_BAY_MASS = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
 
     ### Length Estimates
     RECOVERY_BAY_LENGTH = 24 * c.IN2M  # [m] Length of the recovery bay
@@ -165,7 +163,7 @@ def calculate_structures(
         + upperAirframeMass
         + lowerAirframeMass
         + noseconeMass
-        + RECOVERY_MASS_ESTIMATE
+        + RECOVERY_BAY_MASS
     )  # [kg]
 
     return [
@@ -176,11 +174,10 @@ def calculate_structures(
         heliumBayLength,
         heliumBayMass,
         RECOVERY_BAY_LENGTH,
-        RECOVERY_MASS_ESTIMATE,
+        RECOVERY_BAY_MASS,
         noseconeLength,
         noseconeMass,
-        totalStructuresMass,
-        CD_NOSECODE,
+        totalStructuresMass
     ]
 
 
@@ -195,14 +192,19 @@ def calculate_pumpfed_structures(
 
     NUMBER_OF_STRUTS = 3  # [-] Number of struts on the rocket
 
+    FINENESS = 5
+
     ### MASS ESTIMATES
 
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
     FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
 
-    RECOVERY_MASS_ESTIMATE = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
+    RECOVERY_BAY_MASS = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
 
     ### Length Estimates
+
+    RECOVERY_BAY_LENGTH = 24 * c.IN2M  # [m] Length of the recovery bay
+
 
     ### Layer Counts
 
@@ -224,14 +226,14 @@ def calculate_pumpfed_structures(
 
     ### Nosecone Properties
     noseconeLength = (
-        tankOD * 5
-    )  # [m] Length of the nosecone based on a 5:1 fineness ratio
-    noseconeSA = (
-        np.pi * (tankOD / 2) * np.sqrt((tankOD / 2) ** 2 + noseconeLength**2)
-    )  # [m^2] Surface area of the nosecone based on a cone
+        tankOD * FINENESS
+    )  # [m] Length of the nosecone based on the fineness ratio
+    noseconeVolume = (
+        noseconeLength * (np.pi / 2) * ((tankOD * LAYER_THICKNESS * NOSECONE_LAYER_COUNT) - ((LAYER_THICKNESS ** 2) * (NOSECONE_LAYER_COUNT ** 2)))
+    )  # [m^3] Approximate volume of nosecone, assuming von karman
 
     noseconeMass = (
-        (noseconeSA * c.DENSITY_CF * LAYER_THICKNESS * NOSECONE_LAYER_COUNT)
+        (noseconeVolume * c.DENSITY_CF)
         + TIP_MASS_ESTIMATE
         + couplerMass
     )  # [kg]
@@ -293,11 +295,21 @@ def calculate_pumpfed_structures(
         + upperAirframeMass
         + lowerAirframeMass
         + noseconeMass
-        + RECOVERY_MASS_ESTIMATE
+        + RECOVERY_BAY_MASS
     )  # [kg]
 
     return [
         lowerAirframeLength,
         lowerAirframeMass,
         totalStructuresMass,
+        heliumBayMass,
+        heliumBayLength,
+        lowerAirframeLength,
+        lowerAirframeMass,
+        upperAirframeLength,
+        upperAirframeMass,
+        noseconeMass,
+        noseconeLength,
+        RECOVERY_BAY_MASS,
+        RECOVERY_BAY_LENGTH,
     ]

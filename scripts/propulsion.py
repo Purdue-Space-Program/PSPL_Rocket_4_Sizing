@@ -202,7 +202,7 @@ def calculate_propulsion(
         Fuel mass flow rate [kg/s].
     burnTime : float
         Total burn time of the engine [s].
-    thrustChamberLength : float
+    totalThrustChamberLength : float
         Overall length of the combustion chamber including the nozzle [m].
     chamberOD : float
         Outer diameter of the combustion chamber [m].
@@ -395,7 +395,7 @@ def calculate_propulsion_pumpfed(
             Thrust in vacuum conditions [N].
         - seaLevelThrust : float
             Thrust at sea level [N].
-        - thrustChamberLength : float
+        - totalThrustChamberLength : float
             Total length of the thrust chamber, including converging and diverging
             sections [m].
         - chamberOD : float

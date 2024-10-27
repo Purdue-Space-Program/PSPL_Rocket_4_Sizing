@@ -15,7 +15,6 @@ def calculate_trajectory(
     mDotTotal,
     jetThrust,
     tankOD,
-    ascentDragCoeff,
     exitArea,
     exitPressure,
     burnTime,
@@ -36,8 +35,6 @@ def calculate_trajectory(
         Engine thrust [N].
     tankOD : float
         Outer diameter of the tank [m].
-    ascentDragCoeff : float
-        Drag coefficient during ascent [-].
     exitArea : float
         Exit area of the nozzle [m^2].
     exitPressure : float
