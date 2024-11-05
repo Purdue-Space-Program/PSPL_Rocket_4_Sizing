@@ -170,3 +170,7 @@ GRAVITY = 9.81  # [m/s^2] acceleration due to gravity
 # Assumptions
 
 MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]
+
+# Fins
+
+FIN_THICKNESS = 0.16*IN2M # not sure if this is valid, should discuss further [m]
