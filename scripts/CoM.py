@@ -244,4 +244,5 @@ def calculate_modified_center_of_mass(
     return [
         initialModifiedRocketCoM,
         finalModifiedRocketCoM,
+        lowerAirframePosition
     ]
