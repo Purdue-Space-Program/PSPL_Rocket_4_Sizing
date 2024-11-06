@@ -15,6 +15,8 @@ def calculate_trajectory(
     mDotTotal,
     jetThrust,
     tankOD,
+    finNumber,
+    finHeight,
     exitArea,
     exitPressure,
     burnTime,
@@ -35,6 +37,10 @@ def calculate_trajectory(
         Engine thrust [N].
     tankOD : float
         Outer diameter of the tank [m].
+    finNumber : int
+        Number of fins [-].
+    finHeight : float
+        Fin semi-span [m].
     exitArea : float
         Exit area of the nozzle [m^2].
     exitPressure : float
@@ -61,7 +67,7 @@ def calculate_trajectory(
     """
 
     # Rocket Properties
-    referenceArea = np.pi * (tankOD) ** 2 / 4  # [m^2] reference area of the rocket
+    referenceArea = (np.pi * (tankOD) ** 2 / 4) + finNumber * finHeight * c.FIN_THICKNESS # [m^2] reference area of the rocket
     mass = wetMass  # [kg] initial mass of the rocket
 
     cD = 0.4

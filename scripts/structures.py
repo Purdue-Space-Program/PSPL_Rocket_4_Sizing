@@ -57,6 +57,10 @@ def calculate_structures(
     upperPlumbingLength,
     COPVLength,
     tankOD,
+    finNumber,
+    finHeight,
+    finTipChord,
+    finRootChord,
 ):
     ### Constants and Inputs
 
@@ -67,7 +71,6 @@ def calculate_structures(
     ### MASS ESTIMATES
 
     TIP_MASS_ESTIMATE = 0.4535  # [kg] Mass of the tip of the rocket
-    FIN_MASS_ESTIMATE = 1.75 * c.LB2KG  # [kg] Estimated mass of the fins
 
     RECOVERY_BAY_MASS = 25 * c.LB2KG  # [kg] Estimated mass of the recovery bay
 
@@ -141,10 +144,16 @@ def calculate_structures(
 
     ### Lower Airframe Calculations
 
+    finVolume = finNumber * .5 * (finRootChord + finTipChord) * finHeight * c.FIN_THICKNESS
+
+    finMass = finVolume * c.DENSITY_AL
+
     lowerAirframeLength = lowerPlumbingLength  # [m]
+
     lowerAirframeStrutMass = (
         NUMBER_OF_STRUTS * (lowerAirframeLength * strutArea) * c.DENSITY_AL
     )  # [kg]
+
     lowerAirframeMass = (
         np.pi
         * tankOD
@@ -155,7 +164,7 @@ def calculate_structures(
     )  # [kg]
 
     lowerAirframeMass = (
-        lowerAirframeMass + lowerAirframeStrutMass + FIN_MASS_ESTIMATE
+        lowerAirframeMass + lowerAirframeStrutMass + finMass
     )  # [kg]
 
     totalStructuresMass = (
@@ -187,6 +196,10 @@ def calculate_pumpfed_structures(
     upperPlumbingLength,
     COPVLength,
     tankOD,
+    finNumber,
+    finHeight,
+    finTipChord,
+    finRootChord,
 ):
     ### Constants and Inputs
 
@@ -252,14 +265,17 @@ def calculate_pumpfed_structures(
     heliumBayMass += 2 * couplerMass  # [kg]
 
     ### Upper Airframe Calculations
+
     strutArea = (
         (1.5 * 0.25 + 1 * 0.25) * tankOD / 6.625 * c.IN22M2
     )  # [m^2] area of the struts scaled based on size of tank diameter
 
     upperAirframeLength = upperPlumbingLength  # [m]
+
     upperAirframeStrutMass = (
         NUMBER_OF_STRUTS * (upperAirframeLength * strutArea) * c.DENSITY_AL
     )  # [kg]
+
     upperAirframeMass = (
         np.pi
         * tankOD
@@ -273,10 +289,16 @@ def calculate_pumpfed_structures(
 
     ### Lower Airframe Calculations
 
+    finVolume = finNumber * .5 * (finRootChord + finTipChord) * finHeight * c.FIN_THICKNESS
+
+    finMass = finVolume * c.DENSITY_AL
+
     lowerAirframeLength = lowerPlumbingLength + additionalPumpLength  # [m]
+
     lowerAirframeStrutMass = (
         NUMBER_OF_STRUTS * (lowerAirframeLength * strutArea) * c.DENSITY_AL
     )  # [kg]
+
     lowerAirframeMass = (
         np.pi
         * tankOD

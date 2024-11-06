@@ -36,7 +36,7 @@ from progressbar import Timer, ETA
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
-from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory, CoM
+from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory, CoM, Stability
 from utils import output_folder, rocket_defining_input_handler, results_file
 
 
@@ -266,6 +266,14 @@ def main():
 
         thrustToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
+        finHeight = rocket["Fin Height (m)"] # fin height [m]
+
+        finRootChord = rocket["Fin Root Chord (m)"] # fin root chord [m]
+
+        finTipChord = rocket["Fin Tip Chord (m)"] # fin tip chord [m]
+
+        finNumber = rocket["Number of Fins"] # how many fins we got?
+
         # Propellant Combinations
         propellants = propCombos.loc[
             rocket["Propellant combination"]
@@ -369,7 +377,14 @@ def main():
             noseconeMass,
             structuresMass,
         ] = structures.calculate_structures(
-            lowerPlumbingLength, upperPlumbingLength, copvLength, tankOD
+            lowerPlumbingLength, 
+            upperPlumbingLength, 
+            copvLength, 
+            tankOD,
+            finNumber,
+            finHeight,
+            finTipChord,
+            finRootChord,
         )
 
         while abs(vehicleMassEstimate - vehicleMass) > c.CONVERGE_TOLERANCE:
@@ -461,19 +476,25 @@ def main():
                 continue  # Skip the rest of the loop if the rocket is not within limits
 
         # Trajectory
-        [altitude, maxAccel, railExitVelo, railExitAccel, totalImpulse] = (
-            trajectory.calculate_trajectory(
-                totalWetMass,
-                totalMassFlowRate,
-                idealThrust,
-                tankOD,
-                exitArea,
-                exitPressure,
-                burnTime,
-                totalLength,
+        [
+            altitude, 
+            maxAccel, 
+            railExitVelo, 
+            railExitAccel, 
+            totalImpulse
+        ] = trajectory.calculate_trajectory(
+            totalWetMass,
+            totalMassFlowRate,
+            idealThrust,
+            tankOD,
+            finNumber,
+            finHeight,
+            exitArea,
+            exitPressure,
+            burnTime,
+            totalLength,
                 ATMOSPHERE_DATA,
-                plots=0,
-            )
+            plots=0,
         )
 
         trajectoryDF = trajectoryDF._append(
@@ -508,6 +529,7 @@ def main():
             },
             ignore_index=True,
         )
+
         propulsionDF = propulsionDF._append(
             {
                 "Ideal Thrust [lbf]": idealThrust * c.N2LBF,
@@ -529,6 +551,7 @@ def main():
             },
             ignore_index=True,
         )
+
         combustionDF = combustionDF._append(
             {
                 "C* [m/s]": cstar,
@@ -665,7 +688,12 @@ def main():
                 upperPlumbingLength,
                 copvLength,
                 tankOD,
+                finNumber,
+                finHeight,
+                finTipChord,
+                finRootChord,
             )
+
             [
                 batteryMass,
                 pumpfedTotalAvionicsMass,
@@ -693,6 +721,7 @@ def main():
                 totalPropulsionMass,
                 pumpfedTotalStructuresMass,
             )
+
         pumpfedTotalDryMass = pumpfedDryMassEstimate
         pumpfedTotalWetMass = pumpfedVehicleMassEstimate
         pumpfedMassRatio = pumpfedMassRatioEstimate
@@ -712,6 +741,7 @@ def main():
         [
             pumpfedInitialCoM,
             pumpfedFinalCoM,
+            pumpfedLowerAirframePosition,
          ] = CoM.calculate_center_of_mass(
             noseconeLength,
             noseconeMass,
@@ -760,6 +790,30 @@ def main():
             fuelPropMass,
             pumpsMass,
         )
+        [rocketCp] = Stability.calculate_center_of_pressure(
+            finHeight,
+            finRootChord,
+            finTipChord,
+            tankOD,
+            finNumber,
+            pumpfedLowerAirframePosition,
+            pumpfedLowerAirframeLength,
+
+        )
+
+        [
+            initialStability,
+            finalStability,
+            initialModifiedStability,
+            finalModifiedStability,
+        ] = Stability.are_we_stable(
+            rocketCp,
+            pumpfedInitialCoM,
+            pumpfedFinalCoM,
+            pumpfedInitialModifiedCoM,
+            pumpfedFinalModifiedCoM,
+            tankOD,
+        )
 
         [
             pumpfedAltitude,
@@ -772,6 +826,8 @@ def main():
             pumpfedTotalMassFlowRate,
             pumpfedJetThrust,
             tankOD,
+            finNumber,
+            finHeight,
             pumpfedExitArea,
             exitPressure,
             pumpfedBurnTime,
@@ -835,6 +891,11 @@ def main():
                 "Pumpfed Final CoM [ft]": pumpfedFinalCoM * c.M2FT,
                 "Pumpfed Initial Modified CoM [ft]": pumpfedInitialModifiedCoM * c.M2FT,
                 "Pumpfed Final Modified CoM [ft]": pumpfedFinalModifiedCoM * c.M2FT,
+                "Pumpfed Center of Pressure [ft]": rocketCp * c.M2FT,
+                "Pumpfed Initial Stability [-]": initialStability,
+                "Pumpfed Final Stability [-]": finalStability,
+                "Pumpfed Initial Modified Stability [-]": initialModifiedStability,
+                "Pumpfed Final Modified Stability [-]": finalModifiedStability,
                 "Pumpfed Total Dry Mass [lbm]": pumpfedTotalDryMass * c.KG2LB,
                 "Pumpfed Total Wet Mass [lbm]": pumpfedTotalWetMass * c.KG2LB,
                 "Pumpfed Mass Ratio [-]": pumpfedMassRatio,
