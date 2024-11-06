@@ -92,7 +92,7 @@ DENSITY_SS316 = 7980  # [kg/m^3] Density
 VENTURI_DP_RATIO = 1 / 1.2  # [1] venturi outlet pressure / tank pressure, based on NASA venturi documentation & testing
 MISC_DP_RATIO = 1 / 1.15 # [1] outlet pressure / inlet pressure from misc components, based on CMS numbers
 
-FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
+FILM_PERCENT = 20  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
 RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
 ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
 
@@ -111,7 +111,7 @@ CHAMBER_WALL_THICKNESS = 0.125  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
 INJECTOR_DP_CHAMBER = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
-REGEN_DP_CHAMBER  = 1 # [1] pressure drop / chamber pressure, conservatively based on RPE
+REGEN_DP_CHAMBER  = 0.5 # [1] pressure drop / chamber pressure, conservatively based on RPE
 
 # Propellant Properties
 
