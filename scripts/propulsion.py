@@ -561,10 +561,10 @@ def calculate_pumps(
     )  # [Pa] pressure at pump inlet
 
     oxExitStaticPressure = (
-        c.PUMP_CHAMBER_PRESSURE * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
+        pumpfedChamberPressure * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
     fuelExitStaticPressure = (
-        c.PUMP_CHAMBER_PRESSURE
+        pumpfedChamberPressure
         * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER)
         / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
