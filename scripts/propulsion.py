@@ -717,6 +717,6 @@ def calculate_pumps(
         pumpsMass,
         totalPumpLength,
         totalPumpDiameter,
-        oxTotalPressureRise,
-        fuelTotalPressureRise,
+        oxPressureRise,
+        fuelPressureRise,
     ]
