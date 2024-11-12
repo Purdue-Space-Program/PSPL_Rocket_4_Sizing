@@ -593,24 +593,24 @@ def calculate_pumps(
     elif fuel.lower() == "methanol":
         fuelDensity = c.DENSITY_METHANOL
 
-    oxTotalPressureRise = (
+    oxPressureRise = (
         oxExitPressure - oxInletPressure
     )  # [Pa] pressure rise over ox pump
-    fuelTotalPressureRise = (
+    fuelPressureRise = (
         fuelExitPressure - fuelInletPressure
     )  # [Pa] pressure rise over fuel pump
 
-    oxDevelopedHead = oxTotalPressureRise / (
+    oxDevelopedHead = oxPressureRise / (
         oxDensity * c.GRAVITY
     )  # [m] Developed Head
-    oxPower = (oxMassFlowRate * oxTotalPressureRise) / (
+    oxPower = (oxMassFlowRate * oxPressureRise) / (
         pumpEfficiency * oxDensity
     )  # [W] Power
 
-    fuelDevelopedHead = fuelTotalPressureRise / (
+    fuelDevelopedHead = fuelPressureRise / (
         fuelDensity * c.GRAVITY
     )  # [m] Developed Head
-    fuelPower = (fuelMassFlowRate * fuelTotalPressureRise) / (
+    fuelPower = (fuelMassFlowRate * fuelPressureRise) / (
         pumpEfficiency * fuelDensity
     )
 
