@@ -107,15 +107,18 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
 
-CHAMBER_WALL_THICKNESS = 0.125  # [in] chamber wall thickness
-CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
+CHAMBER_WALL_THICKNESS = 0.125 * IN2M # [in] chamber wall thickness
+CHAMBER_FLANGE_WIDTH = 1 * IN2M # [m] chamber flange thickness
 
 INJECTOR_DP_CHAMBER = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
 REGEN_DP_CHAMBER  = 0.5 # [1] pressure drop / chamber pressure, conservatively based on RPE
 
+RUNLINE_OD = 0.75 * IN2M
+RUNLINE_WALL_THICKNESS = 0.065 * IN2M
+
 # Propellant Properties
 
-WATER_PERCENTAGE = 0.30  # [1] Percentage of water in the ethanol & IPA mixtures
+WATER_PERCENTAGE = 0  # [1] Percentage of water in the ethanol & IPA mixtures
 
 DENSITY_ETHANOL = 785  # [kg/m^3] Ethanol density at STP (https://www.engineeringtoolbox.com/ethanol-ethyl-alcohol-properties-C2H6O-d_2027.html)
 DENSITY_JET_A = 807  # [kg/m^3] Jet-A density at STP (https://www.code7700.com/pdfs/bd700_fuel_density.pdf)
@@ -130,7 +133,7 @@ AVAILABLE_NPSH = (
     80 * PSI2PA
 )  # [Pa] Pfleiderer correlation for min NPSH for LOX with 100% margin
 PUMP_CHAMBER_PRESSURE = (
-    500 * PSI2PA
+    365 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
 
 MAX_POWER = 12000 # max pump power [W]
