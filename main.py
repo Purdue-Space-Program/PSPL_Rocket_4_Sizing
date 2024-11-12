@@ -36,7 +36,16 @@ from progressbar import Timer, ETA
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import constants as c
-from scripts import avionics, fluidsystems, structures, propulsion, vehicle, trajectory, CoM, Stability
+from scripts import (
+    avionics,
+    fluidsystems,
+    structures,
+    propulsion,
+    vehicle,
+    trajectory,
+    CoM,
+    Stability,
+)
 from utils import output_folder, rocket_defining_input_handler, results_file
 
 
@@ -182,6 +191,7 @@ def main():
             "Pumpfed Max Acceleration [g]",
             "Pumpfed Rail Exit Velocity [ft/s]",
             "Pumpfed Rail Exit Acceleration [g]",
+            "Pumpfed Chamber Pressure [psi]",
             "Pumpfed C* [m/s]",
             "Pumpfed Isp [s]",
             "Pumpfed Expansion Ratio [-]",
@@ -203,6 +213,7 @@ def main():
             "Pumpfed Exit Area [in^2]",
             "Oxidizer Pump Motor Power [W]",
             "Fuel Pump Motor Power [W]",
+            "Total Motor Power [W]",
             "Oxidizer Pump Motor Torque [N-m]",
             "Fuel Pump Motor Torque [N-m]",
             "Oxidizer Pump Specific Speed",
@@ -259,6 +270,11 @@ def main():
         ]  # Chamber pressure of the engine [psi]
         chamberPressure = chamberPressure * c.PSI2PA
 
+        pumpfedChamberPressure = rocket[
+            "Pumpfed Chamber Pressure (psi)"
+        ]  # Chamber pressure of the pumpfed engine [psi]
+        pumpfedChamberPressure = pumpfedChamberPressure * c.PSI2PA
+
         exitPressure = rocket[
             "Exit pressure (psi)"
         ]  # Exit pressure of the engine [psi]
@@ -266,13 +282,13 @@ def main():
 
         thrustToWeight = rocket["Thrust-to-Weight ratio"]  # Thrust to weight ratio
 
-        finHeight = rocket["Fin Height (m)"] # fin height [m]
+        finHeight = rocket["Fin Height (m)"]  # fin height [m]
 
-        finRootChord = rocket["Fin Root Chord (m)"] # fin root chord [m]
+        finRootChord = rocket["Fin Root Chord (m)"]  # fin root chord [m]
 
-        finTipChord = rocket["Fin Tip Chord (m)"] # fin tip chord [m]
+        finTipChord = rocket["Fin Tip Chord (m)"]  # fin tip chord [m]
 
-        finNumber = rocket["Number of Fins"] # how many fins we got?
+        finNumber = rocket["Number of Fins"]  # how many fins we got?
 
         # Propellant Combinations
         propellants = propCombos.loc[
@@ -335,7 +351,7 @@ def main():
             oxTankLength,
             oxTankMass,
             fuelTankLength,
-            fuelTankMass
+            fuelTankMass,
         ] = fluidsystems.fluids_sizing(
             oxidizer,
             fuel,
@@ -377,9 +393,9 @@ def main():
             noseconeMass,
             structuresMass,
         ] = structures.calculate_structures(
-            lowerPlumbingLength, 
-            upperPlumbingLength, 
-            copvLength, 
+            lowerPlumbingLength,
+            upperPlumbingLength,
+            copvLength,
             tankOD,
             finNumber,
             finHeight,
@@ -476,25 +492,21 @@ def main():
                 continue  # Skip the rest of the loop if the rocket is not within limits
 
         # Trajectory
-        [
-            altitude, 
-            maxAccel, 
-            railExitVelo, 
-            railExitAccel, 
-            totalImpulse
-        ] = trajectory.calculate_trajectory(
-            totalWetMass,
-            totalMassFlowRate,
-            idealThrust,
-            tankOD,
-            finNumber,
-            finHeight,
-            exitArea,
-            exitPressure,
-            burnTime,
-            totalLength,
+        [altitude, maxAccel, railExitVelo, railExitAccel, totalImpulse] = (
+            trajectory.calculate_trajectory(
+                totalWetMass,
+                totalMassFlowRate,
+                idealThrust,
+                tankOD,
+                finNumber,
+                finHeight,
+                exitArea,
+                exitPressure,
+                burnTime,
+                totalLength,
                 ATMOSPHERE_DATA,
-            plots=0,
+                plots=0,
+            )
         )
 
         trajectoryDF = trajectoryDF._append(
@@ -607,7 +619,7 @@ def main():
             fuelTemp,
             oxTemp,
             pumpfedCharacteristicLength,
-        ] = propulsion.run_CEA(c.PUMP_CHAMBER_PRESSURE, exitPressure, fuel, mixRatio)
+        ] = propulsion.run_CEA(pumpfedChamberPressure, exitPressure, fuel, mixRatio)
 
         pumpfedVehicleMassEstimate = vehicleMass
         pumpfedVehicleMass = -np.inf
@@ -637,7 +649,7 @@ def main():
             ] = propulsion.calculate_propulsion(
                 thrustToWeight,
                 pumpfedVehicleMass,
-                c.PUMP_CHAMBER_PRESSURE,
+                pumpfedChamberPressure,
                 exitPressure,
                 pumpfedCstar,
                 pumpfedSpecificImpulse,
@@ -665,7 +677,8 @@ def main():
                 pumpfedOxMassFlowRate,
                 pumpfedFuelMassFlowRate,
                 oxTankPressure,
-                fuelTankPressure
+                fuelTankPressure,
+                pumpfedChamberPressure,
             )
 
             [
@@ -705,7 +718,7 @@ def main():
                 totalMotorMass,
                 upperAviMass,
             ] = avionics.calculate_pumpfed_avionics(
-                oxPower, 
+                oxPower,
                 fuelPower,
             )
 
@@ -742,7 +755,7 @@ def main():
             pumpfedInitialCoM,
             pumpfedFinalCoM,
             pumpfedLowerAirframePosition,
-         ] = CoM.calculate_center_of_mass(
+        ] = CoM.calculate_center_of_mass(
             noseconeLength,
             noseconeMass,
             recoveryBayLength,
@@ -798,7 +811,6 @@ def main():
             finNumber,
             pumpfedLowerAirframePosition,
             pumpfedLowerAirframeLength,
-
         )
 
         [
@@ -843,6 +855,7 @@ def main():
                 "Pumpfed Max Acceleration [g]": pumpfedMaxAccel / c.GRAVITY,
                 "Pumpfed Rail Exit Velocity [ft/s]": pumpfedRailExitVelo * c.M2FT,
                 "Pumpfed Rail Exit Acceleration [g]": pumpfedRailExitAccel / c.GRAVITY,
+                "Pumpfed Chamber Pressure [psi]": pumpfedChamberPressure * c.PA2PSI,
                 "Pumpfed C* [m/s]": pumpfedCstar,
                 "Pumpfed Isp [s]": pumpfedSpecificImpulse,
                 "Pumpfed Expansion Ratio [-]": pumpfedExpansionRatio,
@@ -871,6 +884,7 @@ def main():
                 "Pumpfed Exit Area [in^2]": pumpfedExitArea * c.M2IN**2,
                 "Oxidizer Pump Motor Power [W]": oxMotorPower,
                 "Fuel Pump Motor Power [W]": fuelMotorPower,
+                "Total Motor Power [W]": oxMotorPower + fuelMotorPower,
                 "Oxidizer Pump Motor Torque [N-m]": oxMotorTorque,
                 "Fuel Pump Motor Torque [N-m]": fuelMotorTorque,
                 "Oxidizer Pump Specific Speed": oxSpecificSpeedUS,

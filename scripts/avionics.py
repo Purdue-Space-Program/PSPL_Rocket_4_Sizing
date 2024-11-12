@@ -54,7 +54,7 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     # Total weight of the battery and motors
     batteryMass = numCells * c.LIPO_CELL_MASS  # [kg]
     pumpAviMass = batteryMass + totalMotorMass + BASE_AVI_MASS  # [kg]
-    upperAviMass = batteryMass + BASE_AVI_MASS # [kg]
+    upperAviMass = batteryMass + BASE_AVI_MASS  # [kg]
 
     # Total mass of the avionics system
 
@@ -67,5 +67,5 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
         oxTorqueRequired,
         fuelTorqueRequired,
         totalMotorMass,
-        upperAviMass
+        upperAviMass,
     ]

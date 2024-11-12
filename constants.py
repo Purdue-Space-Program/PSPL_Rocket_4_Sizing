@@ -89,16 +89,28 @@ DENSITY_SS316 = 7980  # [kg/m^3] Density
 
 # Fluids Constants
 
-VENTURI_DP_RATIO = 1 / 1.2  # [1] venturi outlet pressure / tank pressure, based on NASA venturi documentation & testing
-MISC_DP_RATIO = 1 / 1.15 # [1] outlet pressure / inlet pressure from misc components, based on CMS numbers
+VENTURI_DP_RATIO = (
+    1 / 1.2
+)  # [1] venturi outlet pressure / tank pressure, based on NASA venturi documentation & testing
+MISC_DP_RATIO = (
+    1 / 1.15
+)  # [1] outlet pressure / inlet pressure from misc components, based on CMS numbers
 
 FILM_PERCENT = 20  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
-RESIDUAL_PERCENT = 7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
-ULLAGE_PERCENT = 10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
+RESIDUAL_PERCENT = (
+    7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
+)
+ULLAGE_PERCENT = (
+    10  # [%] Percent of tank volume dedicated to ullage, based on CMS values
+)
 
-R_PROP = 1 - ULLAGE_PERCENT / 100  # [1] Ratio of total tank volume to total propellant volume
+R_PROP = (
+    1 - ULLAGE_PERCENT / 100
+)  # [1] Ratio of total tank volume to total propellant volume
 
-BURNOUT_PRESSURE_RATIO = 2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
+BURNOUT_PRESSURE_RATIO = (
+    2  # [1] COPV burnout pressure / tank pressure to ensure choked flow
+)
 
 K_PRESSURIZATION = 0.64  # [1] Ratio of ideal tank volume to actual tank volume, calculated based on average from past rocket designs
 HE_GAS_CONSTANT = 2077.1  # [J/kgK] Helium gas constant
@@ -110,8 +122,12 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 CHAMBER_WALL_THICKNESS = 0.125  # [in] chamber wall thickness
 CHAMBER_FLANGE_WIDTH = 1  # [in] chamber flange thickness
 
-INJECTOR_DP_CHAMBER = 0.2 # [1] pressure drop / chamber pressure, based on past rockets & RPE
-REGEN_DP_CHAMBER  = 0.5 # [1] pressure drop / chamber pressure, conservatively based on RPE
+INJECTOR_DP_CHAMBER = (
+    0.2  # [1] pressure drop / chamber pressure, based on past rockets & RPE
+)
+REGEN_DP_CHAMBER = (
+    0.5  # [1] pressure drop / chamber pressure, conservatively based on RPE
+)
 
 # Propellant Properties
 
@@ -133,7 +149,7 @@ PUMP_CHAMBER_PRESSURE = (
     500 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
 
-MAX_POWER = 12000 # max pump power [W]
+MAX_POWER = 12000  # max pump power [W]
 
 # FAR Constants
 
@@ -152,7 +168,7 @@ BZ1_COPV_MASS = 3  # [kg] Mass of BZ1 COPV
 
 # Motor Constants (based on the Neumotors 2020 Series motor)
 
-MOTOR_RPM = 30000 # [1/min] max RPM of pump based on neumotors 2020
+MOTOR_RPM = 30000  # [1/min] max RPM of pump based on neumotors 2020
 MOTOR_WEIGHT = 0.660  # [kg] weight of a single motor
 MOTOR_LENGTH = 0.093  # [m] length of a single motor
 MOTOR_DIAMETER = 3.1 * IN2M
@@ -173,4 +189,4 @@ MASS_GROWTH_FACTOR = 1  # [1] iteration growth factor [NEED TO DISCUSS]
 
 # Fins
 
-FIN_THICKNESS = 0.16*IN2M # not sure if this is valid, should discuss further [m]
+FIN_THICKNESS = 0.16 * IN2M  # not sure if this is valid, should discuss further [m]
