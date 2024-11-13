@@ -19,6 +19,7 @@ def calculate_avionics():
 
 
 def calculate_pumpfed_avionics(oxPower, fuelPower):
+
     # Constants
     BASE_AVI_MASS = 6  # [lbm] base mass of avionics
     BASE_AVI_MASS = BASE_AVI_MASS * c.LB2KG  # [kg] Convert mass to kg
@@ -52,7 +53,8 @@ def calculate_pumpfed_avionics(oxPower, fuelPower):
     totalMotorMass = MOTOR_MASS * 2  # [kg]
 
     # Total weight of the battery and motors
-    batteryMass = numCells * c.LIPO_CELL_MASS  # [kg]
+    batteryMass = 8  # lb
+    batteryMass = batteryMass * c.LB2KG  # [kg] Convert mass to kg
     pumpAviMass = batteryMass + totalMotorMass + BASE_AVI_MASS  # [kg]
     upperAviMass = batteryMass + BASE_AVI_MASS  # [kg]
 

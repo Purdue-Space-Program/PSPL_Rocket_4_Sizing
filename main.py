@@ -891,7 +891,8 @@ def main():
                 "Fuel Pump Specific Speed": fuelSpecificSpeedUS,
                 "Pumpfed Pumps Mass [lbm]": pumpsMass * c.KG2LB,
                 "Pump Package Diameter [in]": pumpPackageDiameter * c.M2IN,
-                "Oxidizer Pump Total Pressure Rise [psi]": oxTotalPressureRise * c.PA2PSI,
+                "Oxidizer Pump Total Pressure Rise [psi]": oxTotalPressureRise
+                * c.PA2PSI,
                 "Fuel Pump Total Pressure Rise [psi]": fuelTotalPressurerise * c.PA2PSI,
                 "Pumpfed Battery Mass [lbm]": batteryMass * c.KG2LB,
                 "Pumpfed Total Avionics Mass [lbm]": pumpfedTotalAvionicsMass * c.KG2LB,

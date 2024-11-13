@@ -96,7 +96,7 @@ MISC_DP_RATIO = (
     1 / 1.15
 )  # [1] outlet pressure / inlet pressure from misc components, based on CMS numbers
 
-FILM_PERCENT = 20  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
+FILM_PERCENT = 15  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
 RESIDUAL_PERCENT = (
     7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
 )
@@ -119,8 +119,8 @@ FILL_PRESSURE = 60  # [psi] Tank pressure during fill, based on CMS fill ops
 
 # Prop Constants
 
-CHAMBER_WALL_THICKNESS = 0.125 * IN2M # [in] chamber wall thickness
-CHAMBER_FLANGE_WIDTH = 1 * IN2M # [m] chamber flange thickness
+CHAMBER_WALL_THICKNESS = 0.125 * IN2M  # [in] chamber wall thickness
+CHAMBER_FLANGE_WIDTH = 1 * IN2M  # [m] chamber flange thickness
 
 INJECTOR_DP_CHAMBER = (
     0.2  # [1] pressure drop / chamber pressure, based on past rockets & RPE
