@@ -553,17 +553,17 @@ def calculate_pumps(
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletTotalPressure = oxTankPressure * np.sqrt(
+    oxInletPressure = oxTankPressure * np.sqrt(
         c.MISC_DP_RATIO
     )  # [Pa] pressure at pump inlet
-    fuelInletTotalPressure = fuelTankPressure * np.sqrt(
+    fuelInletPressure = fuelTankPressure * np.sqrt(
         c.MISC_DP_RATIO
     )  # [Pa] pressure at pump inlet
 
-    oxExitStaticPressure = (
+    oxExitPressure = (
         pumpfedChamberPressure * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
     )  # [Pa] pressure at pump exit
-    fuelExitStaticPressure = (
+    fuelExitPressure = (
         pumpfedChamberPressure
         * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER)
         / np.sqrt(c.MISC_DP_RATIO)
@@ -578,14 +578,14 @@ def calculate_pumps(
     oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
 
     oxDensity = PropsSI(
-        "D", "P", oxInletTotalPressure, "T", oxTemp, oxidizer
+        "D", "P", oxInletPressure, "T", oxTemp, oxidizer
     )  # Density [kg/m3]
     if fuel.lower() == "ethanol":
         fuelDensity = PropsSI(
-            "D", "P", fuelInletTotalPressure, "T", fuelTemp, mixtureName
+            "D", "P", fuelInletPressure, "T", fuelTemp, mixtureName
         )
     elif fuel.lower() == "methane":
-        fuelDensity = PropsSI("D", "P", fuelInletTotalPressure, "T", fuelTemp, fuel)
+        fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, fuel)
     elif fuel.lower() == "jet-a":
         fuelDensity = c.DENSITY_JET_A
     elif fuel.lower() == "isopropanol":
@@ -593,36 +593,24 @@ def calculate_pumps(
     elif fuel.lower() == "methanol":
         fuelDensity = c.DENSITY_METHANOL
 
-    runlineID = c.RUNLINE_OD - 2 * c.RUNLINE_WALL_THICKNESS
-    runlineArea = (np.pi / 4) * runlineID**2
-
-    oxLineVelocity = oxMassFlowRate / (oxDensity * runlineArea)
-    fuelLineVelocity = fuelMassFlowRate / (fuelDensity * runlineArea)
-
-    oxDynamicPressure = 0.5 * oxDensity * oxLineVelocity**2
-    fuelDynamicPressure = 0.5 * fuelDensity * fuelLineVelocity**2
-
-    oxExitTotalPressure = oxExitStaticPressure + oxDynamicPressure
-    fuelExitTotalPressure = fuelExitStaticPressure + fuelDynamicPressure
-
-    oxTotalPressureRise = (
-        oxExitTotalPressure - oxInletTotalPressure
+    oxPressureRise = (
+        oxExitPressure - oxInletPressure
     )  # [Pa] pressure rise over ox pump
-    fuelTotalPressureRise = (
-        fuelExitTotalPressure - fuelInletTotalPressure
+    fuelPressureRise = (
+        fuelExitPressure - fuelInletPressure
     )  # [Pa] pressure rise over fuel pump
 
-    oxDevelopedHead = oxTotalPressureRise / (
+    oxDevelopedHead = oxPressureRise / (
         oxDensity * c.GRAVITY
     )  # [m] Developed Head
-    oxPower = (oxMassFlowRate * oxTotalPressureRise) / (
+    oxPower = (oxMassFlowRate * oxPressureRise) / (
         pumpEfficiency * oxDensity
     )  # [W] Power
 
-    fuelDevelopedHead = fuelTotalPressureRise / (
+    fuelDevelopedHead = fuelPressureRise / (
         fuelDensity * c.GRAVITY
     )  # [m] Developed Head
-    fuelPower = (fuelMassFlowRate * fuelTotalPressureRise) / (
+    fuelPower = (fuelMassFlowRate * fuelPressureRise) / (
         pumpEfficiency * fuelDensity
     )
 
@@ -729,6 +717,6 @@ def calculate_pumps(
         pumpsMass,
         totalPumpLength,
         totalPumpDiameter,
-        oxTotalPressureRise,
-        fuelTotalPressureRise,
+        oxPressureRise,
+        fuelPressureRise,
     ]
