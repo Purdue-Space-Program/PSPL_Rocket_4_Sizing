@@ -142,6 +142,7 @@ DENSITY_IPA = 785  # [kg/m^3] Isopropyl alcohol density at STP (https://macro.ls
 DENSITY_METHANOL = 792  # [kg/m^3] Methanol density at STP (https://www.engineeringtoolbox.com/methanol-d_937.html)
 DENSITY_WATER = 1000  # [kg/m^3] Water density at STP (https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.html)
 DENSITY_GASOLINE = 703  # [kg/m^3] Gasoline density at STP (https://www.engineeringtoolbox.com/gasoline-d_1592.html)
+DENSITY_E98 = 794
 
 # Pump Constants
 

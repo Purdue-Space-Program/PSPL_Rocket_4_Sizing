@@ -78,16 +78,15 @@ def run_CEA(
     oxidizerCEA = "O2(L)"
 
     # CEA Propellant Object Setup
-    # fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
-    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp)
+    fuel = CEA.Fuel(fuelCEA, temp=fuelTemp, wt_percent=98)
+    gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
     oxidizer = CEA.Oxidizer(oxidizerCEA, temp=oxTemp)
-    # gasoline = CEA.Fuel("C8H18(L),n-octa", temp=fuelTemp, wt_percent=2)
 
     # Run CEA with optimal mixture ratio
     rocket = CEA.RocketProblem(
         pressure=chamberPressure,
         pip=pressureRatio,
-        materials=[fuel, oxidizer],
+        materials=[fuel, gasoline, oxidizer],
         o_f=mixRatio,
         filename="engineCEAoutput",
         pressure_units="bar",
@@ -575,15 +574,13 @@ def calculate_pumps(
     else:
         fuelTemp = c.T_AMBIENT  # [K] temperature of fuel upon injection into combustion
 
-    oxTemp = 90  # [K] temperature of oxidizer upon injection into combustion
+    oxTemp = PropsSI("T", "P", c.FILL_PRESSURE * c.PSI2PA, "Q", 0, oxidizer)  # [K] temperature of oxidizer upon injection into combustion
 
     oxDensity = PropsSI(
         "D", "P", oxInletPressure, "T", oxTemp, oxidizer
     )  # Density [kg/m3]
     if fuel.lower() == "ethanol":
-        fuelDensity = PropsSI(
-            "D", "P", fuelInletPressure, "T", fuelTemp, mixtureName
-        )
+        fuelDensity = PropsSI('D', 'P', fuelInletPressure, 'T', fuelTemp, mixtureName)
     elif fuel.lower() == "methane":
         fuelDensity = PropsSI("D", "P", fuelInletPressure, "T", fuelTemp, fuel)
     elif fuel.lower() == "jet-a":
