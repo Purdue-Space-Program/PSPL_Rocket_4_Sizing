@@ -144,14 +144,7 @@ def create_results_file(
 
         # List of parameters to plot
         parameters = [
-            ("Chamber pressure (psi)", "chamber_pressure"),
-            ("Exit pressure (psi)", "exit_pressure"),
-            ("Thrust-to-Weight ratio", "tw_ratio"),
-            ("Core O:F Ratio (mass)", "core_of_ratio"),
-            ("Total Mass Flow Rate [lbm/s]", "total_mass_flow_rate"),
-            ("Aspect Ratio [-]", "aspect_ratio"),
-            ("Mass Ratio [-]", "wet_mass_ratio"),
-            ("Ideal Thrust [lbf]", "thrust"),
+            
         ]
 
         # Plot each parameter against altitude

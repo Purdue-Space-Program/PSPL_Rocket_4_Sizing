@@ -1,4 +1,5 @@
 import numpy as np
+from CoolProp.CoolProp import PropsSI
 
 # Main function
 
@@ -96,7 +97,7 @@ MISC_DP_RATIO = (
     1 / 1.15
 )  # [1] outlet pressure / inlet pressure from misc components, based on CMS numbers
 
-FILM_PERCENT = 15  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
+FILM_PERCENT = 10  # [%] Percent of fuel mass flow dedicated to film cooling [WAITING ON ANDREW FOR SOURCE]
 RESIDUAL_PERCENT = (
     7  # [%] Percent of propellant mass dedicated to residuals, based on CMS values
 )
@@ -143,6 +144,7 @@ DENSITY_METHANOL = 792  # [kg/m^3] Methanol density at STP (https://www.engineer
 DENSITY_WATER = 1000  # [kg/m^3] Water density at STP (https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.html)
 DENSITY_GASOLINE = 703  # [kg/m^3] Gasoline density at STP (https://www.engineeringtoolbox.com/gasoline-d_1592.html)
 DENSITY_E98 = 794
+DENSIY_ETHANOL = PropsSI("D", "T", 290, "P", 101325, "ethanol")
 
 # Pump Constants
 
@@ -152,6 +154,8 @@ AVAILABLE_NPSH = (
 PUMP_CHAMBER_PRESSURE = (
     365 * PSI2PA
 )  # [Pa] Chamber pressure with pumps [BASED ON UPPER LIMIT OF TEST STAND, SHOULD ITERATE TO CONFIRM]
+
+PUMPFED_TANK_PRESSURE = 270 * PSI2PA  # [Pa] Tank pressure with pumps
 
 MAX_POWER = 12000  # max pump power [W]
 

@@ -123,12 +123,7 @@ def fluids_sizing(
     )
 
     mixtureName = (
-        fuel
-        + "["
-        + str(1 - c.WATER_PERCENTAGE)
-        + "]&H2O["
-        + str(c.WATER_PERCENTAGE)
-        + "]"
+        fuel + "[0.98]&n-Octane[0.02]"
     )  # [string] Name of the propellant mixture
 
     # Propellant properties
@@ -152,7 +147,7 @@ def fluids_sizing(
         )  # [kg/m^3] Methane density at fill pressure
 
     elif fuel.lower() == "ethanol":
-        fuelDensity = PropsSI('D', 'P', 14.7*c.PSI2PA, 'T', c.T_AMBIENT, mixtureName) # [kg/m^3] gasolined ethanol density
+        fuelDensity = PropsSI('D', 'P', 14.7*c.PSI2PA, 'T', c.T_AMBIENT, mixtureName) # [kg/m^3] gasolined ethanol density  
     elif fuel.lower() == "jet-a":
         fuelDensity = c.DENSITY_JET_A  # [kg/m^3] Jet-A density
     elif fuel.lower() == "isopropanol":

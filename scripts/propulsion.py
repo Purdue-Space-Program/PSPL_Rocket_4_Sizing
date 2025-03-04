@@ -255,6 +255,7 @@ def calculate_propulsion(
         1 + mixtureRatio
     )  # [kg/s] fuel mass flow rate
     oxMassFlowRate = mixtureRatio * fuelMassFlowRate  # [kg/s] oxidizer mass flow rate
+    fuelTotalMassFlowRate  = fuelMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
     totalMassFlowRate = coreMassFlowRate + (c.FILM_PERCENT / 100) * fuelMassFlowRate
     burnTime = (
         (1 - (c.RESIDUAL_PERCENT / 100)) * (fuelMass + oxMass) / totalMassFlowRate
@@ -334,7 +335,7 @@ def calculate_propulsion(
         jetThrust,
         seaLevelThrust,
         oxMassFlowRate,
-        fuelMassFlowRate,
+        fuelTotalMassFlowRate,
         burnTime,
         thrustChamberLength,
         combustionChamberLength,
@@ -552,20 +553,15 @@ def calculate_pumps(
     dynaHeadLoss = 0.2  # Dynamic Head Loss Factor (Assumed Constant)
     exitFlowCoef = 0.8  # Exit Flow Coeffiecnt (Assumed Constant)
 
-    oxInletPressure = oxTankPressure * np.sqrt(
-        c.MISC_DP_RATIO
-    )  # [Pa] pressure at pump inlet
-    fuelInletPressure = fuelTankPressure * np.sqrt(
-        c.MISC_DP_RATIO
-    )  # [Pa] pressure at pump inlet
+    oxInletPressure = oxTankPressure / 1.05  # [Pa] pressure at pump inlet
+    fuelInletPressure = fuelTankPressure / 1.05 # [Pa] pressure at pump inlet
 
     oxExitPressure = (
-        pumpfedChamberPressure * (1 + c.INJECTOR_DP_CHAMBER) / np.sqrt(c.MISC_DP_RATIO)
+        pumpfedChamberPressure * (1 + c.INJECTOR_DP_CHAMBER) * 1.1
     )  # [Pa] pressure at pump exit
     fuelExitPressure = (
         pumpfedChamberPressure
-        * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER)
-        / np.sqrt(c.MISC_DP_RATIO)
+        * (1 + c.INJECTOR_DP_CHAMBER + c.REGEN_DP_CHAMBER) * 1.1
     )  # [Pa] pressure at pump exit
 
     if fuel.lower() == "methane":

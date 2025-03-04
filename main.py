@@ -404,7 +404,7 @@ def main():
         )
 
         while abs(vehicleMassEstimate - vehicleMass) > c.CONVERGE_TOLERANCE:
-
+            
             vehicleMass = vehicleMassEstimate
             [
                 idealThrust,
@@ -676,11 +676,11 @@ def main():
                 fuel,
                 pumpfedOxMassFlowRate,
                 pumpfedFuelMassFlowRate,
-                oxTankPressure,
-                fuelTankPressure,
+                c.PUMPFED_TANK_PRESSURE,
+                c.PUMPFED_TANK_PRESSURE,
                 pumpfedChamberPressure,
             )
-
+            
             [
                 pumpfedLowerAirframeLength,
                 pumpfedLowerAirframeMass,
