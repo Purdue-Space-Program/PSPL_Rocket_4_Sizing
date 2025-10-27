@@ -220,7 +220,7 @@ def calculate_modified_center_of_mass(
     initialModifiedRocketCoM = (
         (noseconeMass * noseconeCoM 
          + recoveryBayMass * recoveryBayPosition 
-         + (upperAirframeMass + upperAviMass) * upperAirframePosition
+         + (upperAirframeMass + upperAviMass) * upperAirframePosition #upper avi mass could be off, looking at avoincis script, just includes base weight
          + (oxTankMass + oxPropMass) * oxTankPosition
          + heliumBayMass * heliumBayPosition
          + (fuelTankMass + fuelPropMass) * fuelTankPosition
